@@ -41,54 +41,59 @@ export default function LinkGenerator() {
     : "";
 
   return (
-    <div className="card card-gradient-top space-y-6 p-6">
+    <div className="card card-gradient-top space-y-5 p-6">
       <div>
         <label htmlFor="dest-url" className="block text-sm font-medium text-[var(--text)]">
-          Destination URL
+          Where should the user end up?
         </label>
         <input
           id="dest-url"
           type="url"
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
-          placeholder="https://YOURPROJECT.supabase.co/auth/v1/verify?token=...&type=recovery"
+          placeholder="https://yourapp.com/after-login or your Supabase verify URL"
           className="input-base mt-2"
         />
       </div>
       <div>
         <label htmlFor="rail-base" className="block text-sm font-medium text-[var(--text)]">
-          Rail base URL (your domain)
+          Your link domain
         </label>
         <input
           id="rail-base"
           type="url"
           value={railBase}
           onChange={(e) => setRailBase(e.target.value)}
+          placeholder={RAIL_BASE_DEFAULT}
           className="input-base mt-2"
         />
       </div>
       {railLink && (
         <>
           <div>
-            <label className="block text-sm font-medium text-[var(--text)]">Protected link</label>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+            <p className="text-sm font-medium text-[var(--text)]">Protected link</p>
+            <p className="mt-1 text-xs text-[var(--muted)]">Use this in your email.</p>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
               <code className="input-base flex-1 break-all px-4 py-3 font-mono text-sm">
                 {railLink}
               </code>
-              <CopyButton text={railLink} label="Copy link" />
+              <CopyButton text={railLink} label="Copy" />
             </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-[var(--text)]">
-              Supabase template snippet
-            </label>
-            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
-              <pre className="input-base flex-1 overflow-x-auto whitespace-pre-wrap p-4 font-mono text-xs">
-                {snippet}
-              </pre>
-              <CopyButton text={snippet} label="Copy snippet" />
+          <details className="group">
+            <summary className="cursor-pointer list-none text-sm font-medium text-[var(--accent)] hover:underline">
+              Need the snippet?
+            </summary>
+            <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg2)] p-4">
+              <p className="text-xs text-[var(--muted)] mb-2">For Supabase (or similar) when sending the email:</p>
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                <pre className="input-base flex-1 overflow-x-auto whitespace-pre-wrap p-3 font-mono text-xs">
+                  {snippet}
+                </pre>
+                <CopyButton text={snippet} label="Copy snippet" />
+              </div>
             </div>
-          </div>
+          </details>
         </>
       )}
     </div>

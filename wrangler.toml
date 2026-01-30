@@ -1,6 +1,9 @@
-name = "scanner-safe-links"
+# Deploy: from repo root run "npm run deploy" (builds site first via predeploy, then deploys Worker).
+# Marketing site (suqram.com) is deployed separately via Cloudflare Pages (root dir: site, output: out).
+name = "suqram"
 main = "src/worker.ts"
 compatibility_date = "2026-01-23"
+account_id = "e51733a914697da87e60c4d6f4a5aef6"
 
 [durable_objects]
 bindings = [
@@ -15,8 +18,8 @@ bindings = [
 [[d1_databases]]
 binding = "EIG_DB"
 database_name = "eig-db"
-database_id = "52a70cb9-8ca6-46bc-bb36-1d1b1037335c"
-preview_database_id = "52a70cb9-8ca6-46bc-bb36-1d1b1037335c"
+database_id = "c7e80648-3f94-491d-b24f-0881d7f1a1ab"
+preview_database_id = "c7e80648-3f94-491d-b24f-0881d7f1a1ab"
 
 [vars]
 ORIGIN_BASE_URL = "http://127.0.0.1:8787"

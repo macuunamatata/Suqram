@@ -33,11 +33,23 @@ export async function handleTestSend(request: Request, env: LiveTestEnv, railBas
     return jsonResponse(500, { ok: false, error: 'Live test not configured' });
   }
 
+  const cloned = request.clone();
+  let raw: string;
+  try {
+    raw = await cloned.text();
+  } catch (e) {
+    return jsonResponse(400, { ok: false, error: 'Invalid JSON', detail: String(e) });
+  }
   let body: { email?: string };
   try {
-    body = await request.json<{ email?: string }>();
-  } catch {
-    return jsonResponse(400, { ok: false, error: 'Invalid JSON' });
+    body = JSON.parse(raw) as { email?: string };
+  } catch (e) {
+    return jsonResponse(400, {
+      ok: false,
+      error: 'Invalid JSON',
+      detail: String(e),
+      rawLength: raw.length,
+    });
   }
   const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {

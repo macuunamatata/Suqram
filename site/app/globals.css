@@ -2,22 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design system: dark-first, premium, high-contrast */
+/* Design system: light, domained.app-style. Dark mode explicitly disabled (single theme). */
 :root {
-  --bg: #0a0a0f;
-  --bg2: #0f0f16;
-  --panel: #14141c;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --text: #f4f4f5;
-  --muted: #a1a1aa;
-  --muted-strong: #71717a;
-  --accent: #22d3ee;
-  --accent-dim: rgba(34, 211, 238, 0.15);
-  --accent2: #06b6d4;
-  --ring: #22d3ee;
-  --shadow: 0 0 40px -12px rgba(34, 211, 238, 0.25);
-  --shadow-sm: 0 0 20px -8px rgba(34, 211, 238, 0.2);
+  --bg: #f8f9fa;
+  --bg2: #f1f3f5;
+  --panel: #ffffff;
+  --border: #e9ecef;
+  --border-strong: #dee2e6;
+  --text: #1a1d21;
+  --muted: #6c757d;
+  --muted-strong: #495057;
+  --accent: #0d6efd;
+  --accent-dim: rgba(13, 110, 253, 0.12);
+  --accent2: #0a58ca;
+  --ring: #0d6efd;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 
 body {
@@ -27,66 +27,47 @@ body {
   line-height: 1.6;
 }
 
-/* Subtle background: radial gradient + faint grid */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.08), transparent),
-    linear-gradient(180deg, transparent 0%, var(--bg) 100%);
-}
-
-/* Optional: very faint grid (CSS-only) */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, black 20%, transparent 70%);
+h1, h2, h3 {
+  color: var(--text);
 }
 
 @layer components {
   .card {
     @apply rounded-2xl border transition-all duration-200;
     background: var(--panel);
-    border-color: var(--border);
-    box-shadow: 0 1px 0 0 var(--border-strong);
+    border: 1px solid var(--border);
+    box-shadow: none;
   }
   .card:hover {
+    box-shadow: var(--shadow-hover);
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-sm);
   }
   .card-gradient-top {
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 24px), var(--panel);
+    background: var(--panel);
+    border: 1px solid var(--border);
   }
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold text-[var(--bg)] transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold transition-all duration-200;
+    height: 48px;
+    min-height: 48px;
     background: var(--accent);
-    box-shadow: 0 0 24px -4px rgba(34, 211, 238, 0.4);
+    color: #fff;
   }
   .btn-primary:hover {
-    filter: brightness(1.08);
+    background: var(--accent2);
     box-shadow: var(--shadow);
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl border px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold transition-all duration-200;
+    height: 48px;
+    min-height: 48px;
     color: var(--text);
-    border-color: var(--border-strong);
     background: transparent;
+    border: 1px solid var(--border-strong);
   }
   .btn-secondary:hover {
+    background: var(--bg2);
     border-color: var(--muted);
-    background: rgba(255, 255, 255, 0.04);
   }
   .link-accent {
     @apply font-medium transition-colors;
@@ -97,19 +78,21 @@ body::after {
     text-decoration: underline;
   }
   .pill {
-    @apply inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--muted);
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+    background: var(--bg2);
+    color: var(--muted-strong);
     border: 1px solid var(--border);
   }
   .pill-accent {
     background: var(--accent-dim);
     color: var(--accent);
-    border-color: rgba(34, 211, 238, 0.3);
+    border-color: rgba(13, 110, 253, 0.25);
   }
   .input-base {
-    @apply block w-full rounded-xl border bg-[var(--panel)] px-4 py-3 text-[var(--text)] placeholder-[var(--muted-strong)] transition-all duration-200;
-    border-color: var(--border);
+    @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--muted-strong)] transition-all duration-200;
+    height: 48px;
+    background: var(--panel);
+    border: 1px solid var(--border);
   }
   .input-base:focus {
     @apply outline-none;
@@ -118,6 +101,9 @@ body::after {
   }
   .prose-muted {
     color: var(--muted);
+  }
+  .section-border {
+    border-top: 1px solid var(--border);
   }
 }
 

@@ -636,9 +636,56 @@ export default {
         });
       }
       if (request.method === 'POST') {
-        const railBase = `${url.protocol}//${url.host}`;
-        const res = await handleTestSend(request, env, railBase);
-        return addCors(res);
+        try {
+          const missing: string[] = [];
+          if (!env.RESEND_API_KEY) missing.push('RESEND_API_KEY');
+          if (!env.TEST_FROM_EMAIL) missing.push('TEST_FROM_EMAIL');
+          if (!env.EIG_DB) missing.push('EIG_DB');
+          if (missing.length > 0) {
+            return addCors(new Response(JSON.stringify({ ok: false, error: 'Missing required config', missing }), {
+              status: 500,
+              headers: { 'Content-Type': 'application/json' },
+            }));
+          }
+          const cloned = request.clone();
+          let raw: string;
+          try {
+            raw = await cloned.text();
+          } catch (e) {
+            return addCors(new Response(JSON.stringify({ ok: false, error: 'Invalid JSON', detail: String(e) }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' },
+            }));
+          }
+          try {
+            JSON.parse(raw);
+          } catch (e) {
+            return addCors(new Response(JSON.stringify({
+              ok: false,
+              error: 'Invalid JSON',
+              detail: String(e),
+              rawLength: raw.length,
+              rawPreview: raw.slice(0, 80),
+            }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' },
+            }));
+          }
+          const railBase = `${url.protocol}//${url.host}`;
+          const res = await handleTestSend(request, env, railBase);
+          return addCors(res);
+        } catch (e) {
+          const err = e instanceof Error ? e : new Error(String(e));
+          return addCors(new Response(JSON.stringify({
+            ok: false,
+            error: 'Unhandled error',
+            detail: String(e),
+            stack: err?.stack?.toString?.() ?? null,
+          }), {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          }));
+        }
       }
     }
     if (path === '/test/control' && request.method === 'GET') {

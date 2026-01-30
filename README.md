@@ -38,6 +38,13 @@ All 7 checks should pass (health, scanner loop, simulated human, replay). **Loca
 
 ---
 
+## Deployment
+
+- **suqram.com** is **Cloudflare Pages**: deployed on git push to the connected branch. In the Pages project set **Root directory** = `site`, **Build output directory** = `out`, **Build command** = `npm run build` (run from the `site` root by Pages).
+- **go.suqram.com** is a **Cloudflare Worker**: deployed via `npm run deploy:prod`.
+
+---
+
 ## Production setup (go.suqram.com)
 
 **Rail:** `https://go.suqram.com` · **Marketing:** `https://suqram.com` (or www)

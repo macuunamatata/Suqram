@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { RAIL_BASE_DEFAULT } from "@/lib/constants";
+import { sendTestEmail } from "@/lib/sendTestEmail";
 
 export default function LiveTestPage() {
   const [email, setEmail] = useState("");
@@ -13,23 +13,9 @@ export default function LiveTestPage() {
     e.preventDefault();
     setError("");
     setStatus("sending");
-    try {
-      const res = await fetch(`${RAIL_BASE_DEFAULT}/test/send`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.ok) {
-        setStatus("sent");
-      } else {
-        setStatus("error");
-        setError(data?.error || data?.detail || "Request failed");
-      }
-    } catch (err) {
-      setStatus("error");
-      setError(err instanceof Error ? err.message : "Network error");
-    }
+    const result = await sendTestEmail(email);
+    setStatus(result.ok ? "sent" : "error");
+    if (!result.ok) setError(result.error ?? "Something went wrong.");
   }
 
   return (
@@ -76,7 +62,9 @@ export default function LiveTestPage() {
               />
             </div>
             {error && (
-              <p className="text-sm text-[var(--accent)]">{error}</p>
+              <p className="text-sm text-[var(--accent)]" role="alert">
+                {error}
+              </p>
             )}
             <button
               type="submit"
@@ -89,8 +77,8 @@ export default function LiveTestPage() {
         )}
 
         <p className="mt-10 text-sm text-[var(--muted)]">
-          <Link href="/start" className="link-accent">
-            ← Start free
+          <Link href="/" className="link-accent">
+            ← Home
           </Link>
         </p>
       </div>

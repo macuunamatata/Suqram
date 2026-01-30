@@ -160,7 +160,7 @@ export default function HomePage() {
     <>
       {/* Hero: grid only here; subtle teal wash behind content */}
       <section className={`hero-bg ${HERO_PY}`}>
-        <div className={`glow-teal ${CONTAINER} text-center`}>
+        <div className={`${CONTAINER} text-center`}>
           <p className="pill-hero inline-flex items-center gap-2 text-xs">
             <span className="pill-hero-dot" aria-hidden />
             Scanner-proof auth links
@@ -237,7 +237,7 @@ export default function HomePage() {
       </Section>
 
       {/* Features — ambient teal glow */}
-      <Section id="features" glow="teal" containerClassName={CONTAINER}>
+      <Section id="features" containerClassName={CONTAINER}>
         <h2 className="section-h2 text-center">
           Features
         </h2>

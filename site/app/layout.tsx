@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="relative z-10 min-h-screen flex flex-col antialiased bg-[var(--bg)]">
+      <body className="relative z-10 min-h-screen flex flex-col antialiased">
         <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--panel)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--panel)]/90">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-6 px-4 sm:px-6">
             <a

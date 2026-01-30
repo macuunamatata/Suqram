@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { REPO_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Auth Link Rail — Auth links that don't break in corporate inboxes",
+  title: "Suqram — Scanner-proof auth links",
   description:
-    "Send yourself a test email. If your auth links break in corporate inboxes, you'll see it in 60 seconds.",
+    "Magic links that survive Safe Links and security scanners. Suqram Auth Link Rail.",
   openGraph: {
-    title: "Auth Link Rail — Auth links that don't break in corporate inboxes",
+    title: "Suqram — Scanner-proof auth links",
     description:
-      "Send yourself a test email. If your auth links break in corporate inboxes, you'll see it in 60 seconds.",
+      "Magic links that survive Safe Links and security scanners. Suqram Auth Link Rail.",
     type: "website",
   },
 };
@@ -21,11 +20,8 @@ const CENTER_NAV = [
 ];
 
 const FOOTER_LINKS = [
-  { href: "/docs", label: "Docs" },
-  { href: "/pricing", label: "Pricing" },
-  { href: "/terms", label: "Terms" },
   { href: "/privacy", label: "Privacy" },
-  { href: REPO_URL, label: "GitHub", external: true },
+  { href: "/terms", label: "Terms" },
 ];
 
 export default function RootLayout({
@@ -36,20 +32,20 @@ export default function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <body className="relative z-10 min-h-screen flex flex-col antialiased">
-        <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--panel)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--panel)]/90">
+        <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--bg)]">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-6 px-4 sm:px-6">
             <a
               href="/"
-              className="text-lg font-semibold text-[var(--text)] transition-opacity hover:opacity-90 shrink-0"
+              className="text-lg font-semibold text-[var(--text)] transition-opacity hover:opacity-90 shrink-0 whitespace-nowrap"
             >
-              Auth Link Rail
+              Suqram
             </a>
             <nav className="hidden sm:flex items-center justify-center gap-6 md:gap-8 flex-1 min-w-0 px-4" aria-label="Main">
               {CENTER_NAV.map(({ href, label }) => (
                 <a
                   key={href}
                   href={href}
-                  className="text-sm text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
+                  className="text-sm text-[var(--text)] transition-colors duration-150 ease-out hover:text-[var(--text)] opacity-90 hover:opacity-100"
                 >
                   {label}
                 </a>
@@ -69,25 +65,29 @@ export default function RootLayout({
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="section-border py-10 bg-[var(--panel)]">
+        <footer className="border-t border-[var(--border)] py-8 bg-[var(--bg)]">
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-                {FOOTER_LINKS.map(({ href, label, external }) => (
+            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+              <p className="text-sm text-[var(--text)]">
+                Suqram — Scanner-proof auth links.
+              </p>
+              <div className="flex items-center gap-4">
+                {FOOTER_LINKS.map(({ href, label }) => (
                   <a
                     key={href}
                     href={href}
-                    target={external ? "_blank" : undefined}
-                    rel={external ? "noopener noreferrer" : undefined}
                     className="text-xs text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
                   >
                     {label}
                   </a>
                 ))}
+                <a
+                  href="mailto:support@suqram.com"
+                  className="text-xs text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
+                >
+                  support@suqram.com
+                </a>
               </div>
-              <p className="text-xs text-[var(--muted)]">
-                © {new Date().getFullYear()} Auth Link Rail
-              </p>
             </div>
           </div>
         </footer>

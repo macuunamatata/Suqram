@@ -404,9 +404,35 @@ h3 {
     color: var(--accent);
   }
 
-  /* Hero: no extra layers; page gradient is the only background */
+  /* Hero: very subtle grid only in hero area + soft vignette */
   .hero-bg {
-    /* no grid, no vignette */
+    position: relative;
+    background-color: var(--bg);
+  }
+  .hero-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      repeating-linear-gradient(0deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 36px),
+      repeating-linear-gradient(90deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 36px);
+    background-size: 36px 36px;
+  }
+  .hero-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      radial-gradient(closest-side at 50% 35%, rgba(255, 255, 255, 0.04), transparent 60%),
+      radial-gradient(1200px 600px at 50% 40%, transparent 0%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0.75) 100%);
+  }
+  .hero-bg > * {
+    position: relative;
+    z-index: 2;
   }
 }
 

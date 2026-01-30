@@ -58,11 +58,11 @@ export default function RootLayout({
             <div className="flex items-center gap-3 shrink-0">
               <a
                 href="/start"
-                className="btn-secondary hidden sm:inline-flex text-sm py-2.5 px-4"
+                className="btn-ghost hidden sm:inline-flex text-sm py-2.5 px-4 min-h-0 h-10"
               >
                 Log in
               </a>
-              <a href="/start" className="btn-primary text-sm py-2.5 px-4 min-h-0 h-10">
+              <a href="/start" className="btn-secondary text-sm py-2.5 px-4 min-h-0 h-10">
                 Integrate
               </a>
             </div>

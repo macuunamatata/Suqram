@@ -72,7 +72,7 @@ export default function PricingPage() {
           <div
             key={tier.name}
             className={`card card-gradient-top relative p-6 sm:p-8 ${
-              tier.featured ? "border-[var(--accent)]/40 shadow-[0_0_32px_-8px_rgba(34,211,238,0.2)]" : ""
+              tier.featured ? "border-[var(--accent)]" : ""
             }`}
           >
             {tier.pill && (
@@ -87,7 +87,7 @@ export default function PricingPage() {
             <h2 className="text-lg font-semibold text-[var(--text)]">{tier.name}</h2>
             <p className="mt-1 text-sm text-[var(--muted)]">{tier.description}</p>
             <div className="mt-6 flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-[var(--text)]">{tier.price}</span>
+              <span className={`text-3xl font-bold ${tier.featured ? "text-[var(--accent)]" : "text-[var(--text)]"}`}>{tier.price}</span>
               <span className="text-[var(--muted)]">{tier.period}</span>
             </div>
             <ul className="mt-6 space-y-3 text-sm text-[var(--muted)]">

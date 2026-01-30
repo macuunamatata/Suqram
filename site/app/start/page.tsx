@@ -29,7 +29,7 @@ export default function StartPage() {
             </p>
             <Link
               href="/"
-              className="btn-primary mt-6 inline-flex w-full justify-center sm:w-auto"
+              className="btn-hero mt-6 inline-flex w-full justify-center sm:w-auto"
             >
               Send test email
             </Link>

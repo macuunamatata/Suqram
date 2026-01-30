@@ -147,17 +147,17 @@ export default function HomePage() {
     <>
       {/* Hero */}
       <section className={`${SECTION_PY} ${CONTAINER} text-center`}>
-        <p className="pill-accent pill inline-block text-xs">
+        <p className="pill-hero inline-block text-xs">
           Auth links that don&apos;t break in corporate inboxes
         </p>
-        <h1 className="mt-6 text-4xl font-bold tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl leading-tight">
+        <h1 className="mt-6 text-4xl font-bold tracking-tight text-[var(--text)] sm:text-5xl lg:text-6xl leading-[1.15]">
           Magic links that survive Safe Links and scanners
         </h1>
         <p className="mt-6 max-w-2xl mx-auto text-lg text-[var(--muted)]">
           Corporate scanners click your links and consume one-time tokens. We protect your magic and reset links so only the real user can redeem them.
         </p>
         <div className="mt-10">
-          <a href="#try" className="btn-primary">
+          <a href="#try" className="btn-hero">
             Send me the test email
           </a>
         </div>
@@ -269,17 +269,17 @@ export default function HomePage() {
           {PRICING_TIERS.map((tier) => (
             <div
               key={tier.name}
-              className={`card relative p-6 sm:p-8 ${tier.featured ? "border-[var(--accent)]/50 shadow-[var(--shadow-hover)]" : ""}`}
+              className={`card relative p-6 sm:p-8 ${tier.featured ? "border-[var(--accent)]" : ""}`}
             >
               {tier.featured && tier.pill && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 pill-accent pill">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 pill-accent">
                   {tier.pill}
                 </span>
               )}
               <h3 className="text-lg font-semibold text-[var(--text)]">{tier.name}</h3>
               <p className="mt-1 text-sm text-[var(--muted)]">{tier.description}</p>
               <div className="mt-6 flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-[var(--text)]">{tier.price}</span>
+                <span className={`text-3xl font-bold ${tier.featured ? "text-[var(--accent)]" : "text-[var(--text)]"}`}>{tier.price}</span>
                 <span className="text-[var(--muted)]">{tier.period}</span>
               </div>
               <Link
@@ -313,7 +313,7 @@ export default function HomePage() {
             Run the inbox test or go straight to generating protected links.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href="#try" className="btn-primary w-full sm:w-auto">
+            <a href="#try" className="btn-hero w-full sm:w-auto">
               Send test email
             </a>
             <Link href="/start" className="btn-secondary w-full sm:w-auto">

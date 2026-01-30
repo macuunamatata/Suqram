@@ -78,13 +78,13 @@ export default function HomeEmailModule() {
                 {error}
               </p>
             )}
-            <button
-              type="submit"
-              disabled={status === "sending"}
-              className="btn-primary w-full disabled:opacity-50"
-            >
-              {status === "sending" ? "Sending…" : "Send me the test email"}
-            </button>
+<button
+                type="submit"
+                disabled={status === "sending"}
+                className="btn-hero w-full disabled:opacity-50"
+              >
+                {status === "sending" ? "Sending…" : "Send me the test email"}
+              </button>
             <p className="text-center text-xs text-[var(--muted)]">
               No credit card. Takes ~60 seconds.
             </p>

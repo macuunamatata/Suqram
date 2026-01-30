@@ -4,9 +4,9 @@ import { useState } from "react";
 import { sendTestEmail } from "@/lib/sendTestEmail";
 
 const BULLETS = [
-  "See the difference between protected vs normal",
+  "Two links: normal (breaks) and protected (works)",
   "Works even when scanners click first",
-  "Supabase-first, bring your own auth",
+  "Supabase drop-in, bring your own auth",
 ];
 
 export default function HomeEmailModule() {
@@ -52,7 +52,7 @@ export default function HomeEmailModule() {
               onClick={() => { setStatus("idle"); setEmail(""); }}
               className="link-accent mt-6 text-sm font-medium"
             >
-              Send another
+              Send another test
             </button>
           </>
         ) : (
@@ -83,10 +83,13 @@ export default function HomeEmailModule() {
                 disabled={status === "sending"}
                 className="btn-hero w-full disabled:opacity-50"
               >
-                {status === "sending" ? "Sending…" : "Send me the test email"}
+                {status === "sending" ? "Sending…" : "Send test to my inbox"}
               </button>
-            <p className="text-center text-xs text-[var(--muted)]">
-              No credit card. Takes ~60 seconds.
+            <p className="text-center text-sm text-[var(--text-muted)] leading-relaxed">
+              We&apos;ll email you two links: a normal one (breaks) and a protected one (works).
+            </p>
+            <p className="text-center text-xs text-[var(--muted)] mt-1">
+              No signup. No marketing email.
             </p>
           </form>
         )}

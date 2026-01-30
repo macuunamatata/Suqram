@@ -52,6 +52,16 @@
   --cta-text: var(--ctaText);
   --cta-hover-bg: #E6E8E7;
   --ring: var(--accent);
+
+  /* Motion — premium easing; overridden by reduced-motion */
+  --ease-out-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --duration-ui: 200ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-ui: 80ms;
+  }
 }
 
 body {
@@ -141,30 +151,41 @@ h3 {
 }
 
 @layer components {
-  /* Cards: green-charcoal surface, 1px border, radius 16px */
+  /* Cards: glass — transparent over dark, subtle border, inner highlight; hover minimal */
   .card {
-    @apply transition-[border-color,box-shadow] duration-150 ease-out;
-    background: linear-gradient(180deg, rgba(25, 195, 125, 0.02) 0%, transparent 32px), var(--surface-elevated);
-    border: 1px solid var(--border);
+    transition: color var(--duration-ui) var(--ease-out-smooth),
+      background-color var(--duration-ui) var(--ease-out-smooth),
+      border-color var(--duration-ui) var(--ease-out-smooth),
+      box-shadow var(--duration-ui) var(--ease-out-smooth),
+      transform var(--duration-ui) var(--ease-out-smooth);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.03) 100%), var(--bg2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
-    box-shadow: none;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
   .card:hover {
-    border-color: var(--border-strong);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-1px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover {
+      transform: none;
+    }
   }
   .card-padded {
-    padding: 1rem 1.25rem;
+    padding: 1rem 1.125rem; /* 16–18 mobile */
   }
   @media (min-width: 640px) {
     .card-padded {
-      padding: 1.25rem 1.5rem;
+      padding: 1.375rem 1.625rem; /* 22–26 desktop */
     }
   }
   .card-gradient-top {
-    background: linear-gradient(180deg, rgba(25, 195, 125, 0.03) 0%, transparent 28px), var(--surface-elevated);
-    border: 1px solid var(--border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 50%, transparent 100%), var(--bg2);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
   }
 
   /* Primary CTA: Domained — ctaBg/ctaText, pill, premium hover, no heavy shadow */
@@ -176,11 +197,16 @@ h3 {
     color: var(--ctaText);
     border: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: none;
-    transition: background-color 180ms ease, border-color 180ms ease, transform 180ms ease;
+    transition: background-color var(--duration-ui) var(--ease-out-smooth), border-color var(--duration-ui) var(--ease-out-smooth), transform var(--duration-ui) var(--ease-out-smooth);
   }
   .btn-hero:hover {
     background: var(--cta-hover-bg);
     transform: translateY(-1px);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .btn-hero:hover {
+      transform: none;
+    }
   }
   .btn-hero:focus-visible {
     outline: none;
@@ -316,11 +342,12 @@ h3 {
 
   /* Inputs: dark surface, subtle border, soft teal focus ring */
   .input-base {
-    @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--text-muted-strong)] transition-[border-color,box-shadow] duration-150 ease-out;
+    @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--text-muted-strong)];
     height: 48px;
     background: var(--surface-elevated);
     border: 1px solid var(--border);
     border-radius: 14px;
+    transition: border-color var(--duration-ui) var(--ease-out-smooth), box-shadow var(--duration-ui) var(--ease-out-smooth);
   }
   .input-base:focus {
     outline: none;
@@ -340,7 +367,86 @@ h3 {
     border-top: 1px solid var(--border);
   }
 
-  /* Hero: Domained-style — base, grid (below), then center spotlight + vignette */
+  /* Section wrapper: gradient fades at top/bottom (no hard divider lines) */
+  .section-fade {
+    position: relative;
+    padding-top: 4rem;   /* 64px mobile */
+    padding-bottom: 4rem;
+  }
+  @media (min-width: 640px) {
+    .section-fade {
+      padding-top: 6rem;   /* 96px desktop */
+      padding-bottom: 6rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .section-fade {
+      padding-top: 7.5rem; /* 120px */
+      padding-bottom: 7.5rem;
+    }
+  }
+  .section-fade::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 80px;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(to bottom, var(--bg), transparent);
+  }
+  .section-fade::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 80px;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(to top, var(--bg), transparent);
+  }
+  .section-fade > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Ambient glow — very low opacity (< 6%), premium teal or warm wash */
+  .glow-teal {
+    position: relative;
+  }
+  .glow-teal::before {
+    content: "";
+    position: absolute;
+    inset: -20% 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% 50%, rgba(25, 195, 125, 0.04), transparent 70%);
+  }
+  .glow-teal > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* IconBadge: small rounded square, subtle surface, icon inside */
+  .icon-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .icon-badge.icon-badge-accent {
+    color: var(--accent);
+  }
+
+  /* Hero: Domained-style — base, grid (below), then center spotlight + vignette — hero only */
   .hero-bg {
     position: relative;
     background-color: var(--bg);
@@ -386,6 +492,27 @@ h3 {
   }
   .text-error-muted {
     color: var(--error-muted);
+  }
+  .transition-ui {
+    transition: color var(--duration-ui) var(--ease-out-smooth),
+      background-color var(--duration-ui) var(--ease-out-smooth),
+      border-color var(--duration-ui) var(--ease-out-smooth),
+      box-shadow var(--duration-ui) var(--ease-out-smooth),
+      transform var(--duration-ui) var(--ease-out-smooth);
+  }
+}
+
+/* Global transitions for interactive elements (respect reduced-motion via :root --duration-ui) */
+a, button {
+  transition: color var(--duration-ui) var(--ease-out-smooth),
+    background-color var(--duration-ui) var(--ease-out-smooth),
+    border-color var(--duration-ui) var(--ease-out-smooth),
+    box-shadow var(--duration-ui) var(--ease-out-smooth),
+    transform var(--duration-ui) var(--ease-out-smooth);
+}
+@media (prefers-reduced-motion: reduce) {
+  a, button {
+    transition-duration: 80ms;
   }
 }
 

@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import HomeEmailModule from "./HomeEmailModule";
 import HomeFAQ from "./HomeFAQ";
+import Section from "./Section";
+import IconBadge from "./components/IconBadge";
+import { IconMail, IconLink, IconLightning, IconChart } from "./components/icons";
 
 export const metadata: Metadata = {
-  title: "Auth Link Rail — Auth links that don't break in corporate inboxes",
+  title: "Auth Link Rail — Magic links that survive Safe Links and corporate scanners",
   description:
-    "Send yourself a test email. If your auth links break in corporate inboxes, you'll see it in 60 seconds.",
+    "Corporate email scanners click your links first. We protect magic and reset links so only the real user can complete them.",
 };
 
 const STATS = [
@@ -18,9 +21,10 @@ const STATS = [
 
 const FEATURES = [
   {
-    title: "Live inbox test",
-    copy: "Send a test email and see protected vs normal links side by side. No setup.",
-    icon: "✉️",
+    title: "Inbox scanner test",
+    copy: "See how Safe Links treats your links. One email, two links: normal (breaks) and protected (works).",
+    detail: "Uses your real inbox.",
+    icon: <IconMail />,
     mock: (
       <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg2)] p-3 text-xs font-mono text-[var(--muted-strong)]">
         you@company.com → Send test
@@ -28,9 +32,10 @@ const FEATURES = [
     ),
   },
   {
-    title: "Protected links",
-    copy: "Wrap any URL in a rail link. Scanners can't consume the token; only the real user can.",
-    icon: "🔗",
+    title: "Rail-protected links",
+    copy: "Wrap any URL in a Rail URL. Scanners get a redirect; only the user's click completes the flow.",
+    detail: "One-time links stay one-time.",
+    icon: <IconLink />,
     mock: (
       <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg2)] p-3 text-xs font-mono text-[var(--muted-strong)] break-all">
         go.suqram.com/r/abc#u=https%3A%2F%2F...
@@ -38,9 +43,10 @@ const FEATURES = [
     ),
   },
   {
-    title: "Supabase integration",
-    copy: "Paste the rail URL into your magic link or reset email template. One redirect, same UX.",
-    icon: "⚡",
+    title: "Drop-in for Supabase",
+    copy: "Use the Rail URL as your confirmation or reset link. Same redirect, same UX.",
+    detail: `Replace {{ .ConfirmationURL }} in your template.`,
+    icon: <IconLightning />,
     mock: (
       <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg2)] p-3 text-xs text-[var(--muted-strong)]">
         Email template → {`{{ .ConfirmationURL }}`}
@@ -48,9 +54,10 @@ const FEATURES = [
     ),
   },
   {
-    title: "Dashboard & logs",
-    copy: "See redemptions, domains, and logs. Control where links are allowed to go.",
-    icon: "📊",
+    title: "Dashboard and logs",
+    copy: "View redemptions, allowed domains, and per-link logs.",
+    detail: "Control where links are allowed to go.",
+    icon: <IconChart />,
     mock: (
       <div className="mt-4 rounded-lg border border-[var(--border)] bg-[var(--bg2)] p-3 text-xs text-[var(--muted-strong)]">
         Redemptions: 127 · Domains: 1
@@ -61,29 +68,35 @@ const FEATURES = [
 
 const STEPS = [
   {
-    title: "Run the inbox test",
-    copy: "Send yourself a test email. Click protected vs normal link and see the difference in 60 seconds.",
+    title: "Test in your inbox",
+    copy: "We send two links to your email. Click both; the protected one works, the normal one fails after the scanner.",
     illustration: (
-      <div className="flex h-24 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--panel)] text-4xl">
-        ✉️
+      <div className="flex h-24 items-center justify-center">
+        <IconBadge accent>
+          <IconMail />
+        </IconBadge>
       </div>
     ),
   },
   {
-    title: "Generate a protected link",
-    copy: "Paste your destination URL and get a rail link. Copy it into your Supabase email template.",
+    title: "Wrap links with Rail URL",
+    copy: "Paste your destination URL into Rail. Copy the generated link into your auth email template.",
     illustration: (
-      <div className="flex h-24 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--panel)] text-4xl">
-        🔗
+      <div className="flex h-24 items-center justify-center">
+        <IconBadge accent>
+          <IconLink />
+        </IconBadge>
       </div>
     ),
   },
   {
-    title: "Paste into your app",
-    copy: "Use the rail URL as the confirmation or reset link. One redirect; the user lands where you expect.",
+    title: "Paste into Supabase",
+    copy: "Use the Rail URL as the magic link or reset link. One redirect. No flow changes.",
     illustration: (
-      <div className="flex h-24 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--panel)] text-4xl">
-        ⚡
+      <div className="flex h-24 items-center justify-center">
+        <IconBadge accent>
+          <IconLightning />
+        </IconBadge>
       </div>
     ),
   },
@@ -140,50 +153,52 @@ const FAQ_ITEMS = [
 ];
 
 const CONTAINER = "mx-auto max-w-[1200px] px-4 sm:px-6";
-const SECTION_PY = "py-12 sm:py-20";
-const HERO_PY = "py-16 sm:py-24";
+const HERO_PY = "py-16 sm:py-20 lg:py-24";
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero: generous spacing, calm premium feel */}
+      {/* Hero: grid only here; subtle teal wash behind content */}
       <section className={`hero-bg ${HERO_PY}`}>
-        <div className={`${CONTAINER} text-center`}>
+        <div className={`glow-teal ${CONTAINER} text-center`}>
           <p className="pill-hero inline-flex items-center gap-2 text-xs">
             <span className="pill-hero-dot" aria-hidden />
-            Auth links that don&apos;t break in corporate inboxes
+            Scanner-proof auth links
           </p>
           <h1 className="hero-h1 mt-8 max-w-4xl mx-auto">
-            Magic links that survive Safe Links and scanners
+            Magic links that work in corporate inboxes
           </h1>
-          <p className="mt-6 max-w-2xl mx-auto body-hero">
-            Corporate scanners click your links and consume one-time tokens. We protect your magic and reset links so only the real user can redeem them.
+          <p className="mt-6 max-w-2xl mx-auto body-hero leading-relaxed">
+            Corporate email (Safe Links, Mimecast) clicks every link first. Your one-time magic link gets used before the user sees it. We fix that.
           </p>
-          <div className="mt-12">
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a href="#try" className="btn-hero">
-              Send me the test email
+              Send test to my inbox
+            </a>
+            <a href="#how" className="text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-ui">
+              See how it works
             </a>
           </div>
         </div>
       </section>
 
       {/* Try it: email form */}
-      <section id="try" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
+      <Section id="try" containerClassName={CONTAINER}>
         <div className="max-w-lg mx-auto text-center">
           <h2 className="section-h2">
-            See the difference in 60 seconds
+            Run the inbox scanner test
           </h2>
-          <p className="mt-4 text-[var(--text-muted)] leading-relaxed">
-            We&apos;ll send you one email with a protected link and a normal link. Click both; only the protected one works twice.
+          <p className="mt-4 text-[var(--text-muted)] leading-relaxed max-w-xl mx-auto">
+            We&apos;ll email you two links: a normal one (breaks) and a protected one (works). No signup.
           </p>
-          <div className="mt-8">
+          <div className="mt-10">
             <HomeEmailModule />
           </div>
         </div>
-      </section>
+      </Section>
 
       {/* Stats */}
-      <section className={`section-border ${SECTION_PY} ${CONTAINER}`}>
+      <Section containerClassName={CONTAINER}>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {STATS.map(({ label, value }) => (
             <div
@@ -197,79 +212,80 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* Problem */}
-      <section className={`section-border ${SECTION_PY} ${CONTAINER}`}>
+      <Section containerClassName={CONTAINER}>
         <h2 className="section-h2 text-center">
-          Scanners consume your one-time tokens
+          Why magic links break in corporate email
         </h2>
-        <p className="mt-4 max-w-2xl mx-auto text-center body-text">
-          Safe Links, Mimecast, and other scanners click every link. With a normal magic link, the first click (the scanner) consumes the token. The user gets &quot;link expired&quot;.
+        <p className="mt-4 max-w-2xl mx-auto text-center body-text leading-relaxed">
+          Safe Links, Mimecast, and similar tools open every link before the user. With a normal one-time link, that first open uses the link. The user sees &quot;link expired.&quot; Rail lets only the real user&apos;s click complete the link.
         </p>
-        <div className="mt-8 flex flex-col sm:flex-row items-stretch justify-center gap-4 max-w-2xl mx-auto">
+        <div className="mt-10 flex flex-col sm:flex-row items-stretch justify-center gap-4 max-w-2xl mx-auto">
           <div className="card card-padded flex-1 text-center">
             <p className="text-sm font-semibold text-[var(--text-muted)]">Normal link</p>
-            <p className="mt-2 text-lg font-bold text-[var(--text)]">1 click = consumed</p>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">Scanner clicks first → user sees expired</p>
+            <p className="mt-2 text-lg font-bold text-[var(--text)]">Scanner opens first → link used</p>
+            <p className="mt-1 text-sm text-[var(--text-muted)]">User sees &quot;link expired&quot;</p>
           </div>
           <div className="card card-padded flex-1 text-center border-[var(--accent)]/30 bg-[var(--accent-dim)]/20">
-            <p className="text-sm font-semibold text-accent">Protected link</p>
-            <p className="mt-2 text-lg font-bold text-[var(--text)]">Only real user consumes</p>
+            <p className="text-sm font-semibold text-accent">Rail-protected link</p>
+            <p className="mt-2 text-lg font-bold text-[var(--text)]">Only user&apos;s click completes</p>
             <p className="mt-1 text-sm text-[var(--text-muted)]">Scanner gets redirect; user gets through</p>
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* Features */}
-      <section id="features" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
+      {/* Features — ambient teal glow */}
+      <Section id="features" glow="teal" containerClassName={CONTAINER}>
         <h2 className="section-h2 text-center">
           Features
         </h2>
-        <p className="mt-4 max-w-xl mx-auto text-center body-text">
-          One rail: inbox test, link generator, Supabase-ready redirects, and control.
+        <p className="mt-4 max-w-2xl mx-auto text-center body-text leading-relaxed">
+          Inbox test, link wrapper, Supabase drop-in, and dashboard.
         </p>
-        <div className="mt-8 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map(({ title, copy, icon, mock }) => (
+        <div className="mt-10 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {FEATURES.map(({ title, copy, detail, icon, mock }) => (
             <div key={title} className="card card-padded">
-              <span className="text-2xl" aria-hidden>{icon}</span>
-              <h3 className="mt-3 text-lg font-semibold text-[var(--text-heading)]">{title}</h3>
-              <p className="mt-2 text-sm text-[var(--text-muted)]">{copy}</p>
+              <IconBadge>{icon}</IconBadge>
+              <h3 className="mt-4 text-lg font-semibold text-[var(--text-heading)]">{title}</h3>
+              <p className="mt-2 text-sm text-[var(--text-muted)] leading-relaxed">{copy}</p>
+              <p className="mt-2 text-xs text-[var(--text-muted)]">{detail}</p>
               {mock}
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* How it works (steps) */}
-      <section id="how" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
+      <Section id="how" containerClassName={CONTAINER}>
         <h2 className="section-h2 text-center">
           How it works
         </h2>
-        <p className="mt-4 max-w-xl mx-auto text-center body-text">
-          Three steps from test to production.
+        <p className="mt-4 max-w-2xl mx-auto text-center body-text leading-relaxed">
+          Test in your inbox, wrap links, paste into your auth provider.
         </p>
-        <div className="mt-8 grid gap-8 sm:grid-cols-3">
+        <div className="mt-10 grid gap-8 sm:grid-cols-3">
           {STEPS.map(({ title, copy, illustration }, i) => (
             <div key={i} className="text-center">
               <div className="mx-auto w-full max-w-[200px]">{illustration}</div>
-              <p className="mt-4 text-sm font-semibold text-[var(--accent)]">Step {i + 1}</p>
-              <h3 className="mt-1 text-lg font-semibold text-[var(--text-heading)]">{title}</h3>
-              <p className="mt-2 text-sm text-[var(--text-muted)]">{copy}</p>
+              <p className="mt-6 text-sm font-semibold text-[var(--accent)]">Step {i + 1}</p>
+              <h3 className="mt-2 text-lg font-semibold text-[var(--text-heading)]">{title}</h3>
+              <p className="mt-2 text-sm text-[var(--text-muted)] leading-relaxed">{copy}</p>
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* Pricing */}
-      <section id="pricing" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
+      <Section id="pricing" containerClassName={CONTAINER}>
         <h2 className="section-h2 text-center">
           Pricing
         </h2>
-        <p className="mt-4 max-w-xl mx-auto text-center body-text">
+        <p className="mt-4 max-w-2xl mx-auto text-center body-text leading-relaxed">
           You only pay for successful redemptions. No charge when a scanner clicks.
         </p>
-        <div className="mt-8 grid gap-4 sm:gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
+        <div className="mt-10 grid gap-4 sm:gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
           {PRICING_TIERS.map((tier) => (
             <div
               key={tier.name}
@@ -295,37 +311,37 @@ export default function HomePage() {
             </div>
           ))}
         </div>
-      </section>
+      </Section>
 
       {/* FAQ */}
-      <section id="faq" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
+      <Section id="faq" containerClassName={CONTAINER}>
         <h2 className="section-h2 text-center">
           FAQ
         </h2>
-        <div className="mt-8">
+        <div className="mt-10">
           <HomeFAQ items={FAQ_ITEMS} />
         </div>
-      </section>
+      </Section>
 
       {/* Final CTA */}
-      <section className={`section-border ${SECTION_PY} ${CONTAINER}`}>
-        <div className="max-w-2xl mx-auto text-center card p-8 sm:p-10">
+      <Section containerClassName={CONTAINER}>
+        <div className="max-w-2xl mx-auto text-center card card-padded p-8 sm:p-10">
           <h2 className="section-h2">
             Ready to try?
           </h2>
-          <p className="mt-4 body-text">
-            Run the inbox test or go straight to generating protected links.
+          <p className="mt-6 body-text leading-relaxed">
+            Run the inbox test or start integrating.
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
             <a href="#try" className="btn-hero w-full sm:w-auto">
-              Send test email
+              Send test to my inbox
             </a>
             <Link href="/start" className="btn-secondary w-full sm:w-auto">
               Integrate
             </Link>
           </div>
         </div>
-      </section>
+      </Section>
     </>
   );
 }

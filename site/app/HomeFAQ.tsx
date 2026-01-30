@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { IconChevronDown } from "./components/icons";
 
 export type FAQItem = { q: string; a: string };
 
@@ -17,15 +18,15 @@ export default function HomeFAQ({ items }: { items: FAQItem[] }) {
           <button
             type="button"
             onClick={() => setOpenIndex(openIndex === i ? null : i)}
-            className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-medium text-[var(--text)] hover:bg-[var(--bg2)]/40 transition-colors duration-150 ease-out rounded-t-2xl focus-visible:ring-2 focus-visible:ring-[var(--accent-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-elevated)]"
+            className="transition-ui flex w-full items-center justify-between gap-3 px-5 py-4 text-left text-sm font-medium text-[var(--text)] hover:bg-[rgba(255,255,255,0.03)] rounded-t-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
             aria-expanded={openIndex === i}
           >
             <span>{item.q}</span>
             <span
-              className={`shrink-0 text-[var(--text-muted)] transition-transform duration-150 ease-out ${openIndex === i ? "rotate-180" : ""}`}
+              className={`transition-ui shrink-0 text-[var(--text-muted)] ${openIndex === i ? "rotate-180" : ""}`}
               aria-hidden
             >
-              ▼
+              <IconChevronDown />
             </span>
           </button>
           {openIndex === i && (

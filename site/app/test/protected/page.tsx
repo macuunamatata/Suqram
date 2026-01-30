@@ -1,16 +1,11 @@
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Protected link worked — Auth Link Rail",
-  description: "Outcome: protected link worked.",
-};
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 
-export default function TestProtectedPage({
-  searchParams,
-}: {
-  searchParams: { tid?: string };
-}) {
-  const tid = searchParams?.tid ?? "";
+function ProtectedContent() {
+  const searchParams = useSearchParams();
+  const tid = searchParams.get("tid") ?? "";
   const ts = new Date().toISOString();
 
   return (
@@ -33,5 +28,21 @@ export default function TestProtectedPage({
         </a>
       </p>
     </div>
+  );
+}
+
+export default function TestProtectedPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-xl px-4 py-20 text-center">
+          <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-10">
+            <p className="text-slate-600">Loading…</p>
+          </div>
+        </div>
+      }
+    >
+      <ProtectedContent />
+    </Suspense>
   );
 }

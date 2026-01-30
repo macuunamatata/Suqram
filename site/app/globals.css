@@ -69,6 +69,7 @@ body {
   background: linear-gradient(180deg, #070A0B 0%, #0A0E10 50%, #070A0B 100%);
   background-attachment: fixed;
   min-height: 100vh;
+  overflow-x: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -404,10 +405,12 @@ h3 {
     color: var(--accent);
   }
 
-  /* Hero: very subtle grid only in hero area + soft vignette */
+  /* Hero: grid and vignette only in hero area; isolate so they don’t bleed */
   .hero-bg {
     position: relative;
     background-color: var(--bg);
+    isolation: isolate;
+    overflow: hidden;
   }
   .hero-bg::before {
     content: "";
@@ -428,7 +431,7 @@ h3 {
     z-index: 1;
     background:
       radial-gradient(closest-side at 50% 35%, rgba(255, 255, 255, 0.04), transparent 60%),
-      radial-gradient(1200px 600px at 50% 40%, transparent 0%, rgba(0, 0, 0, 0.5) 70%, rgba(0, 0, 0, 0.75) 100%);
+      radial-gradient(1200px 600px at 50% 40%, transparent 0%, rgba(0, 0, 0, 0.28) 70%, rgba(0, 0, 0, 0.45) 100%);
   }
   .hero-bg > * {
     position: relative;

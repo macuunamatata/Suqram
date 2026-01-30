@@ -7,8 +7,8 @@ export const metadata: Metadata = {
     "Scanner-proof auth links. Stop losing users to link expired when corporate scanners pre-open one-time auth links.",
 };
 
-const CONTAINER = "mx-auto max-w-[1200px] px-4 sm:px-6";
-const HERO_PY = "py-16 sm:py-20 lg:py-28";
+const CONTAINER = "mx-auto w-full max-w-[1200px] px-4 sm:px-6";
+const HERO_PY = "py-20 sm:py-24 lg:py-28";
 
 const DASHBOARD_METRICS = [
   { value: "0", label: "Protected Apps", desc: "Apps with scanner-proof auth flows" },
@@ -48,11 +48,11 @@ export default function HomePage() {
       </section>
 
       {/* Empty dashboard teaser */}
-      <section className="pb-20 sm:pb-28">
+      <section className="pt-20 sm:pt-24 pb-24 sm:pb-32" aria-label="Product preview">
         <div className={`${CONTAINER} max-w-4xl mx-auto`}>
-          <div className="card overflow-hidden">
+          <div className="card overflow-hidden rounded-2xl">
             <div className="p-5 sm:p-6 border-b border-[var(--border)]">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 min-w-0">
                 {DASHBOARD_METRICS.map(({ value, label, desc }) => (
                   <div
                     key={label}

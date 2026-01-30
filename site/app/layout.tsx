@@ -13,11 +13,7 @@ export const metadata: Metadata = {
   },
 };
 
-const CENTER_NAV = [
-  { href: "/#how", label: "How it works" },
-  { href: "/#features", label: "Features" },
-  { href: "/pricing", label: "Pricing" },
-];
+const CENTER_NAV = [{ href: "/pricing", label: "Pricing" }];
 
 const FOOTER_LINKS = [
   { href: "/privacy", label: "Privacy" },

@@ -2,22 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design system: light, domained.app-style. Dark mode explicitly disabled (single theme). */
+/* Design system: domained.app-style — dark theme, vibrant green accent. */
 :root {
-  --bg: #f8f9fa;
-  --bg2: #f1f3f5;
-  --panel: #ffffff;
-  --border: #e9ecef;
-  --border-strong: #dee2e6;
-  --text: #1a1d21;
-  --muted: #6c757d;
-  --muted-strong: #495057;
-  --accent: #0d6efd;
-  --accent-dim: rgba(13, 110, 253, 0.12);
-  --accent2: #0a58ca;
-  --ring: #0d6efd;
-  --shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
-  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.1);
+  --bg: #0f0f0f;
+  --bg2: #1a1a1a;
+  --panel: #1a1a1a;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --text: #ffffff;
+  --muted: #a0a0a0;
+  --muted-strong: #888888;
+  --accent: #00e573;
+  --accent-dim: rgba(0, 229, 115, 0.15);
+  --accent2: #00c462;
+  --ring: #00e573;
+  --shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.4);
 }
 
 body {
@@ -51,22 +51,22 @@ h1, h2, h3 {
     height: 48px;
     min-height: 48px;
     background: var(--accent);
-    color: #fff;
+    color: #0f0f0f;
   }
   .btn-primary:hover {
     background: var(--accent2);
-    box-shadow: var(--shadow);
+    box-shadow: 0 0 20px rgba(0, 229, 115, 0.35);
   }
   .btn-secondary {
     @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold transition-all duration-200;
     height: 48px;
     min-height: 48px;
     color: var(--text);
-    background: transparent;
+    background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--border-strong);
   }
   .btn-secondary:hover {
-    background: var(--bg2);
+    background: rgba(255, 255, 255, 0.12);
     border-color: var(--muted);
   }
   .link-accent {
@@ -79,14 +79,14 @@ h1, h2, h3 {
   }
   .pill {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
-    background: var(--bg2);
-    color: var(--muted-strong);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--muted);
     border: 1px solid var(--border);
   }
   .pill-accent {
     background: var(--accent-dim);
     color: var(--accent);
-    border-color: rgba(13, 110, 253, 0.25);
+    border-color: rgba(0, 229, 115, 0.35);
   }
   .input-base {
     @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--muted-strong)] transition-all duration-200;

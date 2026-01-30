@@ -78,7 +78,7 @@ export default function PricingPage() {
             {tier.pill && (
               <span
                 className={`absolute -top-3 left-1/2 -translate-x-1/2 ${
-                  tier.featured ? "pill-accent" : "pill"
+                  tier.featured ? "pill-popular" : "pill"
                 }`}
               >
                 {tier.pill}

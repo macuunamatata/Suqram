@@ -83,19 +83,47 @@ h3 {
   font-size: 1.125rem;
 }
 
-/* Hero H1 — soft off-white, tight tracking, large clamp, line-height ~1.0–1.1 */
+/* Hero H1 — domained: 60px, weight 500, letter-spacing -1.5px, line-height 66px */
 .hero-h1 {
   color: var(--text-heading);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.06;
+  font-weight: 500;
+  letter-spacing: -0.025em; /* ~-1.5px at 60px */
+  line-height: 1.1;
   font-size: clamp(2.25rem, 5.5vw + 1rem, 3.75rem);
+  max-width: 60ch;
+}
+
+/* Hero body — domained: 24px, line-height 32px, muted */
+.body-hero {
+  color: var(--text-muted);
+  font-size: 1.25rem;   /* 20px mobile */
+  line-height: 1.5;
+}
+@media (min-width: 640px) {
+  .body-hero {
+    font-size: 1.5rem; /* 24px desktop */
+    line-height: 1.33; /* 32px */
+  }
 }
 
 /* Body copy — muted gray, line-height ~1.5–1.7 */
 .body-text {
   color: var(--text-muted);
   line-height: 1.6;
+}
+
+/* Section H2 — domained: 36px, weight 500 */
+.section-h2 {
+  font-size: 1.875rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--text-heading);
+}
+@media (min-width: 640px) {
+  .section-h2 {
+    font-size: 2.25rem; /* 36px */
+  }
 }
 
 @layer components {
@@ -199,6 +227,25 @@ h3 {
     box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
   }
 
+  /* Nav CTA — domained "Sign up": subtle fill, 8px radius, 1px border */
+  .btn-nav-cta {
+    @apply inline-flex items-center justify-center text-sm font-medium text-[var(--text)] transition-[background-color,border-color] duration-150 ease-out;
+    height: 48px;
+    min-height: 48px;
+    padding: 0 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  .btn-nav-cta:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .btn-nav-cta:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
+  }
+
   .link-accent {
     @apply font-medium transition-colors duration-150 ease-out;
     color: var(--accent);
@@ -238,6 +285,13 @@ h3 {
     background: var(--accent-dim);
     color: var(--accent);
     border: 1px solid rgba(45, 212, 191, 0.25);
+  }
+  /* "Most Popular" — domained: solid accent bg, black text */
+  .pill-popular {
+    @apply inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold;
+    background: var(--accent);
+    color: var(--cta-text);
+    border: none;
   }
   .pill-warn {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;

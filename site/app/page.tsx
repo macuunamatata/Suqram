@@ -156,7 +156,7 @@ export default function HomePage() {
           <h1 className="hero-h1 mt-8 max-w-4xl mx-auto">
             Magic links that survive Safe Links and scanners
           </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-lg body-text leading-relaxed">
+          <p className="mt-6 max-w-2xl mx-auto body-hero">
             Corporate scanners click your links and consume one-time tokens. We protect your magic and reset links so only the real user can redeem them.
           </p>
           <div className="mt-12">
@@ -170,7 +170,7 @@ export default function HomePage() {
       {/* Try it: email form */}
       <section id="try" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
         <div className="max-w-lg mx-auto text-center">
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl">
+          <h2 className="section-h2">
             See the difference in 60 seconds
           </h2>
           <p className="mt-4 text-[var(--text-muted)] leading-relaxed">
@@ -201,7 +201,7 @@ export default function HomePage() {
 
       {/* Problem */}
       <section className={`section-border ${SECTION_PY} ${CONTAINER}`}>
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
+        <h2 className="section-h2 text-center">
           Scanners consume your one-time tokens
         </h2>
         <p className="mt-4 max-w-2xl mx-auto text-center body-text">
@@ -223,7 +223,7 @@ export default function HomePage() {
 
       {/* Features */}
       <section id="features" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
+        <h2 className="section-h2 text-center">
           Features
         </h2>
         <p className="mt-4 max-w-xl mx-auto text-center body-text">
@@ -243,7 +243,7 @@ export default function HomePage() {
 
       {/* How it works (steps) */}
       <section id="how" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
+        <h2 className="section-h2 text-center">
           How it works
         </h2>
         <p className="mt-4 max-w-xl mx-auto text-center body-text">
@@ -263,7 +263,7 @@ export default function HomePage() {
 
       {/* Pricing */}
       <section id="pricing" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
+        <h2 className="section-h2 text-center">
           Pricing
         </h2>
         <p className="mt-4 max-w-xl mx-auto text-center body-text">
@@ -276,7 +276,7 @@ export default function HomePage() {
               className={`card card-padded relative ${tier.featured ? "border-[var(--accent)]/50" : ""}`}
             >
               {tier.featured && tier.pill && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 pill-accent">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 pill-popular">
                   {tier.pill}
                 </span>
               )}
@@ -299,7 +299,7 @@ export default function HomePage() {
 
       {/* FAQ */}
       <section id="faq" className={`section-border ${SECTION_PY} ${CONTAINER}`}>
-        <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
+        <h2 className="section-h2 text-center">
           FAQ
         </h2>
         <div className="mt-8">
@@ -307,25 +307,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ThemePreview: accent, warn, surface, CTA — for palette verification */}
-      <section className={`section-border py-12 ${CONTAINER}`} aria-hidden>
-        <div className="flex flex-wrap items-center justify-center gap-6 rounded-xl border border-[var(--border)] bg-[var(--surface)]/50 p-6">
-          <span className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
-            <span className="pill-hero-dot" />
-            <span className="text-accent font-medium">Accent</span>
-          </span>
-          <span className="pill-warn text-xs">Expiring soon</span>
-          <div className="h-10 w-24 rounded-lg border border-[var(--border)] bg-[var(--surface-elevated)]" title="Surface" />
-          <button type="button" className="btn-hero text-sm py-2 px-4 min-h-0 h-9" disabled>
-            CTA pill
-          </button>
-        </div>
-      </section>
-
       {/* Final CTA */}
       <section className={`section-border ${SECTION_PY} ${CONTAINER}`}>
         <div className="max-w-2xl mx-auto text-center card p-8 sm:p-10">
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl">
+          <h2 className="section-h2">
             Ready to try?
           </h2>
           <p className="mt-4 body-text">

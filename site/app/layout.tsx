@@ -62,7 +62,7 @@ export default function RootLayout({
               >
                 Log in
               </a>
-              <a href="/start" className="btn-secondary text-sm py-2.5 px-4 min-h-0 h-10">
+              <a href="/start" className="btn-nav-cta">
                 Integrate
               </a>
             </div>

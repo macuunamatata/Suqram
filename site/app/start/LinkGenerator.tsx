@@ -22,7 +22,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
     <button
       type="button"
       onClick={copy}
-      className="shrink-0 rounded border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+      className="btn-secondary shrink-0 px-3 py-2 text-sm"
     >
       {copied ? "Copied" : label}
     </button>
@@ -41,9 +41,9 @@ export default function LinkGenerator() {
     : "";
 
   return (
-    <div className="space-y-6 rounded-xl border border-slate-200 bg-white p-6">
+    <div className="card card-gradient-top space-y-6 p-6">
       <div>
-        <label htmlFor="dest-url" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="dest-url" className="block text-sm font-medium text-[var(--text)]">
           Destination URL
         </label>
         <input
@@ -52,11 +52,11 @@ export default function LinkGenerator() {
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
           placeholder="https://YOURPROJECT.supabase.co/auth/v1/verify?token=...&type=recovery"
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+          className="input-base mt-2"
         />
       </div>
       <div>
-        <label htmlFor="rail-base" className="block text-sm font-medium text-slate-700">
+        <label htmlFor="rail-base" className="block text-sm font-medium text-[var(--text)]">
           Rail base URL (your domain)
         </label>
         <input
@@ -64,26 +64,26 @@ export default function LinkGenerator() {
           type="url"
           value={railBase}
           onChange={(e) => setRailBase(e.target.value)}
-          className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-slate-900 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+          className="input-base mt-2"
         />
       </div>
       {railLink && (
         <>
           <div>
-            <label className="block text-sm font-medium text-slate-700">Protected link</label>
-            <div className="mt-1 flex gap-2">
-              <code className="flex-1 overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-800 break-all">
+            <label className="block text-sm font-medium text-[var(--text)]">Protected link</label>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+              <code className="input-base flex-1 break-all px-4 py-3 font-mono text-sm">
                 {railLink}
               </code>
               <CopyButton text={railLink} label="Copy link" />
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700">
+            <label className="block text-sm font-medium text-[var(--text)]">
               Supabase template snippet
             </label>
-            <div className="mt-1 flex gap-2">
-              <pre className="flex-1 overflow-x-auto rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs text-slate-800 whitespace-pre-wrap">
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+              <pre className="input-base flex-1 overflow-x-auto whitespace-pre-wrap p-4 font-mono text-xs">
                 {snippet}
               </pre>
               <CopyButton text={snippet} label="Copy snippet" />

@@ -21,30 +21,32 @@ function ResultContent() {
       : "You were the first to click this link. In a corporate inbox, scanners often hit it first."
     : "Open this page from the control link in your test email to see the outcome.";
 
+  const isUsed = hasUsed && used;
+
   return (
-    <div className="mx-auto max-w-xl px-4 py-20 text-center">
+    <div className="mx-auto max-w-[1120px] px-4 py-20 text-center">
       <div
-        className={`rounded-2xl border-2 p-10 ${
-          hasUsed && used
-            ? "border-amber-300 bg-amber-50"
-            : "border-green-300 bg-green-50"
+        className={`card card-gradient-top mx-auto max-w-xl p-10 ${
+          isUsed
+            ? "border-amber-500/30 shadow-[0_0_24px_-8px_rgba(245,158,11,0.15)]"
+            : "border-[var(--accent)]/30 shadow-[0_0_32px_-8px_rgba(34,211,238,0.15)]"
         }`}
       >
         <h1
           className={`text-2xl font-bold sm:text-3xl ${
-            hasUsed && used ? "text-amber-800" : "text-green-800"
+            isUsed ? "text-amber-400" : "text-[var(--text)]"
           }`}
         >
           {headline}
         </h1>
-        <p className="mt-4 text-slate-600">{subtext}</p>
-        <p className="mt-6 text-sm text-slate-500">
+        <p className="mt-4 text-[var(--muted)]">{subtext}</p>
+        <p className="mt-6 text-sm text-[var(--muted)]">
           {ts}
           {tid ? ` · Test ID: ${tid}` : ""}
         </p>
       </div>
-      <p className="mt-8">
-        <a href="/live-test" className="text-sky-600 hover:text-sky-700">
+      <p className="mt-10">
+        <a href="/live-test" className="link-accent">
           Run another live inbox test →
         </a>
       </p>
@@ -56,9 +58,9 @@ export default function TestControlResultPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-xl px-4 py-20 text-center">
-          <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-10">
-            <p className="text-slate-600">Loading…</p>
+        <div className="mx-auto max-w-[1120px] px-4 py-20 text-center">
+          <div className="card mx-auto max-w-xl p-10">
+            <p className="text-[var(--muted)]">Loading…</p>
           </div>
         </div>
       }

@@ -9,21 +9,21 @@ function ProtectedContent() {
   const ts = new Date().toISOString();
 
   return (
-    <div className="mx-auto max-w-xl px-4 py-20 text-center">
-      <div className="rounded-2xl border-2 border-green-300 bg-green-50 p-10">
-        <h1 className="text-2xl font-bold text-green-800 sm:text-3xl">
+    <div className="mx-auto max-w-[1120px] px-4 py-20 text-center">
+      <div className="card card-gradient-top mx-auto max-w-xl border-[var(--accent)]/30 p-10 shadow-[0_0_32px_-8px_rgba(34,211,238,0.15)]">
+        <h1 className="text-2xl font-bold text-[var(--text)] sm:text-3xl">
           Protected link worked
         </h1>
-        <p className="mt-4 text-slate-600">
+        <p className="mt-4 text-[var(--muted)]">
           You landed here after one click. Scanners did not consume this link.
         </p>
-        <p className="mt-6 text-sm text-slate-500">
+        <p className="mt-6 text-sm text-[var(--muted)]">
           {ts}
           {tid ? ` · Test ID: ${tid}` : ""}
         </p>
       </div>
-      <p className="mt-8">
-        <a href="/live-test" className="text-sky-600 hover:text-sky-700">
+      <p className="mt-10">
+        <a href="/live-test" className="link-accent">
           Run another live inbox test →
         </a>
       </p>
@@ -35,9 +35,9 @@ export default function TestProtectedPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-xl px-4 py-20 text-center">
-          <div className="rounded-2xl border-2 border-slate-200 bg-slate-50 p-10">
-            <p className="text-slate-600">Loading…</p>
+        <div className="mx-auto max-w-[1120px] px-4 py-20 text-center">
+          <div className="card mx-auto max-w-xl p-10">
+            <p className="text-[var(--muted)]">Loading…</p>
           </div>
         </div>
       }

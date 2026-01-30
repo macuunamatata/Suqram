@@ -17,6 +17,7 @@ const TIERS = [
     cta: "Start free",
     href: "/start",
     featured: false,
+    pill: "Free tier",
   },
   {
     name: "Indie",
@@ -29,6 +30,7 @@ const TIERS = [
     cta: "Get Indie",
     href: "/start",
     featured: true,
+    pill: "Popular",
   },
   {
     name: "Growth",
@@ -41,6 +43,7 @@ const TIERS = [
     cta: "Get Growth",
     href: "/start",
     featured: false,
+    pill: null,
   },
 ];
 
@@ -53,10 +56,12 @@ const COST_PER_1K = [
 
 export default function PricingPage() {
   return (
-    <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20">
+    <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-20">
       <div className="text-center">
-        <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">Pricing</h1>
-        <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
+          Pricing
+        </h1>
+        <p className="mt-4 max-w-2xl mx-auto text-lg text-[var(--muted)]">
           You only pay for successful redemptions. No charge when a link is scanned but not
           clicked by a real user.
         </p>
@@ -66,34 +71,36 @@ export default function PricingPage() {
         {TIERS.map((tier) => (
           <div
             key={tier.name}
-            className={`relative rounded-2xl border p-6 sm:p-8 ${
-              tier.featured
-                ? "border-sky-500 bg-sky-50/50 shadow-lg"
-                : "border-slate-200 bg-white"
+            className={`card card-gradient-top relative p-6 sm:p-8 ${
+              tier.featured ? "border-[var(--accent)]/40 shadow-[0_0_32px_-8px_rgba(34,211,238,0.2)]" : ""
             }`}
           >
-            {tier.featured && (
-              <p className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-sky-600 px-3 py-0.5 text-xs font-medium text-white">
-                Popular
-              </p>
+            {tier.pill && (
+              <span
+                className={`absolute -top-3 left-1/2 -translate-x-1/2 ${
+                  tier.featured ? "pill-accent" : "pill"
+                }`}
+              >
+                {tier.pill}
+              </span>
             )}
-            <h2 className="text-lg font-semibold text-slate-900">{tier.name}</h2>
-            <p className="mt-1 text-slate-600">{tier.description}</p>
+            <h2 className="text-lg font-semibold text-[var(--text)]">{tier.name}</h2>
+            <p className="mt-1 text-sm text-[var(--muted)]">{tier.description}</p>
             <div className="mt-6 flex items-baseline gap-1">
-              <span className="text-3xl font-bold text-slate-900">{tier.price}</span>
-              <span className="text-slate-500">{tier.period}</span>
+              <span className="text-3xl font-bold text-[var(--text)]">{tier.price}</span>
+              <span className="text-[var(--muted)]">{tier.period}</span>
             </div>
-            <ul className="mt-6 space-y-3 text-sm text-slate-600">
+            <ul className="mt-6 space-y-3 text-sm text-[var(--muted)]">
               <li>{tier.redeems}</li>
               <li>{tier.domains}</li>
               <li>{tier.support}</li>
             </ul>
             <a
               href={tier.href}
-              className={`mt-8 block w-full rounded-lg py-3 text-center text-sm font-semibold transition-colors ${
+              className={`mt-8 block w-full rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200 ${
                 tier.featured
-                  ? "bg-sky-600 text-white hover:bg-sky-700"
-                  : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  ? "btn-primary"
+                  : "btn-secondary"
               }`}
             >
               {tier.cta}
@@ -102,51 +109,47 @@ export default function PricingPage() {
         ))}
       </div>
 
-      <p className="mt-8 text-center text-sm text-slate-600">
+      <p className="mt-10 text-center text-sm text-[var(--muted)]">
         A redemption = a user successfully completing the link. You only pay for successful
         redemptions; scans and failed attempts don&apos;t count.
       </p>
 
-      <p className="mt-4 text-center text-sm text-slate-500">
-        You only pay for successful redemptions. Scans and failed attempts don&apos;t count.
-      </p>
-
       {/* Cost per 1k redeems (static table) */}
-      <div className="mt-16">
-        <h2 className="text-center text-xl font-bold text-slate-900">
+      <div className="mt-20">
+        <h2 className="text-center text-xl font-bold tracking-tight text-[var(--text)]">
           Cost per 1,000 successful redemptions
         </h2>
-        <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
-          <table className="min-w-full divide-y divide-slate-200">
+        <div className="mt-8 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--panel)]">
+          <table className="min-w-full divide-y divide-[var(--border)]">
             <thead>
-              <tr className="bg-slate-50">
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+              <tr className="bg-[var(--bg2)]">
+                <th className="px-4 py-4 text-left text-sm font-semibold text-[var(--text)]">
                   Tier
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                <th className="px-4 py-4 text-left text-sm font-semibold text-[var(--text)]">
                   Redeems
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                <th className="px-4 py-4 text-left text-sm font-semibold text-[var(--text)]">
                   Cost
                 </th>
-                <th className="px-4 py-3 text-left text-sm font-semibold text-slate-900">
+                <th className="px-4 py-4 text-left text-sm font-semibold text-[var(--text)]">
                   Per 1k redeems
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-[var(--border)]">
               {COST_PER_1K.map((row) => (
                 <tr key={row.tier}>
-                  <td className="px-4 py-3 text-sm text-slate-900">{row.tier}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{row.redeems}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{row.cost}</td>
-                  <td className="px-4 py-3 text-sm text-slate-600">{row.per1k}</td>
+                  <td className="px-4 py-4 text-sm text-[var(--text)]">{row.tier}</td>
+                  <td className="px-4 py-4 text-sm text-[var(--muted)]">{row.redeems}</td>
+                  <td className="px-4 py-4 text-sm text-[var(--muted)]">{row.cost}</td>
+                  <td className="px-4 py-4 text-sm text-[var(--muted)]">{row.per1k}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-        <p className="mt-4 text-center text-sm text-slate-500">
+        <p className="mt-4 text-center text-xs text-[var(--muted)]">
           Overage pricing TBD. Contact us for high-volume or enterprise.
         </p>
       </div>

@@ -2,18 +2,123 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design system: dark-first, premium, high-contrast */
 :root {
-  --foreground: #0f172a;
-  --background: #ffffff;
-  --muted: #64748b;
-  --accent: #0ea5e9;
-  --accent-hover: #0284c7;
+  --bg: #0a0a0f;
+  --bg2: #0f0f16;
+  --panel: #14141c;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --text: #f4f4f5;
+  --muted: #a1a1aa;
+  --muted-strong: #71717a;
+  --accent: #22d3ee;
+  --accent-dim: rgba(34, 211, 238, 0.15);
+  --accent2: #06b6d4;
+  --ring: #22d3ee;
+  --shadow: 0 0 40px -12px rgba(34, 211, 238, 0.25);
+  --shadow-sm: 0 0 20px -8px rgba(34, 211, 238, 0.2);
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
+  color: var(--text);
+  background: var(--bg);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.6;
+}
+
+/* Subtle background: radial gradient + faint grid */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 211, 238, 0.08), transparent),
+    linear-gradient(180deg, transparent 0%, var(--bg) 100%);
+}
+
+/* Optional: very faint grid (CSS-only) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 80% at 50% 0%, black 20%, transparent 70%);
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border transition-all duration-200;
+    background: var(--panel);
+    border-color: var(--border);
+    box-shadow: 0 1px 0 0 var(--border-strong);
+  }
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow-sm);
+  }
+  .card-gradient-top {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 24px), var(--panel);
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold text-[var(--bg)] transition-all duration-200;
+    background: var(--accent);
+    box-shadow: 0 0 24px -4px rgba(34, 211, 238, 0.4);
+  }
+  .btn-primary:hover {
+    filter: brightness(1.08);
+    box-shadow: var(--shadow);
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border px-6 py-3 text-base font-semibold transition-all duration-200;
+    color: var(--text);
+    border-color: var(--border-strong);
+    background: transparent;
+  }
+  .btn-secondary:hover {
+    border-color: var(--muted);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .link-accent {
+    @apply font-medium transition-colors;
+    color: var(--accent);
+  }
+  .link-accent:hover {
+    color: var(--accent2);
+    text-decoration: underline;
+  }
+  .pill {
+    @apply inline-flex items-center rounded-full px-3 py-0.5 text-xs font-medium;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--muted);
+    border: 1px solid var(--border);
+  }
+  .pill-accent {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-color: rgba(34, 211, 238, 0.3);
+  }
+  .input-base {
+    @apply block w-full rounded-xl border bg-[var(--panel)] px-4 py-3 text-[var(--text)] placeholder-[var(--muted-strong)] transition-all duration-200;
+    border-color: var(--border);
+  }
+  .input-base:focus {
+    @apply outline-none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .prose-muted {
+    color: var(--muted);
+  }
 }
 
 @layer utilities {

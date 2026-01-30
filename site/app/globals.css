@@ -2,23 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-/* domained.app-style: dark page, elevated cards, white hero CTA, green accent for highlights only. */
+/* Domained.app-style: centralized theme — near-black, grid + vignette hero, teal accent, off-white CTA. */
 :root {
-  --bg: #0a0a0a;
-  --panel: #1a1a1a;
-  --bg2: #1f1f1f;
-  --card: #242424;
-  --border: rgba(255, 255, 255, 0.1);
-  --border-strong: rgba(255, 255, 255, 0.14);
-  --text: #ffffff;
-  --muted: rgba(255, 255, 255, 0.7);
-  --muted-strong: rgba(255, 255, 255, 0.55);
-  --accent: #00e676;
-  --accent-dim: rgba(0, 230, 118, 0.15);
-  --accent2: #00c96a;
-  --accent-muted: #4d8955;
-  --ring: #00e676;
-  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.35);
+  /* Base & surfaces */
+  --bg: #0c0c0e;
+  --surface: #161a1c;
+  --surface-elevated: #1c2124;
+  --bg2: #1a1e20;
+  --border: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --grid-line: rgba(255, 255, 255, 0.05);
+
+  /* Typography */
+  --text: #e8e8ea;
+  --text-heading: #e4e4e8;
+  --text-muted: #9ca3af;
+  --text-muted-strong: #6b7280;
+
+  /* Accent & warn */
+  --accent: #2dd4bf;
+  --accent-dim: rgba(45, 212, 191, 0.12);
+  --accent-glow: rgba(45, 212, 191, 0.35);
+  --warn: #f59e0b;
+  --warn-dim: rgba(245, 158, 11, 0.15);
+
+  /* Primary CTA (pill: off-white, dark text — NOT green) */
+  --cta-bg: #f4f4f5;
+  --cta-text: #18181b;
+  --cta-border: rgba(255, 255, 255, 0.2);
+  --cta-hover-bg: #e4e4e7;
+
+  /* Legacy aliases for existing components */
+  --panel: var(--surface);
+  --card: var(--surface-elevated);
+  --muted: var(--text-muted);
+  --muted-strong: var(--text-muted-strong);
+  --ring: var(--accent);
+  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 body {
@@ -28,77 +48,72 @@ body {
   line-height: 1.6;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: -1;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 48px 48px;
-}
-
 h1, h2, h3 {
-  color: var(--text);
+  color: var(--text-heading);
 }
 
 @layer components {
+  /* Cards: dark surface, 1px border, optional very low green wash; hover restrained */
   .card {
     @apply rounded-2xl border transition-all duration-200;
-    background: var(--card);
+    background: linear-gradient(180deg, rgba(45, 212, 191, 0.03) 0%, transparent 40px), var(--surface-elevated);
     border: 1px solid var(--border);
     box-shadow: none;
   }
   .card:hover {
-    box-shadow: var(--shadow-hover);
     border-color: var(--border-strong);
+    box-shadow: var(--shadow-hover);
   }
   .card-gradient-top {
-    background: var(--card);
+    background: linear-gradient(180deg, rgba(45, 212, 191, 0.04) 0%, transparent 32px), var(--surface-elevated);
     border: 1px solid var(--border);
   }
-  /* Hero CTA: white bg, dark text (domained "Start tracking domains") */
+
+  /* Primary CTA: pill, off-white bg, dark text, subtle border; hover slightly darkens */
   .btn-hero {
-    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
     height: 48px;
     min-height: 48px;
-    background: #ffffff;
-    color: #0a0a0a;
+    background: var(--cta-bg);
+    color: var(--cta-text);
+    border: 1px solid var(--cta-border);
   }
   .btn-hero:hover {
-    background: #f0f0f0;
-    box-shadow: 0 4px 14px rgba(255, 255, 255, 0.15);
+    background: var(--cta-hover-bg);
+    border-color: rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
   }
-  /* Accent CTA: green (featured pricing, key actions) */
+
+  /* Accent CTA: teal (featured pricing, key actions) */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
     height: 48px;
     min-height: 48px;
     background: var(--accent);
-    color: #0a0a0a;
+    color: var(--cta-text);
+    border: 1px solid rgba(45, 212, 191, 0.4);
   }
   .btn-primary:hover {
-    background: var(--accent2);
-    box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
+    box-shadow: 0 0 20px var(--accent-glow);
+    filter: brightness(1.05);
   }
-  /* Dark filled: nav "Sign up", non-featured "Get Started" */
+
+  /* Secondary: dark surface, border, white text */
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
     height: 48px;
     min-height: 48px;
     color: var(--text);
-    background: var(--panel);
+    background: var(--surface);
     border: 1px solid var(--border-strong);
   }
   .btn-secondary:hover {
-    background: #222222;
-    border-color: var(--muted);
+    background: var(--surface-elevated);
+    border-color: var(--text-muted);
   }
-  /* Ghost: nav "Log in" */
+
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-xl px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
     height: 48px;
     min-height: 48px;
     color: var(--text);
@@ -106,41 +121,59 @@ h1, h2, h3 {
     border: 1px solid var(--border-strong);
   }
   .btn-ghost:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: var(--muted);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--text-muted);
   }
+
   .link-accent {
     @apply font-medium transition-colors;
     color: var(--accent);
   }
   .link-accent:hover {
-    color: var(--accent2);
+    filter: brightness(1.15);
     text-decoration: underline;
   }
-  /* Hero pill: muted green (domained "Lifetime Deal Available") */
+
+  /* Badge: "Lifetime Deal Available" style — dark capsule, border, teal dot with glow, teal text */
   .pill-hero {
-    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
-    background: var(--accent-muted);
-    color: #ffffff;
-    border: none;
+    @apply inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium;
+    background: var(--surface);
+    color: var(--accent);
+    border: 1px solid var(--border-strong);
   }
+  .pill-hero-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+
   .pill {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--muted);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-muted);
     border: 1px solid var(--border);
   }
-  /* Most Popular badge: vibrant green */
+
   .pill-accent {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
-    background: var(--accent);
-    color: #0a0a0a;
-    border: none;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border: 1px solid rgba(45, 212, 191, 0.3);
   }
+
+  .pill-warn {
+    @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
+    background: var(--warn-dim);
+    color: var(--warn);
+    border: 1px solid rgba(245, 158, 11, 0.35);
+  }
+
   .input-base {
-    @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--muted-strong)] transition-all duration-200;
+    @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--text-muted-strong)] transition-all duration-200;
     height: 48px;
-    background: var(--card);
+    background: var(--surface-elevated);
     border: 1px solid var(--border);
   }
   .input-base:focus {
@@ -148,16 +181,54 @@ h1, h2, h3 {
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-dim);
   }
+
   .prose-muted {
-    color: var(--muted);
+    color: var(--text-muted);
   }
+
   .section-border {
     border-top: 1px solid var(--border);
+  }
+
+  /* Hero area: grid + vignette applied via .hero-bg */
+  .hero-bg {
+    position: relative;
+    background-color: var(--bg);
+  }
+  .hero-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .hero-bg::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+                radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+  }
+  .hero-bg > * {
+    position: relative;
+    z-index: 1;
   }
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+  .text-accent {
+    color: var(--accent);
+  }
+  .text-warn {
+    color: var(--warn);
   }
 }

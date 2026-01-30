@@ -1,0 +1,9 @@
+ADMIN_API_KEY=change-me
+
+# Rail: for local smoke tests only (required for npm run smoke)
+ALLOWED_DEST_HOSTS=example.com
+
+# Production: set via Cloudflare Secrets (wrangler secret put). Do NOT use example.com in production.
+# ALLOWED_DEST_HOSTS=yourproject.supabase.co,yourapp.com
+# ALLOWED_DEST_HOST_SUFFIXES=.supabase.co
+# Do NOT set ALLOWED_PRIVATE_IP=1 in production.

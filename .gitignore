@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.wrangler/
+dist/
+
+# Environment variables (local dev secrets)
+.dev.vars
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db

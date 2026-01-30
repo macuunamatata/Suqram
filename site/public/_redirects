@@ -1,0 +1,6 @@
+# Redirect no-trailing-slash to trailing-slash (matches output: export + trailingSlash: true)
+/start /start/ 302
+/docs /docs/ 302
+/pricing /pricing/ 302
+/terms /terms/ 302
+/privacy /privacy/ 302

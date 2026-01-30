@@ -1,0 +1,6 @@
+﻿{
+  "hostname": "127.0.0.1:8787",
+  "originBaseUrl": "http://127.0.0.1:8787",
+  "pathAllowlist": ["/auth", "/demo"],
+  "queryAllowlist": ["token", "type", "redirect_to", "next", "state"]
+}

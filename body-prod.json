@@ -1,0 +1,8 @@
+﻿{
+  "hostname": "scanner-safe-links.marcus-liljequist.workers.dev",
+  "originBaseUrl": "https://httpbin.org",
+  "pathAllowlist": ["/anything"],
+  "queryAllowlist": ["token"],
+  "turnstileEnabled": false,
+  "turnstileSiteKey": ""
+}

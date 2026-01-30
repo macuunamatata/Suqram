@@ -1,0 +1,7 @@
+﻿{
+  "originBaseUrl": "https://httpbin.org",
+  "pathAllowlist": ["/auth","/reset","/verify","/invite","/magic","/demo","/anything"],
+  "queryAllowlist": ["token","type","redirect_to","next","state"],
+  "turnstileEnabled": false,
+  "turnstileSiteKey": ""
+}

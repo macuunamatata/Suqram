@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifying Link...</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      margin: 0;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      text-align: center;
+      max-width: 400px;
+    }
+    h1 {
+      margin-top: 0;
+      color: #667eea;
+    }
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .message {
+      margin: 1rem 0;
+      color: #666;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    form {
+      margin-top: 1rem;
+    }
+    button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover:not(:disabled) {
+      background: #5568d3;
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    .noscript-fallback {
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 6px;
+      padding: 1rem;
+      margin: 1rem 0;
+      color: #856404;
+    }
+    .noscript-fallback strong {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #856404;
+    }
+    .noscript-fallback p {
+      margin: 0.5rem 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .browser-instructions {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid #eee;
+      font-size: 13px;
+      color: #666;
+    }
+    .browser-instructions strong {
+      display: block;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Verifying Link</h1>
+    <div class="spinner"></div>
+    <p>Please wait while we verify this link...</p>
+    <div class="message">
+      Security scanners may preview this link. This step ensures only you complete it.
+    </div>
+    <noscript>
+      <div class="noscript-fallback">
+        <strong>JavaScript is required</strong>
+        <p>This link requires a browser with JavaScript enabled. Copy and paste this link into Chrome, Safari, Firefox, or Edge to continue.</p>
+        <p style="margin-top: 0.75rem; font-family: monospace; font-size: 12px; word-break: break-all; background: #fff; padding: 0.5rem; border-radius: 4px;">https://example.com/auth/verify?token=hello123&amp;type=magiclink</p>
+      </div>
+    </noscript>
+    <div class="browser-instructions">
+      <strong>Opening in an email client?</strong>
+      <p>If you're viewing this in an email app (Gmail, Outlook, Apple Mail), tap "Open in browser" or copy the link and paste it into Chrome, Safari, or Firefox.</p>
+    </div>
+    
+    <form method="POST" action="/v/cc155beeb4b1a6af" id="verifyForm" data-nonce="cc155beeb4b1a6af" data-seed="bbd5dcb9986c687f4ba39e3177a85a9d">
+      <input type="hidden" name="signature" id="signatureInput">
+      <input type="hidden" name="proofSeed" value="bbd5dcb9986c687f4ba39e3177a85a9d">
+      
+      <button type="submit" id="continueBtn" disabled>Continue</button>
+    </form>
+  </div>
+  
+  <script>
+    (async function() {
+      const nonce = 'cc155beeb4b1a6af';
+      const sessionId = 'cont_1769263743465_tl6eait';
+      const proofSeed = 'bbd5dcb9986c687f4ba39e3177a85a9d';
+      const showTurnstile = false;
+      const turnstileSiteKey = null;
+      
+      let signatureComputed = false;
+      let turnstileCompleted = !showTurnstile;
+      
+      function enableButtonIfReady() {
+        if (signatureComputed && turnstileCompleted) {
+          document.getElementById('continueBtn').disabled = false;
+        }
+      }
+      
+      // Compute signature in browser: sha256hex(sessionId + ":" + nonce + ":" + proofSeed)
+      // Returns full 64-character hex string (32 bytes)
+      async function computeSignature(sessionId, nonce, proofSeed) {
+        const data = sessionId + ':' + nonce + ':' + proofSeed;
+        const encoder = new TextEncoder();
+        const dataBuffer = encoder.encode(data);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', dataBuffer);
+        const bytes = new Uint8Array(hashBuffer);
+        const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+        // Return full 64-character hex string
+        return hex;
+      }
+      
+      // Initialize Turnstile if enabled
+      if (showTurnstile && turnstileSiteKey) {
+        window.turnstileCallback = function(token) {
+          document.getElementById('turnstileTokenInput').value = token;
+          turnstileCompleted = true;
+          enableButtonIfReady();
+        };
+        
+        window.turnstileError = function() {
+          console.error('Turnstile error');
+          document.getElementById('continueBtn').textContent = 'Verification failed - Please refresh';
+        };
+        
+        // Wait for Turnstile script to load
+        function initTurnstile() {
+          if (window.turnstile) {
+            window.turnstile.render(document.getElementById('turnstile-widget'), {
+              sitekey: turnstileSiteKey,
+              callback: window.turnstileCallback,
+              'error-callback': window.turnstileError,
+            });
+          } else {
+            setTimeout(initTurnstile, 100);
+          }
+        }
+        initTurnstile();
+      }
+      
+      try {
+        // Compute signature: sha256hex(sessionId + ":" + nonce + ":" + proofSeed)
+        const signature = await computeSignature(sessionId, nonce, proofSeed);
+        document.getElementById('signatureInput').value = signature;
+        signatureComputed = true;
+        enableButtonIfReady();
+      } catch (error) {
+        console.error('Failed to compute signature:', error);
+        document.getElementById('continueBtn').textContent = 'Error - Please refresh';
+      }
+    })();
+  </script>
+</body>
+</html>

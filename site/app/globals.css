@@ -2,139 +2,218 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Domained.app-style: centralized theme — near-black, grid + vignette hero, teal accent, off-white CTA. */
+/* Premium polish: domained.app feel — typography, spacing, glass surfaces, restrained interactions. */
 :root {
   /* Base & surfaces */
   --bg: #0c0c0e;
   --surface: #161a1c;
   --surface-elevated: #1c2124;
   --bg2: #1a1e20;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --grid-line: rgba(255, 255, 255, 0.05);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-strong: rgba(255, 255, 255, 0.10);
+  --grid-line: rgba(255, 255, 255, 0.025);
 
-  /* Typography */
-  --text: #e8e8ea;
-  --text-heading: #e4e4e8;
-  --text-muted: #9ca3af;
-  --text-muted-strong: #6b7280;
+  /* Typography — avoid pure #fff; soft off-white + muted gray */
+  --text: #e6e6e8;
+  --text-heading: #e6e6e6;
+  --text-muted: #a8afb8;
+  --text-muted-strong: #8b92a0;
 
   /* Accent & warn */
   --accent: #2dd4bf;
-  --accent-dim: rgba(45, 212, 191, 0.12);
-  --accent-glow: rgba(45, 212, 191, 0.35);
+  --accent-dim: rgba(45, 212, 191, 0.10);
+  --accent-focus: rgba(45, 212, 191, 0.25);
+  --accent-glow: rgba(45, 212, 191, 0.22);
   --warn: #f59e0b;
-  --warn-dim: rgba(245, 158, 11, 0.15);
+  --warn-dim: rgba(245, 158, 11, 0.12);
+  --error-muted: rgba(248, 113, 113, 0.9);
 
-  /* Primary CTA (pill: off-white, dark text — NOT green) */
+  /* Primary CTA */
   --cta-bg: #f4f4f5;
   --cta-text: #18181b;
-  --cta-border: rgba(255, 255, 255, 0.2);
-  --cta-hover-bg: #e4e4e7;
+  --cta-hover-bg: #e8e8ea;
 
-  /* Legacy aliases for existing components */
+  /* Spacing rhythm: 8/12/16/24/32/48/72 */
+  --space-1: 0.25rem;  /* 4 */
+  --space-2: 0.5rem;   /* 8 */
+  --space-3: 0.75rem;  /* 12 */
+  --space-4: 1rem;    /* 16 */
+  --space-6: 1.5rem;  /* 24 */
+  --space-8: 2rem;    /* 32 */
+  --space-12: 3rem;   /* 48 */
+  --space-18: 4.5rem; /* 72 */
+
+  /* Legacy aliases */
   --panel: var(--surface);
   --card: var(--surface-elevated);
   --muted: var(--text-muted);
   --muted-strong: var(--text-muted-strong);
   --ring: var(--accent);
-  --shadow-hover: 0 6px 20px rgba(0, 0, 0, 0.25);
 }
 
 body {
   color: var(--text);
   background: var(--bg);
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Heading hierarchy — consistent sizes and weights */
+h1, h2, h3 {
+  color: var(--text-heading);
+  font-weight: 700;
+}
+
+h1 {
+  letter-spacing: -0.03em;
+  line-height: 1.08;
+  font-size: clamp(2rem, 5vw + 1rem, 3.75rem);
+}
+
+h2 {
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  font-size: clamp(1.5rem, 2.5vw + 0.5rem, 1.875rem);
+}
+
+h3 {
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  font-size: 1.125rem;
+}
+
+/* Hero H1 — soft off-white, tight tracking, large clamp, line-height ~1.0–1.1 */
+.hero-h1 {
+  color: var(--text-heading);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.06;
+  font-size: clamp(2.25rem, 5.5vw + 1rem, 3.75rem);
+}
+
+/* Body copy — muted gray, line-height ~1.5–1.7 */
+.body-text {
+  color: var(--text-muted);
   line-height: 1.6;
 }
 
-h1, h2, h3 {
-  color: var(--text-heading);
-}
-
 @layer components {
-  /* Cards: dark surface, 1px border, optional very low green wash; hover restrained */
+  /* Cards: glass/dark-surface, 1px low-contrast border, radius 16px, no heavy shadow */
   .card {
-    @apply rounded-2xl border transition-all duration-200;
-    background: linear-gradient(180deg, rgba(45, 212, 191, 0.03) 0%, transparent 40px), var(--surface-elevated);
+    @apply transition-[border-color,box-shadow] duration-150 ease-out;
+    background: linear-gradient(180deg, rgba(45, 212, 191, 0.02) 0%, transparent 32px), var(--surface-elevated);
     border: 1px solid var(--border);
+    border-radius: 16px;
     box-shadow: none;
   }
   .card:hover {
     border-color: var(--border-strong);
-    box-shadow: var(--shadow-hover);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18);
+  }
+  .card-padded {
+    padding: 1rem 1.25rem; /* 16–20px mobile */
+  }
+  @media (min-width: 640px) {
+    .card-padded {
+      padding: 1.25rem 1.5rem; /* 20–24px desktop */
+    }
   }
   .card-gradient-top {
-    background: linear-gradient(180deg, rgba(45, 212, 191, 0.04) 0%, transparent 32px), var(--surface-elevated);
+    background: linear-gradient(180deg, rgba(45, 212, 191, 0.03) 0%, transparent 28px), var(--surface-elevated);
     border: 1px solid var(--border);
+    border-radius: 16px;
   }
 
-  /* Primary CTA: pill, off-white bg, dark text, subtle border; hover slightly darkens */
+  /* Primary CTA: off-white pill, dark text, no/minimal shadow, subtle hover */
   .btn-hero {
-    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold;
     height: 48px;
     min-height: 48px;
     background: var(--cta-bg);
     color: var(--cta-text);
-    border: 1px solid var(--cta-border);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: none;
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms ease;
   }
   .btn-hero:hover {
     background: var(--cta-hover-bg);
-    border-color: rgba(255, 255, 255, 0.25);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .btn-hero:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
   }
 
-  /* Accent CTA: teal (featured pricing, key actions) */
   .btn-primary {
-    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold;
     height: 48px;
     min-height: 48px;
     background: var(--accent);
     color: var(--cta-text);
-    border: 1px solid rgba(45, 212, 191, 0.4);
+    border: 1px solid rgba(45, 212, 191, 0.35);
+    transition: filter 150ms ease, box-shadow 150ms ease;
   }
   .btn-primary:hover {
-    box-shadow: 0 0 20px var(--accent-glow);
-    filter: brightness(1.05);
+    filter: brightness(1.04);
+    box-shadow: 0 0 16px var(--accent-glow);
+  }
+  .btn-primary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
   }
 
-  /* Secondary: dark surface, border, white text */
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold;
     height: 48px;
     min-height: 48px;
     color: var(--text);
     background: var(--surface);
     border: 1px solid var(--border-strong);
+    transition: background-color 150ms ease, border-color 150ms ease;
   }
   .btn-secondary:hover {
     background: var(--surface-elevated);
-    border-color: var(--text-muted);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  .btn-secondary:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all duration-200;
+    @apply inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold;
     height: 48px;
     min-height: 48px;
     color: var(--text);
     background: transparent;
     border: 1px solid var(--border-strong);
+    transition: background-color 150ms ease, border-color 150ms ease;
   }
   .btn-ghost:hover {
     background: rgba(255, 255, 255, 0.04);
     border-color: var(--text-muted);
   }
+  .btn-ghost:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
+  }
 
   .link-accent {
-    @apply font-medium transition-colors;
+    @apply font-medium transition-colors duration-150 ease-out;
     color: var(--accent);
   }
   .link-accent:hover {
-    filter: brightness(1.15);
+    filter: brightness(1.12);
     text-decoration: underline;
   }
+  .link-accent:focus-visible {
+    outline: none;
+    border-radius: 4px;
+    box-shadow: 0 0 0 2px var(--accent-focus);
+  }
 
-  /* Badge: "Lifetime Deal Available" style — dark capsule, border, teal dot with glow, teal text */
+  /* Pills */
   .pill-hero {
     @apply inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium;
     background: var(--surface);
@@ -146,40 +225,43 @@ h1, h2, h3 {
     height: 6px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 8px var(--accent-glow);
+    box-shadow: 0 0 6px var(--accent-glow);
   }
-
   .pill {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-muted);
     border: 1px solid var(--border);
   }
-
   .pill-accent {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
     background: var(--accent-dim);
     color: var(--accent);
-    border: 1px solid rgba(45, 212, 191, 0.3);
+    border: 1px solid rgba(45, 212, 191, 0.25);
   }
-
   .pill-warn {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
     background: var(--warn-dim);
     color: var(--warn);
-    border: 1px solid rgba(245, 158, 11, 0.35);
+    border: 1px solid rgba(245, 158, 11, 0.28);
   }
 
+  /* Inputs: dark surface, subtle border, soft teal focus ring */
   .input-base {
-    @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--text-muted-strong)] transition-all duration-200;
+    @apply block w-full rounded-xl border px-4 py-3 text-[var(--text)] placeholder-[var(--text-muted-strong)] transition-[border-color,box-shadow] duration-150 ease-out;
     height: 48px;
     background: var(--surface-elevated);
     border: 1px solid var(--border);
+    border-radius: 14px;
   }
   .input-base:focus {
-    @apply outline-none;
+    outline: none;
     border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .input-base:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
   }
 
   .prose-muted {
@@ -190,7 +272,7 @@ h1, h2, h3 {
     border-top: 1px solid var(--border);
   }
 
-  /* Hero area: grid + vignette applied via .hero-bg */
+  /* Hero: extremely subtle grid + soft vignette (no obvious circles) */
   .hero-bg {
     position: relative;
     background-color: var(--bg);
@@ -204,7 +286,7 @@ h1, h2, h3 {
     background-image:
       linear-gradient(var(--grid-line) 1px, transparent 1px),
       linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-size: 48px 48px;
   }
   .hero-bg::after {
     content: "";
@@ -212,8 +294,9 @@ h1, h2, h3 {
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
-                radial-gradient(ellipse 100% 100% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.5) 100%);
+    background:
+      radial-gradient(ellipse 120% 80% at 50% -15%, rgba(255, 255, 255, 0.03) 0%, transparent 55%),
+      radial-gradient(ellipse 140% 120% at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.35) 100%);
   }
   .hero-bg > * {
     position: relative;
@@ -231,4 +314,17 @@ h1, h2, h3 {
   .text-warn {
     color: var(--warn);
   }
+  .text-error-muted {
+    color: var(--error-muted);
+  }
+}
+
+/* Global focus-visible: thin ring, premium (not neon). Buttons/inputs define their own; this catches bare links. */
+*:focus-visible {
+  outline: none;
+}
+
+a:not([class*="btn"]):focus-visible {
+  border-radius: 6px;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
 }

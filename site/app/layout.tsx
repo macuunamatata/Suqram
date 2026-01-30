@@ -49,7 +49,7 @@ export default function RootLayout({
                 <a
                   key={href}
                   href={href}
-                  className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+                  className="text-sm text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
                 >
                   {label}
                 </a>
@@ -79,7 +79,7 @@ export default function RootLayout({
                     href={href}
                     target={external ? "_blank" : undefined}
                     rel={external ? "noopener noreferrer" : undefined}
-                    className="text-xs text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+                    className="text-xs text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
                   >
                     {label}
                   </a>

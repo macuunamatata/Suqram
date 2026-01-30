@@ -26,7 +26,7 @@ export default function HomeEmailModule() {
   return (
     <div className="mx-auto max-w-lg">
       {/* Primary card: form or success */}
-      <div className="card card-gradient-top p-6 sm:p-8">
+      <div className="card card-padded card-gradient-top">
         {status === "sent" ? (
           <>
             <p className="font-semibold text-[var(--text)]">Check your inbox.</p>
@@ -74,7 +74,7 @@ export default function HomeEmailModule() {
               />
             </div>
             {error && (
-              <p className="text-sm text-[var(--accent)]" role="alert">
+              <p className="text-sm text-error-muted" role="alert">
                 {error}
               </p>
             )}

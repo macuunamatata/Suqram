@@ -140,25 +140,26 @@ const FAQ_ITEMS = [
 ];
 
 const CONTAINER = "mx-auto max-w-[1200px] px-4 sm:px-6";
-const SECTION_PY = "py-16 sm:py-20";
+const SECTION_PY = "py-12 sm:py-20";
+const HERO_PY = "py-16 sm:py-24";
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero: near-black + subtle grid (4–6% opacity) + soft vignette/spotlight */}
-      <section className={`hero-bg ${SECTION_PY}`}>
+      {/* Hero: generous spacing, calm premium feel */}
+      <section className={`hero-bg ${HERO_PY}`}>
         <div className={`${CONTAINER} text-center`}>
           <p className="pill-hero inline-flex items-center gap-2 text-xs">
             <span className="pill-hero-dot" aria-hidden />
             Auth links that don&apos;t break in corporate inboxes
           </p>
-          <h1 className="mt-6 text-4xl font-bold tracking-tight text-[var(--text-heading)] sm:text-5xl lg:text-6xl leading-[1.15]">
+          <h1 className="hero-h1 mt-8 max-w-4xl mx-auto">
             Magic links that survive Safe Links and scanners
           </h1>
-          <p className="mt-6 max-w-2xl mx-auto text-lg text-[var(--text-muted)]">
+          <p className="mt-6 max-w-2xl mx-auto text-lg body-text leading-relaxed">
             Corporate scanners click your links and consume one-time tokens. We protect your magic and reset links so only the real user can redeem them.
           </p>
-          <div className="mt-10">
+          <div className="mt-12">
             <a href="#try" className="btn-hero">
               Send me the test email
             </a>
@@ -172,10 +173,10 @@ export default function HomePage() {
           <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl">
             See the difference in 60 seconds
           </h2>
-          <p className="mt-3 text-[var(--text-muted)]">
+          <p className="mt-4 text-[var(--text-muted)] leading-relaxed">
             We&apos;ll send you one email with a protected link and a normal link. Click both; only the protected one works twice.
           </p>
-          <div className="mt-10">
+          <div className="mt-8">
             <HomeEmailModule />
           </div>
         </div>
@@ -187,12 +188,12 @@ export default function HomePage() {
           {STATS.map(({ label, value }) => (
             <div
               key={label}
-              className="card p-6 text-center"
+              className="card card-padded text-center"
             >
               <p className="text-2xl font-bold tracking-tight text-accent sm:text-3xl">
                 {value}
               </p>
-              <p className="mt-1 text-sm text-[var(--text-muted)]">{label}</p>
+              <p className="mt-2 text-sm text-[var(--text-muted)]">{label}</p>
             </div>
           ))}
         </div>
@@ -203,16 +204,16 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
           Scanners consume your one-time tokens
         </h2>
-        <p className="mt-4 max-w-2xl mx-auto text-center text-[var(--text-muted)]">
+        <p className="mt-4 max-w-2xl mx-auto text-center body-text">
           Safe Links, Mimecast, and other scanners click every link. With a normal magic link, the first click (the scanner) consumes the token. The user gets &quot;link expired&quot;.
         </p>
-        <div className="mt-10 flex flex-col sm:flex-row items-stretch justify-center gap-4 max-w-2xl mx-auto">
-          <div className="card flex-1 p-5 text-center">
+        <div className="mt-8 flex flex-col sm:flex-row items-stretch justify-center gap-4 max-w-2xl mx-auto">
+          <div className="card card-padded flex-1 text-center">
             <p className="text-sm font-semibold text-[var(--text-muted)]">Normal link</p>
             <p className="mt-2 text-lg font-bold text-[var(--text)]">1 click = consumed</p>
             <p className="mt-1 text-sm text-[var(--text-muted)]">Scanner clicks first → user sees expired</p>
           </div>
-          <div className="card flex-1 p-5 text-center border-[var(--accent)]/40 bg-[var(--accent-dim)]/30">
+          <div className="card card-padded flex-1 text-center border-[var(--accent)]/30 bg-[var(--accent-dim)]/20">
             <p className="text-sm font-semibold text-accent">Protected link</p>
             <p className="mt-2 text-lg font-bold text-[var(--text)]">Only real user consumes</p>
             <p className="mt-1 text-sm text-[var(--text-muted)]">Scanner gets redirect; user gets through</p>
@@ -225,12 +226,12 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
           Features
         </h2>
-        <p className="mt-3 max-w-xl mx-auto text-center text-[var(--text-muted)]">
+        <p className="mt-4 max-w-xl mx-auto text-center body-text">
           One rail: inbox test, link generator, Supabase-ready redirects, and control.
         </p>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-8 grid gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map(({ title, copy, icon, mock }) => (
-            <div key={title} className="card p-6">
+            <div key={title} className="card card-padded">
               <span className="text-2xl" aria-hidden>{icon}</span>
               <h3 className="mt-3 text-lg font-semibold text-[var(--text-heading)]">{title}</h3>
               <p className="mt-2 text-sm text-[var(--text-muted)]">{copy}</p>
@@ -245,10 +246,10 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
           How it works
         </h2>
-        <p className="mt-3 max-w-xl mx-auto text-center text-[var(--text-muted)]">
+        <p className="mt-4 max-w-xl mx-auto text-center body-text">
           Three steps from test to production.
         </p>
-        <div className="mt-12 grid gap-10 sm:grid-cols-3">
+        <div className="mt-8 grid gap-8 sm:grid-cols-3">
           {STEPS.map(({ title, copy, illustration }, i) => (
             <div key={i} className="text-center">
               <div className="mx-auto w-full max-w-[200px]">{illustration}</div>
@@ -265,14 +266,14 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
           Pricing
         </h2>
-        <p className="mt-3 max-w-xl mx-auto text-center text-[var(--text-muted)]">
+        <p className="mt-4 max-w-xl mx-auto text-center body-text">
           You only pay for successful redemptions. No charge when a scanner clicks.
         </p>
-        <div className="mt-12 grid gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
+        <div className="mt-8 grid gap-4 sm:gap-6 sm:grid-cols-3 max-w-4xl mx-auto">
           {PRICING_TIERS.map((tier) => (
             <div
               key={tier.name}
-              className={`card relative p-6 sm:p-8 ${tier.featured ? "border-[var(--accent)]" : ""}`}
+              className={`card card-padded relative ${tier.featured ? "border-[var(--accent)]/50" : ""}`}
             >
               {tier.featured && tier.pill && (
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 pill-accent">
@@ -301,13 +302,13 @@ export default function HomePage() {
         <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl text-center">
           FAQ
         </h2>
-        <div className="mt-12">
+        <div className="mt-8">
           <HomeFAQ items={FAQ_ITEMS} />
         </div>
       </section>
 
       {/* ThemePreview: accent, warn, surface, CTA — for palette verification */}
-      <section className={`section-border py-8 ${CONTAINER}`} aria-hidden>
+      <section className={`section-border py-12 ${CONTAINER}`} aria-hidden>
         <div className="flex flex-wrap items-center justify-center gap-6 rounded-xl border border-[var(--border)] bg-[var(--surface)]/50 p-6">
           <span className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
             <span className="pill-hero-dot" />
@@ -323,11 +324,11 @@ export default function HomePage() {
 
       {/* Final CTA */}
       <section className={`section-border ${SECTION_PY} ${CONTAINER}`}>
-        <div className="max-w-2xl mx-auto text-center card p-10 sm:p-12">
-          <h2 className="text-2xl font-bold tracking-tight text-[var(--text)] sm:text-3xl">
+        <div className="max-w-2xl mx-auto text-center card p-8 sm:p-10">
+          <h2 className="text-2xl font-bold tracking-tight text-[var(--text-heading)] sm:text-3xl">
             Ready to try?
           </h2>
-          <p className="mt-3 text-[var(--text-muted)]">
+          <p className="mt-4 body-text">
             Run the inbox test or go straight to generating protected links.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">

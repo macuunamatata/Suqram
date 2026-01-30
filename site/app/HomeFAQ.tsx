@@ -17,19 +17,19 @@ export default function HomeFAQ({ items }: { items: FAQItem[] }) {
           <button
             type="button"
             onClick={() => setOpenIndex(openIndex === i ? null : i)}
-            className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-medium text-[var(--text)] hover:bg-[var(--bg2)]/50 transition-colors"
+            className="flex w-full items-center justify-between px-5 py-4 text-left text-sm font-medium text-[var(--text)] hover:bg-[var(--bg2)]/40 transition-colors duration-150 ease-out rounded-t-2xl focus-visible:ring-2 focus-visible:ring-[var(--accent-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-elevated)]"
             aria-expanded={openIndex === i}
           >
             <span>{item.q}</span>
             <span
-              className={`shrink-0 text-[var(--muted)] transition-transform ${openIndex === i ? "rotate-180" : ""}`}
+              className={`shrink-0 text-[var(--text-muted)] transition-transform duration-150 ease-out ${openIndex === i ? "rotate-180" : ""}`}
               aria-hidden
             >
               ▼
             </span>
           </button>
           {openIndex === i && (
-            <div className="border-t border-[var(--border)] px-5 py-4 text-sm text-[var(--muted)]">
+            <div className="border-t border-[var(--border)] px-5 py-4 text-sm body-text">
               {item.a}
             </div>
           )}

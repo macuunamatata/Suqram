@@ -530,118 +530,131 @@ h3 {
     z-index: 3;
     opacity: 0;
   }
-  .demo-orb-scan[data-target="1"] {
-    top: 3.5rem;
-    animation: demoOrbFly1 400ms var(--ease-out-move) 200ms forwards;
-  }
-  .demo-orb-scan[data-target="2"] {
-    top: 3.5rem;
-    animation: demoOrbFly2 500ms var(--ease-out-move) 700ms forwards;
-  }
-  .demo-orb-user[data-target="3"] {
-    top: 3.5rem;
-    animation: demoOrbFly3 550ms var(--ease-out-move) 1300ms forwards;
-  }
   .demo-url-preview {
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
     font-size: clamp(0.875rem, 1.5vw + 0.25rem, 1rem);
   }
-  .demo-event-log {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
+
+  /* Vertical timeline */
+  .demo-timeline {
     position: relative;
     z-index: 1;
+    --y-step0: 0;
+    --y-step1: 2.5rem;
+    --y-step2: 6rem;
+    --y-step3: 9.5rem;
   }
-  .demo-event-row {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-height: 2rem;
-    font-size: clamp(1rem, 1.5vw + 0.25rem, 1.125rem);
-    opacity: 0.35;
-    transform: translateY(10px);
-    transition: opacity 0.35s var(--ease-out-entrance), transform 0.35s var(--ease-out-entrance);
-  }
-  .demo-event-row.demo-event-row-visible {
-    opacity: 1;
-    transform: translateY(0);
-    animation: demoRowIn 0.4s var(--ease-out-entrance) both;
-  }
-  .demo-event-row.demo-event-row-visible.demo-event-row-ok::after {
-    animation: demoRippleGood 0.6s var(--ease-out-entrance) both;
-  }
-  .demo-event-row.demo-event-row-visible.demo-event-row-bad::after {
-    animation: demoRippleBad 0.6s var(--ease-out-entrance) both;
-  }
-  .demo-event-row::after {
-    content: "";
+  .demo-line {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    width: 24px;
-    height: 24px;
+    left: 9px;
+    top: 0.75rem;
+    bottom: 0.75rem;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 1px;
+  }
+  .demo-signal {
+    position: absolute;
+    left: 10px;
+    width: 10px;
+    height: 10px;
+    margin-left: -5px;
+    top: var(--y-step0);
+    transform: translateY(-50%);
     border-radius: 50%;
-    border: 2px solid transparent;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
     pointer-events: none;
-    transform: translate(-50%, -50%) scale(0);
+    z-index: 2;
+    opacity: 0;
+    transition: top 0.4s var(--ease-out-move), opacity 0.2s ease;
   }
-  .demo-event-dot {
-    flex-shrink: 0;
-    width: 12px;
-    height: 12px;
+  [data-phase="running"] .demo-signal,
+  [data-phase="done"] .demo-signal {
+    opacity: 1;
+  }
+  [data-active-step="0"] .demo-signal {
+    top: var(--y-step0);
+  }
+  [data-active-step="1"] .demo-signal {
+    top: var(--y-step1);
+  }
+  [data-active-step="2"] .demo-signal {
+    top: var(--y-step2);
+  }
+  [data-active-step="3"] .demo-signal {
+    top: var(--y-step3);
+  }
+  [data-phase="done"] .demo-signal {
+    opacity: 0.4;
+  }
+  .demo-step {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 0.75rem 1rem;
+    min-height: 3rem;
+    font-size: clamp(1rem, 1.5vw + 0.25rem, 1.125rem);
+  }
+  .demo-step + .demo-step {
+    margin-top: 0.5rem;
+  }
+  .demo-node {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.25);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    transition: background 0.25s var(--ease-out-entrance), border-color 0.25s var(--ease-out-entrance);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    transition: background 0.25s var(--ease-out-entrance), border-color 0.25s var(--ease-out-entrance), transform 0.25s var(--ease-out-entrance);
   }
-  .demo-event-row.demo-event-row-visible .demo-event-dot {
+  .demo-step.demo-step-active .demo-node {
     background: rgba(255, 255, 255, 0.5);
     border-color: rgba(255, 255, 255, 0.4);
-    animation: demoDotPop 0.3s var(--ease-out-entrance) both;
+    animation: demoNodePop 0.3s var(--ease-out-entrance) both;
   }
-  .demo-event-row.demo-event-row-ok .demo-event-dot {
+  .demo-step.demo-step-ok .demo-node {
     background: rgba(30, 184, 176, 0.5);
     border-color: rgba(30, 184, 176, 0.4);
   }
-  .demo-event-row.demo-event-row-bad .demo-event-dot {
+  .demo-step.demo-step-bad .demo-node {
     background: rgba(200, 100, 100, 0.4);
     border-color: rgba(200, 100, 100, 0.35);
   }
-  .demo-event-label {
-    flex: 1;
+  .demo-step-label {
     color: var(--text2);
   }
-  .demo-event-outcome {
-    font-weight: 600;
+  .demo-step-outcome-wrap {
+    min-width: 8ch;
+    text-align: right;
   }
-  .demo-event-ok {
+  .demo-step-outcome {
+    font-weight: 600;
+    display: inline-block;
+  }
+  .demo-step-outcome.demo-outcome-visible {
+    animation: demoOutcomeIn 160ms var(--ease-out-entrance) both;
+  }
+  .demo-step-outcome-ok {
     color: #1eb8b0;
   }
-  .demo-event-bad {
+  .demo-step-outcome-bad {
     color: rgba(210, 110, 110, 0.95);
   }
-  [data-phase="running"][data-active-row="3"] .demo-real-link {
+
+  [data-phase="running"][data-active-step="3"] .demo-real-link {
     animation: demoTap 320ms var(--ease-out-move) both;
   }
-  [data-phase="running"][data-active-row="3"][data-mode="unprotected"] .demo-real-link {
+  [data-phase="running"][data-active-step="3"][data-mode="unprotected"] .demo-real-link {
     animation: demoTapThenShake 800ms var(--ease-out-move) both;
   }
-  [data-phase="running"][data-active-row="3"][data-mode="unprotected"] .demo-real-link-text {
+  [data-phase="running"][data-active-step="3"][data-mode="unprotected"] .demo-real-link-text {
     opacity: 0.7;
   }
-  [data-phase="running"][data-active-row="3"][data-mode="protected"] .demo-real-link {
+  [data-phase="running"][data-active-step="3"][data-mode="protected"] .demo-real-link {
     animation: demoTap 320ms var(--ease-out-move) both;
   }
-  [data-phase="running"][data-active-row="3"][data-mode="protected"] .demo-real-link-inner {
+  [data-phase="running"][data-active-step="3"][data-mode="protected"] .demo-real-link-inner {
     animation: demoSettlePulse 800ms var(--ease-out-entrance) 360ms both;
-  }
-  .demo-btn-ghost {
-    height: 44px;
-    min-height: 44px;
-    padding: 0 1.25rem;
-    font-size: 1rem;
   }
   .demo-hero .demo-btn-primary {
     height: 54px;
@@ -897,6 +910,14 @@ h3 {
   }
   @keyframes demoRowIn {
     from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes demoNodePop {
+    from { opacity: 0.6; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes demoOutcomeIn {
+    from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes demoRippleBad {
@@ -1256,8 +1277,17 @@ h3 {
       animation: none !important;
       transform: translate(-50%, -50%) scale(0);
     }
-    [data-phase="running"][data-active-row="3"] .demo-real-link,
-    [data-phase="running"][data-active-row="3"] .demo-real-link-inner {
+    [data-phase="running"][data-active-step="3"] .demo-real-link,
+    [data-phase="running"][data-active-step="3"] .demo-real-link-inner {
+      animation: none !important;
+    }
+    .demo-signal {
+      transition: none !important;
+    }
+    .demo-step-outcome.demo-outcome-visible {
+      animation: none !important;
+    }
+    .demo-step.demo-step-active .demo-node {
       animation: none !important;
     }
   }

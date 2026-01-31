@@ -488,10 +488,10 @@ h3 {
     transform-origin: left;
     transform: scaleX(1);
   }
-  [data-phase="scanning"] .demo-underline {
+  [data-phase="running"] .demo-underline {
     animation: demoUnderlineDraw 400ms var(--ease-out-entrance) forwards;
   }
-  [data-phase="scanning"] .demo-real-link-text {
+  [data-phase="running"] .demo-real-link-text {
     animation: demoLinkBrighten 400ms var(--ease-out-entrance) forwards;
   }
   .demo-beam {
@@ -515,7 +515,7 @@ h3 {
     opacity: 0;
     transform: translateX(-100%);
   }
-  [data-phase="scanning"] .demo-beam {
+  [data-phase="running"] .demo-beam {
     animation: demoBeamSweep 800ms var(--ease-out-move) 400ms forwards;
   }
   .demo-orb {
@@ -532,15 +532,15 @@ h3 {
   }
   .demo-orb-scan[data-target="1"] {
     top: 3.5rem;
-    animation: demoOrbFly1 1400ms var(--ease-out-move) 500ms forwards;
+    animation: demoOrbFly1 400ms var(--ease-out-move) 200ms forwards;
   }
   .demo-orb-scan[data-target="2"] {
     top: 3.5rem;
-    animation: demoOrbFly2 1400ms var(--ease-out-move) 1200ms forwards;
+    animation: demoOrbFly2 500ms var(--ease-out-move) 700ms forwards;
   }
   .demo-orb-user[data-target="3"] {
     top: 3.5rem;
-    animation: demoOrbFly3 600ms var(--ease-out-move) forwards;
+    animation: demoOrbFly3 550ms var(--ease-out-move) 1300ms forwards;
   }
   .demo-url-preview {
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -622,23 +622,20 @@ h3 {
   .demo-event-bad {
     color: rgba(210, 110, 110, 0.95);
   }
-  [data-phase="user"] .demo-real-link {
+  [data-phase="running"][data-active-row="3"] .demo-real-link {
     animation: demoTap 320ms var(--ease-out-move) both;
   }
-  [data-phase="user"][data-mode="unprotected"] .demo-real-link {
+  [data-phase="running"][data-active-row="3"][data-mode="unprotected"] .demo-real-link {
     animation: demoTapThenShake 800ms var(--ease-out-move) both;
   }
-  [data-phase="user"][data-mode="unprotected"] .demo-real-link-text {
+  [data-phase="running"][data-active-row="3"][data-mode="unprotected"] .demo-real-link-text {
     opacity: 0.7;
   }
-  [data-phase="user"][data-mode="protected"] .demo-real-link {
+  [data-phase="running"][data-active-row="3"][data-mode="protected"] .demo-real-link {
     animation: demoTap 320ms var(--ease-out-move) both;
   }
-  [data-phase="user"][data-mode="protected"] .demo-real-link-inner {
+  [data-phase="running"][data-active-row="3"][data-mode="protected"] .demo-real-link-inner {
     animation: demoSettlePulse 800ms var(--ease-out-entrance) 360ms both;
-  }
-  .demo-btn-secondary.demo-just-enabled {
-    animation: demoBtnShimmer 1s var(--ease-out-entrance) both;
   }
   .demo-btn-ghost {
     height: 44px;
@@ -647,12 +644,6 @@ h3 {
     font-size: 1rem;
   }
   .demo-hero .demo-btn-primary {
-    height: 54px;
-    min-height: 54px;
-    padding: 0 2rem;
-    font-size: clamp(1rem, 1.5vw + 0.25rem, 1.125rem);
-  }
-  .demo-hero .demo-btn-secondary {
     height: 54px;
     min-height: 54px;
     padding: 0 2rem;
@@ -1245,11 +1236,11 @@ h3 {
       animation: none !important;
       opacity: 0.5;
     }
-    [data-phase="scanning"] .demo-underline {
+    [data-phase="running"] .demo-underline {
       animation: none !important;
       transform: scaleX(1);
     }
-    [data-phase="scanning"] .demo-real-link-text {
+    [data-phase="running"] .demo-real-link-text {
       animation: none !important;
     }
     .demo-beam {
@@ -1265,8 +1256,8 @@ h3 {
       animation: none !important;
       transform: translate(-50%, -50%) scale(0);
     }
-    [data-phase="user"] .demo-real-link,
-    [data-phase="user"] .demo-real-link-inner {
+    [data-phase="running"][data-active-row="3"] .demo-real-link,
+    [data-phase="running"][data-active-row="3"] .demo-real-link-inner {
       animation: none !important;
     }
   }

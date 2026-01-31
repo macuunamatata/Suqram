@@ -6,6 +6,15 @@ import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
 const CREATE_SITE_URL = "https://go.suqram.com/app/create-site";
 
+/** First non-empty string from candidates; null/undefined/whitespace count as missing. */
+function pickMsg(candidates: (string | null | undefined)[]): string {
+  for (const c of candidates) {
+    if (c != null && typeof c === "string" && c.trim() !== "") return c.trim();
+  }
+  const last = candidates[candidates.length - 1];
+  return last != null && typeof last === "string" ? last : "";
+}
+
 type Props = { defaultNext: string };
 
 function getNextFromUrl(): string {
@@ -68,9 +77,9 @@ export default function StartPageContent({ defaultNext }: Props) {
           let errMsg: string;
           try {
             const data = text ? (JSON.parse(text) as { error?: string }) : {};
-            errMsg = data.error ?? text || res.statusText || "Failed to create site";
+            errMsg = pickMsg([data.error, text, res.statusText, "Failed to create site"]);
           } catch {
-            errMsg = text || res.statusText || "Failed to create site";
+            errMsg = pickMsg([text, res.statusText, "Failed to create site"]);
           }
           setCreateError(`${res.status}: ${errMsg}`);
           setCreateSubmitting(false);

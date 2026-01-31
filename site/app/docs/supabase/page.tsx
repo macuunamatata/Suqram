@@ -35,7 +35,7 @@ export default function SupabaseDocsPage() {
           </div>
         </section>
 
-        <section className="mt-10 sm:mt-12">
+        <section id="generate" className="mt-10 sm:mt-12">
           <h2 className="text-xl font-semibold text-[var(--text)]">
             Generate your protected link
           </h2>

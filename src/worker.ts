@@ -943,6 +943,11 @@ export default {
       return handleDashboardCounters(request, env);
     }
 
+    // Dashboard: POST /app/create-site - Create first site (no token), set session, redirect
+    if (path === '/app/create-site' && request.method === 'POST') {
+      return handleCreateSite(request, env);
+    }
+
     return new Response('Not Found', { status: 404 });
   },
 };
@@ -2327,6 +2332,74 @@ async function handleDashboardLogin(request: Request, env: Env): Promise<Respons
   const sessionCookie = buildSecureCookie('site_session', sessionValue, 604800, request, { domain: cookieDomain });
   
   const redirectUrl = parseAndValidateNext(nextRaw, request);
+  return new Response(null, {
+    status: 302,
+    headers: {
+      'Location': redirectUrl,
+      'Set-Cookie': sessionCookie,
+    },
+  });
+}
+
+/**
+ * POST /app/create-site - Create first site without token (signup flow).
+ * Generates a unique hostname, creates site via DO, sets session cookie, redirects to next.
+ */
+async function handleCreateSite(request: Request, env: Env): Promise<Response> {
+  const url = new URL(request.url);
+  const hostname = url.host;
+  const isLocalDev = isLocalDevHost(hostname);
+
+  let nextRaw: string | null = null;
+  const contentType = request.headers.get('Content-Type') || '';
+  if (contentType.includes('application/x-www-form-urlencoded') || contentType.includes('multipart/form-data')) {
+    try {
+      const formData = await request.formData();
+      nextRaw = formData.get('next') as string | null;
+    } catch {
+      // ignore
+    }
+  } else if (contentType.includes('application/json')) {
+    try {
+      const body = await request.json<{ next?: string }>();
+      nextRaw = body?.next ?? null;
+    } catch {
+      // ignore
+    }
+  }
+  if (!nextRaw) nextRaw = url.searchParams.get('next');
+
+  const originBaseUrl = getOriginBaseUrl(request, env);
+  const baseDomain = isLocalDev ? hostname.split(':')[0] : 'suqram.com';
+  const uniqueHostname = `app-${generateRandomHex(6)}.${baseDomain}`;
+
+  const stub = getSitesStub(env);
+  const createUrl = new URL('/create', request.url);
+  const createBody = JSON.stringify({
+    hostname: uniqueHostname,
+    originBaseUrl,
+  });
+
+  const createRes = await stub.fetch(createUrl.toString(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: createBody,
+  });
+
+  if (!createRes.ok) {
+    const err = await createRes.json<{ error?: string }>().catch(() => ({}));
+    return new Response(
+      JSON.stringify({ error: err?.error || 'Failed to create site' }),
+      { status: createRes.status, headers: { 'Content-Type': 'application/json' } }
+    );
+  }
+
+  const site = await createRes.json<SiteConfig & { sat?: string }>();
+  const sessionValue = `${site.siteId}:${site.hostname}`;
+  const cookieDomain = (hostname === 'go.suqram.com') ? 'suqram.com' : undefined;
+  const sessionCookie = buildSecureCookie('site_session', sessionValue, 604800, request, { domain: cookieDomain });
+  const redirectUrl = parseAndValidateNext(nextRaw, request);
+
   return new Response(null, {
     status: 302,
     headers: {

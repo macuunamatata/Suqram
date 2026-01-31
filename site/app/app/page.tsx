@@ -52,10 +52,10 @@ function DashboardContent() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
-              Dashboard
+              Your site is ready
             </h1>
             <p className="mt-2 text-[var(--muted)]">
-              Create your site and get a protected link format for Supabase.
+              Connect your domain and get a protected link format for Supabase.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
@@ -64,6 +64,12 @@ function DashboardContent() {
               className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
             >
               Docs
+            </a>
+            <a
+              href="/app/api-keys"
+              className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+            >
+              API keys
             </a>
             <a
               href={logoutUrl}
@@ -76,10 +82,10 @@ function DashboardContent() {
 
         <div className="mt-12 card card-gradient-top border-[var(--accent)]/20 p-6 sm:p-8">
           <h2 className="text-lg font-semibold text-[var(--text)]">
-            Create site
+            Connect domain
           </h2>
           <p className="mt-2 text-sm text-[var(--muted)]">
-            Connect your domain and we&apos;ll give you a protected link format to paste into Supabase email templates.
+            Point your link subdomain to the rail and paste the protected link format into Supabase email templates.
           </p>
           <a
             href="/docs/supabase"
@@ -89,41 +95,26 @@ function DashboardContent() {
           </a>
         </div>
 
-        <ol className="mt-10 space-y-6">
-          <li className="flex gap-4">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)] text-sm font-semibold text-[var(--accent)]">
-              1
-            </span>
-            <div>
-              <p className="font-medium text-[var(--text)]">Connect domain (CNAME)</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Point your link subdomain (e.g. links.yourdomain.com) to the rail.
-              </p>
-            </div>
-          </li>
-          <li className="flex gap-4">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)] text-sm font-semibold text-[var(--accent)]">
-              2
-            </span>
-            <div>
-              <p className="font-medium text-[var(--text)]">Set secret / allowlist</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Configure allowed destination hosts in the worker.
-              </p>
-            </div>
-          </li>
-          <li className="flex gap-4">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)] text-sm font-semibold text-[var(--accent)]">
-              3
-            </span>
-            <div>
-              <p className="font-medium text-[var(--text)]">Update email template link</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">
-                Replace your magic-link URL with the protected link from the rail.
-              </p>
-            </div>
-          </li>
-        </ol>
+        <section className="mt-12">
+          <h2 className="text-lg font-semibold text-[var(--text)]">Tools</h2>
+          <div className="mt-4 space-y-4">
+            <a
+              href="/docs/supabase#generate"
+              className="block card p-4 border border-[var(--border)] rounded-xl hover:border-[var(--accent)]/30 transition-colors"
+            >
+              <span className="font-medium text-[var(--text)]">Generate protected link</span>
+              <p className="mt-1 text-sm text-[var(--muted)]">Paste your destination URL and get the protected link for your email.</p>
+            </a>
+            <a
+              href="/#demo"
+              className="block card p-4 border border-[var(--border)] rounded-xl hover:border-[var(--accent)]/30 transition-colors"
+            >
+              <span className="font-medium text-[var(--text)]">Inbox test</span>
+              <p className="mt-1 text-sm text-[var(--muted)]">Try the demo to see how protected links behave.</p>
+            </a>
+          </div>
+        </section>
+
         <p className="mt-8">
           <a href="/docs/supabase" className="link-accent text-sm">
             Supabase setup guide →

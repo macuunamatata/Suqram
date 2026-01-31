@@ -12,7 +12,7 @@ function getNextFromUrl(): string {
   return (next && next.trim()) || "/app";
 }
 
-export default function StartPageContent({ defaultNext }: Props) {
+export default function ApiKeyPageContent({ defaultNext }: Props) {
   const [nextFull, setNextFull] = useState(defaultNext);
 
   useEffect(() => {
@@ -35,46 +35,51 @@ export default function StartPageContent({ defaultNext }: Props) {
           window.location.href = target;
         }
       })
-      .catch(() => { /* not logged in, show create site */ });
+      .catch(() => {});
     return () => {
       mounted = false;
     };
   }, []);
 
   const railBase = getRailBaseUrl();
-  const createAction = `${railBase}/app/create-site`;
+  const loginAction = `${railBase}/app/login`;
 
   return (
     <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-20">
       <div className="max-w-md">
         <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
-          Create your first site
+          Sign in with API key
         </h1>
         <p className="mt-3 text-[var(--muted)]">
-          Get a protected link format to paste into Supabase email templates. No API key required.
+          For advanced use: sign in using your API key to access the dashboard.
         </p>
 
-        <div className="mt-10 card card-gradient-top border-[var(--accent)]/20 p-6 sm:p-8">
-          <form
-            method="POST"
-            action={createAction}
-            className="space-y-4"
-          >
+        <div className="mt-10 card card-gradient-top border-[var(--border)] p-6 sm:p-8">
+          <form method="POST" action={loginAction} className="space-y-4">
             <input type="hidden" name="next" value={nextFull} />
+            <label htmlFor="sat" className="block text-sm font-medium text-[var(--text)]">
+              API key
+            </label>
+            <input
+              id="sat"
+              name="sat"
+              type="text"
+              required
+              placeholder="Enter your API key"
+              className="input-base w-full font-mono text-sm"
+            />
             <button type="submit" className="btn-hero w-full">
-              Create your first site
+              Continue
             </button>
           </form>
+          <p className="mt-4 text-xs text-[var(--muted)]">
+            Your API key was provided when your site was created. Use the Admin API to rotate it if needed.
+          </p>
         </div>
 
         <p className="mt-8">
-          <Link href="/start/api-key" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-            Advanced: sign in with API key
-          </Link>
-        </p>
-        <p className="mt-4">
-          <Link href="/docs/supabase" className="link-accent text-sm">
-            Supabase setup guide →
+          <Link href="/start" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+            ← Create your first site (no API key)
           </Link>
         </p>
       </div>

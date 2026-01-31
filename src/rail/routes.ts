@@ -1,7 +1,7 @@
 // Auth Link Scanner Immunity Rail: GET /r/:rid (safe), POST /redeem (only spend path)
 
 import { RedemptionPermitDO } from './redemption-permit-do';
-import { generateRailInterstitialHTML } from './html';
+import { generateRailInterstitialHTML, generateConfirmErrorHTML, generateConfirmGetErrorHTML } from './html';
 import { validateDestinationUrl } from './validate';
 import { insertTelemetry, insertRedemptionLedger, type DstMeta } from './db';
 
@@ -60,13 +60,14 @@ export async function handleGetRail(request: Request, env: RailEnv, rid: string)
   const url = new URL(request.url);
   const isSecure = url.protocol === 'https:';
   const secureFlag = isSecure ? '; Secure' : '';
+  const pathScope = '/r';
   const headers = new Headers({
     'Content-Type': 'text/html',
     'Cache-Control': 'no-store',
     'X-Robots-Tag': 'noindex, nofollow',
     'Set-Cookie': [
-      `rail_continuity=${continuityId}; SameSite=Lax; Path=/; Max-Age=86400`,
-      `rail_csrf=${csrfToken}; SameSite=Lax; Path=/; HttpOnly; Max-Age=3600${secureFlag}`,
+      `rail_continuity=${continuityId}; Path=${pathScope}; Max-Age=86400; SameSite=Lax; HttpOnly${secureFlag}`,
+      `rail_csrf=${csrfToken}; Path=${pathScope}; Max-Age=3600; SameSite=Lax; HttpOnly${secureFlag}`,
     ].join(', '),
   });
 
@@ -87,47 +88,73 @@ export async function handleGetRail(request: Request, env: RailEnv, rid: string)
  * POST /r/:rid/confirm - Human-confirmed handoff. Mints one-time handoff in DO (rid + fingerprint), then 302 to destination.
  * Only path that redirects to destination. No redirect on GET.
  */
+/** GET /r/:rid/confirm — 405 with message and link back to /r/:rid */
+export function handleGetConfirm(request: Request, env: RailEnv, rid: string): Response {
+  const html = generateConfirmGetErrorHTML(rid);
+  return new Response(html, {
+    status: 405,
+    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+  });
+}
+
 export async function handlePostConfirm(request: Request, env: RailEnv, rid: string): Promise<Response> {
+  const cookies = request.headers.get('Cookie') || '';
   const continuityId = getContinuityId(request);
+  const hasContinuityCookie = !!continuityId;
+
   if (!continuityId) {
-    return new Response('Missing continuity', { status: 400 });
+    const diag = { hasContinuityCookie: false, hasCsrfCookie: /rail_csrf=/.test(cookies), hasCsrfBody: false, hasUBody: false };
+    const html = generateConfirmErrorHTML(rid, 'Session missing. Open the link again and click Continue.', diag);
+    return new Response(html, { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
-  const cookies = request.headers.get('Cookie') || '';
   const csrfCookieMatch = cookies.match(/rail_csrf=([^;]+)/);
-  const csrfCookie = csrfCookieMatch ? csrfCookieMatch[1] : null;
+  const csrfCookie = csrfCookieMatch ? csrfCookieMatch[1].trim() : null;
+  const hasCsrfCookie = !!csrfCookie;
 
   let u = '';
   const contentType = request.headers.get('Content-Type') || '';
   if (contentType.includes('application/x-www-form-urlencoded')) {
     const body = await request.formData();
-    u = (body.get('u') as string) ?? '';
-    const csrfValue = body.get('csrf') as string | null;
+    u = String(body.get('u') ?? '').trim();
+    const csrfValue = String(body.get('csrf') ?? '').trim();
+    const hasCsrfBody = csrfValue.length > 0;
+    const hasUBody = u.length > 0;
     if (!csrfCookie || !csrfValue || csrfCookie !== csrfValue) {
       await telemetryDenied(env, rid, 'csrf_mismatch');
-      return new Response('Forbidden', { status: 403 });
+      const diag = { hasContinuityCookie: true, hasCsrfCookie, hasCsrfBody, hasUBody };
+      const html = generateConfirmErrorHTML(rid, 'Security check failed. Open the link again and click Continue.', diag);
+      return new Response(html, { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
   } else if (contentType.includes('application/json')) {
     const body = await request.json<{ u?: string; csrf?: string }>();
     u = typeof body?.u === 'string' ? body.u.trim() : '';
     const csrfValue = body?.csrf;
+    const hasCsrfBody = !!csrfValue;
+    const hasUBody = u.length > 0;
     if (!csrfCookie || !csrfValue || csrfCookie !== csrfValue) {
       await telemetryDenied(env, rid, 'csrf_mismatch');
-      return new Response('Forbidden', { status: 403 });
+      const diag = { hasContinuityCookie: true, hasCsrfCookie, hasCsrfBody, hasUBody };
+      const html = generateConfirmErrorHTML(rid, 'Security check failed. Open the link again and click Continue.', diag);
+      return new Response(html, { status: 403, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
     }
   } else {
-    return new Response('Bad request', { status: 400 });
+    const diag = { hasContinuityCookie: true, hasCsrfCookie, hasCsrfBody: false, hasUBody: false };
+    const html = generateConfirmErrorHTML(rid, 'Invalid request. Use the Continue button on the link page.', diag);
+    return new Response(html, { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
   if (!u) {
     await telemetryDenied(env, rid, 'BAD_BODY');
-    return new Response('Missing destination', { status: 400 });
+    const html = generateConfirmErrorHTML(rid, 'Missing destination. Open the link again (it should include #u=...).');
+    return new Response(html, { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
   const dst = decodeDestination(u);
   if (!dst) {
     await telemetryDenied(env, rid, 'BAD_BODY');
-    return new Response('Invalid destination', { status: 400 });
+    const html = generateConfirmErrorHTML(rid, 'Invalid destination.');
+    return new Response(html, { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
   const validation = validateDestinationUrl(dst, {
@@ -137,7 +164,8 @@ export async function handlePostConfirm(request: Request, env: RailEnv, rid: str
   });
   if (!validation.valid) {
     await telemetryDenied(env, rid, 'invalid_destination');
-    return new Response('Invalid destination', { status: 400 });
+    const html = generateConfirmErrorHTML(rid, 'Destination not allowed.');
+    return new Response(html, { status: 400, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
   const continuityHash = await generateContinuityHash(request);
@@ -153,7 +181,9 @@ export async function handlePostConfirm(request: Request, env: RailEnv, rid: str
   if (!confirmData.ok) {
     const reason = confirmData.reason ?? 'confirm_failed';
     await telemetryDenied(env, rid, reason);
-    return new Response(reason === 'REPLAY' ? 'Already used' : 'Confirm failed', { status: 409 });
+    const msg = reason === 'REPLAY' ? 'This link has already been used.' : 'Confirm failed. Open the link again and click Continue.';
+    const html = generateConfirmErrorHTML(rid, msg);
+    return new Response(html, { status: 409, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
   }
 
   const dstMeta: DstMeta = {

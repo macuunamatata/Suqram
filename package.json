@@ -18,6 +18,8 @@
     "migrate:d1:local": "wrangler d1 execute EIG_DB --file ./migrations/0002_live_test_events.sql",
     "migrate:d1:control:remote": "wrangler d1 execute EIG_DB --remote --file ./migrations/0003_control_tokens.sql",
     "migrate:d1:control:local": "wrangler d1 execute EIG_DB --file ./migrations/0003_control_tokens.sql",
+    "migrate:d1:demo:remote": "wrangler d1 execute EIG_DB --remote --file ./migrations/0004_demo_sessions.sql",
+    "migrate:d1:demo:local": "wrangler d1 execute EIG_DB --file ./migrations/0004_demo_sessions.sql",
     "test": "wrangler d1 execute eig-db --file=sql/schema.sql --local && node scripts/smoke.mjs",
     "test:remote": "node scripts/smoke.mjs --remote",
     "seed": "node scripts/seed.mjs",

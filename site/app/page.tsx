@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import DemoSection from "./components/DemoSection";
 
 export const metadata: Metadata = {
   title: "Suqram — Magic links that survive Safe Links and security scanners",
@@ -31,14 +32,14 @@ export default function HomePage() {
             Magic links that survive Safe Links and security scanners.
           </h1>
           <p className="mt-6 max-w-2xl mx-auto body-hero leading-relaxed">
-            Reproduce the &quot;Link expired&quot; bug in 10 seconds — no enterprise inbox required.
+            See the difference in seconds.
           </p>
           <p className="mt-3 max-w-2xl mx-auto body-hero leading-relaxed text-[var(--text2)]">
             Suqram adds a human-confirmed click so only the real user can redeem.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link href="/live-test" className="btn-hero">
-              Simulate Safe Links
+            <Link href="#demo" className="btn-hero">
+              Try the demo
             </Link>
             <Link href="/start" className="btn-secondary text-sm">
               Generate protected link
@@ -49,6 +50,9 @@ export default function HomePage() {
           </p>
         </div>
       </section>
+
+      {/* Two-link demo: unprotected (expired) vs protected (success) */}
+      <DemoSection />
 
       {/* Empty dashboard teaser */}
       <section className="pt-20 sm:pt-24 pb-24 sm:pb-32" aria-label="Product preview">

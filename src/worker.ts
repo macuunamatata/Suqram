@@ -5,8 +5,9 @@ import { IntentNonceDO } from './eig/intent-nonce-do';
 import { TenantConfigDO } from './eig/tenant-config-do';
 import { TokenRefreshMutexDO } from './eig/token-refresh-mutex-do';
 import { RedemptionPermitDO } from './rail/redemption-permit-do';
-import { handleGetRail, handlePostRedeem, handlePostConfirm } from './rail/routes';
+import { handleGetRail, handlePostRedeem, handlePostConfirm, handleGetConfirm } from './rail/routes';
 import { handleTestSend, handleTestControl, handleTestStatus, handleTestCreate, handleTestSimulate } from './live-test';
+import { handleDemoCreate, handleDemoScan, handleDemoUnprotected, handleDemoSuccess } from './demo';
 import { handleHealth, handleJWKS, handleVerify } from './eig/endpoints';
 import {
   handleHubSpotInstall,
@@ -511,8 +512,8 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
-    // OPTIONS for any /test/* — CORS preflight (before other routing)
-    if (path.startsWith('/test/') && request.method === 'OPTIONS') {
+    // OPTIONS for /test/* and /demo/* — CORS preflight (before other routing)
+    if ((path.startsWith('/test/') || path.startsWith('/demo/')) && request.method === 'OPTIONS') {
       const origin = request.headers.get('Origin') || '*';
       return new Response(null, {
         status: 204,
@@ -758,15 +759,75 @@ export default {
       }
     }
 
+    // Deterministic two-link demo: POST /demo/create, POST /demo/scan, GET /demo/unprotected, GET /demo/success
+    if (path === '/demo/create') {
+      if (request.method === 'OPTIONS') {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Max-Age': '86400',
+          },
+        });
+      }
+      if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+      try {
+        const railBase = `${url.protocol}//${url.host}`;
+        const res = await handleDemoCreate(request, env, railBase);
+        return addCors(res);
+      } catch (e) {
+        const err = e instanceof Error ? e : new Error(String(e));
+        return addCors(new Response(JSON.stringify({
+          ok: false,
+          error: 'Unhandled error',
+          detail: String(e),
+          stack: err?.stack?.toString?.() ?? null,
+        }), { status: 500, headers: { 'Content-Type': 'application/json' } }));
+      }
+    }
+    if (path === '/demo/scan') {
+      if (request.method !== 'POST') {
+        return addCors(new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
+          status: 405,
+          headers: { 'Content-Type': 'application/json', 'Allow': 'POST, OPTIONS' },
+        }));
+      }
+      try {
+        const res = await handleDemoScan(request, env);
+        return addCors(res);
+      } catch (e) {
+        const err = e instanceof Error ? e : new Error(String(e));
+        return addCors(new Response(JSON.stringify({
+          ok: false,
+          error: 'Unhandled error',
+          detail: String(e),
+          stack: err?.stack?.toString?.() ?? null,
+        }), { status: 500, headers: { 'Content-Type': 'application/json' } }));
+      }
+    }
+    if (path === '/demo/unprotected' && request.method === 'GET') {
+      return handleDemoUnprotected(request, env);
+    }
+    if (path === '/demo/success' && request.method === 'GET') {
+      return handleDemoSuccess(request, env);
+    }
+
     // Auth Link Scanner Immunity Rail: GET /r/:rid (safe), POST /redeem (only spend path)
     if (path === '/redeem' && request.method === 'POST') {
       return handlePostRedeem(request, env);
     }
 
     const rRidConfirmMatch = path.match(/^\/r\/([^\/]+)\/confirm$/);
-    if (rRidConfirmMatch && request.method === 'POST') {
+    if (rRidConfirmMatch) {
       const rid = rRidConfirmMatch[1];
-      return handlePostConfirm(request, env, rid);
+      if (request.method === 'GET') {
+        return handleGetConfirm(request, env, rid);
+      }
+      if (request.method === 'POST') {
+        return handlePostConfirm(request, env, rid);
+      }
     }
     const rRidMatch = path.match(/^\/r\/([^\/]+)$/);
     if (rRidMatch && request.method === 'GET') {

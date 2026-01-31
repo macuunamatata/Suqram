@@ -59,12 +59,11 @@ export default function StartPageContent({ defaultNext }: Props) {
       e.preventDefault();
       setCreateError(null);
       setCreateSubmitting(true);
-      const formData = new FormData();
-      formData.set("next", nextFull);
       try {
         const res = await fetch(CREATE_SITE_URL, {
           method: "POST",
-          body: formData,
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ next: nextFull }),
           credentials: "include",
           redirect: "manual",
         });
@@ -88,7 +87,11 @@ export default function StartPageContent({ defaultNext }: Props) {
         window.location.href = nextPath;
       } catch (e) {
         const message = e instanceof Error ? e.message : "Request failed";
-        setCreateError(message);
+        const isFailedToFetch = message === "Failed to fetch";
+        const debug = isFailedToFetch
+          ? ` (origin: ${typeof window !== "undefined" ? window.location.origin : "?"}, endpoint: ${CREATE_SITE_URL})`
+          : "";
+        setCreateError(message + debug);
         setCreateSubmitting(false);
       }
     },

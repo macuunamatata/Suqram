@@ -71,13 +71,30 @@ function addCors(response: Response): Response {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
-/** Allowed origins for /app/create-site CORS (browser calls from Pages site). */
-const APP_CORS_ORIGINS = ['https://suqram.com', 'https://www.suqram.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
-
+/**
+ * Allowed origins for /app/create-site CORS: suqram.com, www, *.suqram.pages.dev, localhost.
+ * Returns the request Origin if allowed, else null.
+ */
 function getAppCorsOrigin(request: Request): string | null {
   const origin = request.headers.get('Origin');
-  return origin && APP_CORS_ORIGINS.includes(origin) ? origin : null;
+  if (!origin || typeof origin !== 'string') return null;
+  if (origin === 'https://suqram.com' || origin === 'https://www.suqram.com') return origin;
+  if (origin.startsWith('https://') && origin.endsWith('.suqram.pages.dev')) return origin;
+  try {
+    const u = new URL(origin);
+    if (u.protocol === 'http:' && (u.hostname === 'localhost' || u.hostname === '127.0.0.1')) return origin;
+  } catch {
+    return null;
+  }
+  return null;
 }
+
+const CORS_APP_HEADERS = {
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Max-Age': '86400',
+  'Vary': 'Origin',
+} as const;
 
 function addCorsApp(request: Request, response: Response): Response {
   const origin = getAppCorsOrigin(request);
@@ -85,6 +102,7 @@ function addCorsApp(request: Request, response: Response): Response {
   const headers = new Headers(response.headers);
   headers.set('Access-Control-Allow-Origin', origin);
   headers.set('Access-Control-Allow-Credentials', 'true');
+  headers.set('Vary', 'Origin');
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
@@ -940,7 +958,24 @@ export default {
 
     // Admin API routes are handled above (before this point)
 
-    // Safety net: GET /app or /start (dashboard pages) must be on the Pages site, not the Worker
+    // Dashboard API: /app/create-site — handle before any redirect (OPTIONS + POST only; no redirect)
+    if (path === '/app/create-site') {
+      if (request.method === 'OPTIONS') {
+        const origin = getAppCorsOrigin(request);
+        const headers = new Headers(CORS_APP_HEADERS);
+        if (origin) {
+          headers.set('Access-Control-Allow-Origin', origin);
+          headers.set('Access-Control-Allow-Credentials', 'true');
+        }
+        return new Response(null, { status: 204, headers });
+      }
+      if (request.method === 'POST') {
+        const res = await handleCreateSite(request, env);
+        return addCorsApp(request, res);
+      }
+    }
+
+    // Safety net: GET /app or /start (dashboard pages) → redirect to Pages site; excludes API paths
     const DASHBOARD_SITE_ORIGIN = 'https://suqram.com';
     if (request.method === 'GET') {
       if (path === '/app' || path === '/start') {
@@ -970,27 +1005,6 @@ export default {
     // Dashboard: GET /app/counters - Get event counters (last 24h)
     if (path === '/app/counters' && request.method === 'GET') {
       return handleDashboardCounters(request, env);
-    }
-
-    // Dashboard: POST /app/create-site - Create first site (no token), set session, redirect (CORS for suqram.com)
-    if (path === '/app/create-site') {
-      if (request.method === 'OPTIONS') {
-        const origin = getAppCorsOrigin(request);
-        const headers: Record<string, string> = {
-          'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type',
-          'Access-Control-Max-Age': '86400',
-        };
-        if (origin) {
-          headers['Access-Control-Allow-Origin'] = origin;
-          headers['Access-Control-Allow-Credentials'] = 'true';
-        }
-        return new Response(null, { status: 204, headers });
-      }
-      if (request.method === 'POST') {
-        const res = await handleCreateSite(request, env);
-        return addCorsApp(request, res);
-      }
     }
 
     return new Response('Not Found', { status: 404 });

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   description: "Generate protected links and paste into Supabase. Run the inbox test first.",
 };
 
+/** Static default so /start prerenders; client reads ?next= from URL. */
 export default function StartPage() {
-  return <StartPageContent />;
+  return <StartPageContent defaultNext="/app" />;
 }

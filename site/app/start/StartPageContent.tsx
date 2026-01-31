@@ -2,20 +2,28 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { getRailBaseUrl } from "@/lib/railBase";
 import LinkGenerator from "./LinkGenerator";
 
-export default function StartPageContent() {
-  const searchParams = useSearchParams();
-  const nextParam = searchParams.get("next") ?? "/app";
-  const [nextFull, setNextFull] = useState(nextParam);
+type Props = { defaultNext: string };
+
+function getNextFromUrl(): string {
+  if (typeof window === "undefined") return "/app";
+  const next = new URLSearchParams(window.location.search).get("next");
+  return (next && next.trim()) || "/app";
+}
+
+export default function StartPageContent({ defaultNext }: Props) {
+  const [nextParam, setNextParam] = useState(defaultNext);
+  const [nextFull, setNextFull] = useState(defaultNext);
 
   useEffect(() => {
+    const next = getNextFromUrl();
+    setNextParam(next);
     setNextFull(
-      `${window.location.origin}${nextParam.startsWith("/") ? nextParam : `/${nextParam}`}`
+      `${window.location.origin}${next.startsWith("/") ? next : `/${next}`}`
     );
-  }, [nextParam]);
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -24,8 +32,9 @@ export default function StartPageContent() {
       .then((res) => {
         if (!mounted) return;
         if (res.ok) {
-          const origin = typeof window !== "undefined" ? window.location.origin : "";
-          const target = nextParam.startsWith("/") ? `${origin}${nextParam}` : nextParam;
+          const next = getNextFromUrl();
+          const origin = window.location.origin;
+          const target = next.startsWith("/") ? `${origin}${next}` : next;
           window.location.href = target;
         }
       })
@@ -33,7 +42,7 @@ export default function StartPageContent() {
     return () => {
       mounted = false;
     };
-  }, [nextParam]);
+  }, []);
 
   const railBase = getRailBaseUrl();
   const loginAction = `${railBase}/app/login`;

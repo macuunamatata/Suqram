@@ -181,8 +181,12 @@ export async function handlePostRedeem(request: Request, env: RailEnv): Promise<
   try {
     await insertTelemetry(env.EIG_DB, rid, 'redeemed', undefined, dstMeta);
   } catch (_) {}
+  const now = Date.now();
   try {
-    await insertRedemptionLedger(env.EIG_DB, rid, 0, Date.now(), 'redeemed', undefined, dstMeta);
+    await insertRedemptionLedger(env.EIG_DB, rid, 0, now, 'redeemed', undefined, dstMeta);
+  } catch (_) {}
+  try {
+    await env.EIG_DB.prepare('UPDATE live_tests SET protected_redeemed_at = ? WHERE protected_rid = ?').bind(now, rid).run();
   } catch (_) {}
 
   return jsonResponse({ ok: true, redirect_to: dst });

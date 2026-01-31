@@ -43,6 +43,16 @@ All 7 checks should pass (health, scanner loop, simulated human, replay). **Loca
 - **suqram.com** is **Cloudflare Pages**: deployed on git push to the connected branch. In the Pages project set **Root directory** = `site`, **Build output directory** = `out`, **Build command** = `npm run build` (run from the `site` root by Pages).
 - **go.suqram.com** is a **Cloudflare Worker**: deployed via `npm run deploy:prod`.
 
+### Before using /live-test simulate
+
+The simulate demo ([/live-test](https://suqram.com/live-test)) needs extra D1 columns. Run the migration once (remote or local):
+
+```bash
+npm run migrate:d1:remote
+```
+
+For local dev with D1: `npm run migrate:d1:local`.
+
 ---
 
 ## Production setup (go.suqram.com)

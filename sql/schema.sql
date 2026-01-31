@@ -172,7 +172,7 @@ CREATE TABLE IF NOT EXISTS redemption_ledger (
 );
 CREATE INDEX IF NOT EXISTS idx_redemption_rid ON redemption_ledger(rid);
 
--- Live Inbox Test: real email demo (no raw email stored)
+-- Live Inbox Test: real email demo + simulate demo (no raw email stored)
 CREATE TABLE IF NOT EXISTS live_tests (
   tid TEXT PRIMARY KEY,
   created_at INTEGER NOT NULL,
@@ -181,7 +181,12 @@ CREATE TABLE IF NOT EXISTS live_tests (
   protected_rid TEXT NOT NULL,
   control_token_hash TEXT NOT NULL,
   control_consumed_at INTEGER,
-  notes TEXT
+  notes TEXT,
+  normal_link TEXT,
+  protected_link TEXT,
+  normal_scanner_seen_at INTEGER,
+  protected_scanner_seen_at INTEGER,
+  protected_redeemed_at INTEGER
 );
 CREATE INDEX IF NOT EXISTS idx_live_tests_created ON live_tests(created_at);
 CREATE INDEX IF NOT EXISTS idx_live_tests_email_hash ON live_tests(email_hash);

@@ -1,6 +1,6 @@
 # Auth Link Rail — Marketing site
 
-Next.js (App Router) static export + Tailwind. Routes: `/`, `/start/`, `/pricing/`, `/docs/`, `/terms/`, `/privacy/`.
+Next.js (App Router) static export + Tailwind. Routes: `/`, `/live-test/`, `/start/`, `/pricing/`, `/docs/`, `/terms/`, `/privacy/`.
 
 **Run locally**
 
@@ -42,8 +42,11 @@ Output is in `out/`. All routes are static HTML (e.g. `out/index.html`, `out/sta
 4. **Verify**  
    - Landing: **https://suqram.com/**  
    - Start (link generator): **https://suqram.com/start/**  
+   - Live-test (simulate Safe Links): **https://suqram.com/live-test/**  
    - Pricing: **https://suqram.com/pricing/**  
    - On Start, the “Rail base URL” field should default to **https://go.suqram.com** (change it only if you use a different rail domain).
+
+**Before using /live-test:** From the repo root, run `npm run migrate:d1:remote` once so the simulate demo has the required D1 columns (see root README).
 
 The worker runs separately from the repo root (`npm run dev` there starts the Cloudflare Worker on port 8787).
 

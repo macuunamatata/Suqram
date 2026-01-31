@@ -31,14 +31,17 @@ export default function HomePage() {
             Magic links that survive Safe Links and security scanners.
           </h1>
           <p className="mt-6 max-w-2xl mx-auto body-hero leading-relaxed">
-            Stop losing users to &quot;Link expired&quot; when corporate scanners pre-open one-time auth links.
+            Reproduce the &quot;Link expired&quot; bug in 10 seconds — no enterprise inbox required.
           </p>
           <p className="mt-3 max-w-2xl mx-auto body-hero leading-relaxed text-[var(--text2)]">
             Suqram adds a human-confirmed click so only the real user can redeem.
           </p>
-          <div className="mt-12">
-            <Link href="/start" className="btn-hero">
-              Start protecting links
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link href="/live-test" className="btn-hero">
+              Simulate Safe Links
+            </Link>
+            <Link href="/start" className="btn-secondary text-sm">
+              Generate protected link
             </Link>
           </div>
           <p className="mt-4 text-xs text-[var(--muted)]">

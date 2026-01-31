@@ -188,6 +188,14 @@ export async function handlePostRedeem(request: Request, env: RailEnv): Promise<
   try {
     await env.EIG_DB.prepare('UPDATE live_tests SET protected_redeemed_at = ? WHERE protected_rid = ?').bind(now, rid).run();
   } catch (_) {}
+  try {
+    const row = await env.EIG_DB.prepare('SELECT tid FROM live_tests WHERE protected_rid = ?').bind(rid).first<{ tid: string }>();
+    if (row?.tid) {
+      await env.EIG_DB.prepare(
+        'INSERT INTO live_test_events (id, tid, variant, kind, created_at, meta) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(crypto.randomUUID(), row.tid, '', 'redeem_ok', now, null).run();
+    }
+  } catch (_) {}
 
   return jsonResponse({ ok: true, redirect_to: dst });
 }

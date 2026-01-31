@@ -193,10 +193,12 @@ CREATE INDEX IF NOT EXISTS idx_live_tests_email_hash ON live_tests(email_hash);
 CREATE INDEX IF NOT EXISTS idx_live_tests_ip ON live_tests(creator_ip_hash);
 
 CREATE TABLE IF NOT EXISTS live_test_events (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY,
   tid TEXT NOT NULL,
-  ts INTEGER NOT NULL,
+  variant TEXT NOT NULL,
   kind TEXT NOT NULL,
-  FOREIGN KEY (tid) REFERENCES live_tests(tid)
+  created_at INTEGER NOT NULL,
+  meta TEXT
 );
-CREATE INDEX IF NOT EXISTS idx_live_test_events_tid ON live_test_events(tid);
+CREATE INDEX IF NOT EXISTS idx_live_test_events_tid_created ON live_test_events(tid, created_at);
+CREATE INDEX IF NOT EXISTS idx_live_test_events_kind_created ON live_test_events(kind, created_at);

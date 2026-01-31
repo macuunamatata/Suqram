@@ -511,6 +511,21 @@ export default {
     const url = new URL(request.url);
     const path = url.pathname;
 
+    // OPTIONS for any /test/* — CORS preflight (before other routing)
+    if (path.startsWith('/test/') && request.method === 'OPTIONS') {
+      const origin = request.headers.get('Origin') || '*';
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'Access-Control-Allow-Origin': origin,
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Max-Age': '86400',
+          'Vary': 'Origin',
+        },
+      });
+    }
+
     // Admin endpoints: require auth before routing
     if (path.startsWith('/admin')) {
       // Calculate hasKey and keyLen for diagnostics
@@ -692,7 +707,8 @@ export default {
       return handleTestControl(request, env);
     }
     if (path === '/test/status' && request.method === 'GET') {
-      return handleTestStatus(request, env);
+      const res = await handleTestStatus(request, env);
+      return addCors(res);
     }
     if (path === '/test/create') {
       if (request.method === 'OPTIONS') {
@@ -722,18 +738,12 @@ export default {
       }
     }
     if (path === '/test/simulate') {
-      if (request.method === 'OPTIONS') {
-        return new Response(null, {
-          status: 204,
-          headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type',
-            'Access-Control-Max-Age': '86400',
-          },
-        });
+      if (request.method !== 'POST') {
+        return addCors(new Response(JSON.stringify({ ok: false, error: 'Method not allowed' }), {
+          status: 405,
+          headers: { 'Content-Type': 'application/json', 'Allow': 'POST, OPTIONS' },
+        }));
       }
-      if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
       try {
         const res = await handleTestSimulate(request, env);
         return addCors(res);

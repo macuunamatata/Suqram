@@ -30,6 +30,20 @@ function randomToken(): string {
   return Array.from(arr).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
 
+function insertLiveTestEvent(
+  env: LiveTestEnv,
+  id: string,
+  tid: string,
+  variant: string,
+  kind: string,
+  created_at: number,
+  meta: string | null
+): Promise<D1Result> {
+  return env.EIG_DB.prepare(
+    'INSERT INTO live_test_events (id, tid, variant, kind, created_at, meta) VALUES (?, ?, ?, ?, ?, ?)'
+  ).bind(id, tid, variant, kind, created_at, meta ?? null).run();
+}
+
 /** POST /test/send — body: { email: string } */
 export async function handleTestSend(request: Request, env: LiveTestEnv, railBase: string): Promise<Response> {
   if (!env.RESEND_API_KEY || !env.TEST_FROM_EMAIL) {
@@ -115,12 +129,10 @@ export async function handleTestSend(request: Request, env: LiveTestEnv, railBas
   }
 
   await env.EIG_DB.prepare(
-    `INSERT INTO live_tests (tid, created_at, email_hash, creator_ip_hash, protected_rid, control_token_hash, control_consumed_at, notes)
-     VALUES (?, ?, ?, ?, ?, ?, NULL, NULL)`
+    `INSERT INTO live_tests (tid, created_at, email_hash, creator_ip_hash, protected_rid, control_token_hash)
+     VALUES (?, ?, ?, ?, ?, ?)`
   ).bind(tid, now, emailHash, ipHash, rid, controlTokenHash).run();
-  await env.EIG_DB.prepare(
-    'INSERT INTO live_test_events (tid, ts, kind) VALUES (?, ?, ?)'
-  ).bind(tid, now, 'sent').run();
+  await insertLiveTestEvent(env, crypto.randomUUID(), tid, '', 'sent', now, null);
 
   return jsonResponse(200, { ok: true });
 }
@@ -148,90 +160,144 @@ export async function handleTestCreate(request: Request, env: LiveTestEnv, railB
   const protectedLink = `${railBase}/r/${rid}#u=${encodeURIComponent(protectedDest)}`;
 
   await env.EIG_DB.prepare(
-    `INSERT INTO live_tests (tid, created_at, email_hash, creator_ip_hash, protected_rid, control_token_hash, control_consumed_at, normal_link, protected_link)
-     VALUES (?, ?, 'demo', ?, ?, ?, NULL, ?, ?)`
-  ).bind(tid, now, ipHash, rid, controlTokenHash, normalLink, protectedLink).run();
-  await env.EIG_DB.prepare(
-    'INSERT INTO live_test_events (tid, ts, kind) VALUES (?, ?, ?)'
-  ).bind(tid, now, 'demo_created').run();
+    `INSERT INTO live_tests (tid, created_at, email_hash, creator_ip_hash, protected_rid, control_token_hash)
+     VALUES (?, ?, 'demo', ?, ?, ?)`
+  ).bind(tid, now, ipHash, rid, controlTokenHash).run();
+  await insertLiveTestEvent(
+    env,
+    crypto.randomUUID(),
+    tid,
+    '',
+    'demo_created',
+    now,
+    JSON.stringify({ normalLink, protectedLink })
+  );
 
   return jsonResponse(200, { ok: true, tid, normalLink, protectedLink });
+}
+
+/** Parse simulate body: JSON, double-encoded JSON, or form-encoded. */
+function parseSimulateBody(raw: string): { tid?: string; variant?: string } | null {
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  try {
+    const parsed = JSON.parse(trimmed) as unknown;
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return parsed as { tid?: string; variant?: string };
+    }
+    if (typeof parsed === 'string') {
+      try {
+        return JSON.parse(parsed) as { tid?: string; variant?: string };
+      } catch {
+        // inner string not valid JSON
+      }
+    }
+  } catch {
+    // Double-encoded: first parse failed; try JSON.parse(JSON.parse(raw)) if quoted
+    if ((trimmed.startsWith('"') && trimmed.endsWith('"')) || (trimmed.startsWith("'") && trimmed.endsWith("'"))) {
+      try {
+        const once = JSON.parse(trimmed) as string;
+        return JSON.parse(once) as { tid?: string; variant?: string };
+      } catch {
+        // fall through
+      }
+    }
+    // Form-encoded: tid=xxx&variant=normal
+    if (trimmed.includes('=')) {
+      const params = new URLSearchParams(trimmed);
+      return Object.fromEntries(params.entries()) as { tid?: string; variant?: string };
+    }
+  }
+  return null;
 }
 
 /** POST /test/simulate — body: { tid, variant: "normal" | "protected" }. Simulate scanner open. */
 export async function handleTestSimulate(request: Request, env: LiveTestEnv): Promise<Response> {
   let raw: string;
   try {
-    raw = await request.clone().text();
+    raw = await request.text();
   } catch (e) {
     return jsonResponse(400, { ok: false, error: 'Invalid body', detail: String(e) });
   }
-  let body: { tid?: string; variant?: string };
-  try {
-    body = JSON.parse(raw) as { tid?: string; variant?: string };
-  } catch (e) {
-    return jsonResponse(400, { ok: false, error: 'Invalid JSON', detail: String(e) });
+  const body = parseSimulateBody(raw);
+  if (body == null) {
+    return jsonResponse(400, {
+      ok: false,
+      error: 'Invalid JSON',
+      rawPreview: raw.slice(0, 200),
+      rawCharCodes: Array.from(raw.slice(0, 60)).map((c) => c.charCodeAt(0)),
+    });
   }
-  const tid = typeof body?.tid === 'string' ? body.tid.trim() : '';
-  const variant = body?.variant === 'normal' || body?.variant === 'protected' ? body.variant : null;
+  const tid = typeof body.tid === 'string' ? body.tid.trim() : '';
+  const variant = body.variant === 'normal' || body.variant === 'protected' ? body.variant : null;
   if (!tid || !variant) {
-    return jsonResponse(400, { ok: false, error: 'tid and variant (normal|protected) required' });
+    return jsonResponse(400, { ok: false, error: 'Missing fields', got: body });
   }
 
-  const row = await env.EIG_DB.prepare(
-    'SELECT normal_link, protected_link, control_consumed_at FROM live_tests WHERE tid = ?'
-  ).bind(tid).first<{ normal_link: string | null; protected_link: string | null; control_consumed_at: number | null }>();
-  if (!row) {
+  const eventRow = await env.EIG_DB.prepare(
+    "SELECT meta FROM live_test_events WHERE tid = ? AND kind = 'demo_created' ORDER BY created_at DESC LIMIT 1"
+  ).bind(tid).first<{ meta: string | null }>();
+  if (!eventRow?.meta) {
     return jsonResponse(404, { ok: false, error: 'not_found' });
+  }
+  let meta: { normalLink?: string; protectedLink?: string };
+  try {
+    meta = JSON.parse(eventRow.meta) as { normalLink?: string; protectedLink?: string };
+  } catch {
+    return jsonResponse(500, { ok: false, error: 'Invalid demo session data' });
   }
 
   const now = Date.now();
 
   if (variant === 'normal') {
-    const link = row.normal_link;
+    const link = meta.normalLink;
     if (!link) {
       return jsonResponse(400, { ok: false, error: 'Demo session has no normal link' });
     }
-    const res = await fetch(link, {
+    // Simulate by invoking internal /test/control logic (no external fetch)
+    const syntheticRequest = new Request(link, {
       method: 'GET',
-      redirect: 'follow',
-      headers: { 'User-Agent': SCANNER_UA },
+      headers: new Headers({ 'User-Agent': SCANNER_UA }),
     });
-    await env.EIG_DB.prepare(
-      'UPDATE live_tests SET control_consumed_at = ?, normal_scanner_seen_at = ? WHERE tid = ?'
-    ).bind(now, now, tid).run();
-    await env.EIG_DB.prepare(
-      'INSERT INTO live_test_events (tid, ts, kind) VALUES (?, ?, ?)'
-    ).bind(tid, now, 'normal_simulate').run();
+    await handleTestControl(syntheticRequest, env);
+    await insertLiveTestEvent(
+      env,
+      crypto.randomUUID(),
+      tid,
+      'normal',
+      'scanner_simulated',
+      now,
+      JSON.stringify({ fetch_status: 200, note: 'simulated' })
+    );
     return jsonResponse(200, {
       ok: true,
+      tid,
       variant: 'normal',
-      status: 'consumed',
-      details: `Scanner (simulated) opened normal link; status ${res.status}`,
+      simulated_at: now,
+      fetch_status: 200,
     });
   }
 
   if (variant === 'protected') {
-    const link = row.protected_link;
-    if (!link) {
+    if (!meta.protectedLink) {
       return jsonResponse(400, { ok: false, error: 'Demo session has no protected link' });
     }
-    await fetch(link, {
-      method: 'GET',
-      redirect: 'manual',
-      headers: { 'User-Agent': SCANNER_UA },
-    });
-    await env.EIG_DB.prepare(
-      'UPDATE live_tests SET protected_scanner_seen_at = ? WHERE tid = ?'
-    ).bind(now, tid).run();
-    await env.EIG_DB.prepare(
-      'INSERT INTO live_test_events (tid, ts, kind) VALUES (?, ?, ?)'
-    ).bind(tid, now, 'protected_simulate').run();
+    // Protected rail: scanner GET does not redeem; just record simulation (no external fetch)
+    await insertLiveTestEvent(
+      env,
+      crypto.randomUUID(),
+      tid,
+      'protected',
+      'scanner_simulated',
+      now,
+      JSON.stringify({ fetch_status: 200, note: 'simulated' })
+    );
     return jsonResponse(200, {
       ok: true,
+      tid,
       variant: 'protected',
-      status: 'scanner_fetch_ignored',
-      details: 'Protected link did not redeem; scanner fetch recorded.',
+      simulated_at: now,
+      fetch_status: 200,
     });
   }
 
@@ -248,8 +314,8 @@ export async function handleTestControl(request: Request, env: LiveTestEnv): Pro
   }
 
   const row = await env.EIG_DB.prepare(
-    'SELECT control_token_hash, control_consumed_at FROM live_tests WHERE tid = ?'
-  ).bind(tid).first<{ control_token_hash: string; control_consumed_at: number | null }>();
+    'SELECT control_token_hash FROM live_tests WHERE tid = ?'
+  ).bind(tid).first<{ control_token_hash: string }>();
   if (!row) {
     return redirectResult(tid, 1);
   }
@@ -259,19 +325,15 @@ export async function handleTestControl(request: Request, env: LiveTestEnv): Pro
   }
 
   const now = Date.now();
-  if (row.control_consumed_at != null) {
-    await env.EIG_DB.prepare(
-      'INSERT INTO live_test_events (tid, ts, kind) VALUES (?, ?, ?)'
-    ).bind(tid, now, 'control_replay').run();
+  const alreadyUsed = await env.EIG_DB.prepare(
+    "SELECT 1 FROM live_test_events WHERE tid = ? AND kind = 'control_first_hit' LIMIT 1"
+  ).bind(tid).first();
+  if (alreadyUsed) {
+    await insertLiveTestEvent(env, crypto.randomUUID(), tid, '', 'control_replay', now, null);
     return redirectResult(tid, 1);
   }
 
-  await env.EIG_DB.prepare(
-    'UPDATE live_tests SET control_consumed_at = ? WHERE tid = ?'
-  ).bind(now, tid).run();
-  await env.EIG_DB.prepare(
-    'INSERT INTO live_test_events (tid, ts, kind) VALUES (?, ?, ?)'
-  ).bind(tid, now, 'control_first_hit').run();
+  await insertLiveTestEvent(env, crypto.randomUUID(), tid, '', 'control_first_hit', now, null);
   return redirectResult(tid, 0);
 }
 
@@ -280,42 +342,65 @@ function redirectResult(tid: string, used: 0 | 1): Response {
   return new Response(null, { status: 302, headers: { Location: loc } });
 }
 
-/** GET /test/status?tid=... — JSON status (created_at, scanner timestamps, user results) */
+/** GET /test/status?tid=... — JSON status from live_test_events (counts, timestamps, user results) */
 export async function handleTestStatus(request: Request, env: LiveTestEnv): Promise<Response> {
   const url = new URL(request.url);
   const tid = url.searchParams.get('tid')?.trim();
   if (!tid) {
-    return jsonResponse(400, { error: 'tid required' });
+    return jsonResponse(400, { ok: false, error: 'tid required' });
   }
-  const row = await env.EIG_DB.prepare(
-    `SELECT tid, created_at, protected_rid, control_consumed_at,
-            normal_scanner_seen_at, protected_scanner_seen_at, protected_redeemed_at
-     FROM live_tests WHERE tid = ?`
-  ).bind(tid).first<{
-    tid: string;
-    created_at: number;
-    protected_rid: string;
-    control_consumed_at: number | null;
-    normal_scanner_seen_at: number | null;
-    protected_scanner_seen_at: number | null;
-    protected_redeemed_at: number | null;
-  }>();
-  if (!row) {
-    return jsonResponse(404, { error: 'not_found' });
+  const sessionRow = await env.EIG_DB.prepare(
+    'SELECT tid, created_at FROM live_tests WHERE tid = ?'
+  ).bind(tid).first<{ tid: string; created_at: number }>();
+  if (!sessionRow) {
+    return jsonResponse(404, { ok: false, error: 'not_found' });
   }
-  const normal_user_result = row.control_consumed_at != null
-    ? (row.normal_scanner_seen_at != null ? 'consumed_by_scanner' : 'consumed_by_user')
-    : 'available';
-  const protected_user_result = row.protected_redeemed_at != null ? 'redeemed' : 'available';
+
+  const events = await env.EIG_DB.prepare(
+    'SELECT kind, variant, created_at FROM live_test_events WHERE tid = ? ORDER BY created_at ASC'
+  ).bind(tid).all<{ kind: string; variant: string; created_at: number }>();
+
+  let scanner_simulated_normal_count = 0;
+  let scanner_simulated_protected_count = 0;
+  let last_scanner_simulated_normal_at: number | null = null;
+  let last_scanner_simulated_protected_at: number | null = null;
+  let control_first_hit_at: number | null = null;
+  let redeem_ok_at: number | null = null;
+
+  for (const e of events.results) {
+    if (e.kind === 'scanner_simulated' && e.variant === 'normal') {
+      scanner_simulated_normal_count++;
+      last_scanner_simulated_normal_at = e.created_at;
+    } else if (e.kind === 'scanner_simulated' && e.variant === 'protected') {
+      scanner_simulated_protected_count++;
+      last_scanner_simulated_protected_at = e.created_at;
+    } else if (e.kind === 'control_first_hit') {
+      control_first_hit_at = e.created_at;
+    } else if (e.kind === 'redeem_ok') {
+      redeem_ok_at = e.created_at;
+    }
+  }
+
+  const normal_user_result =
+    control_first_hit_at != null
+      ? (scanner_simulated_normal_count > 0 ? 'consumed_by_scanner' : 'consumed_by_user')
+      : scanner_simulated_normal_count > 0
+        ? 'consumed_by_scanner'
+        : 'available';
+  const protected_user_result = redeem_ok_at != null ? 'redeemed' : 'available';
+
   return jsonResponse(200, {
-    tid: row.tid,
-    created_at: row.created_at,
-    normal_scanner_seen_at: row.normal_scanner_seen_at ?? null,
-    protected_scanner_seen_at: row.protected_scanner_seen_at ?? null,
+    ok: true,
+    tid: sessionRow.tid,
+    created_at: sessionRow.created_at,
+    scanner_simulated_normal_count,
+    scanner_simulated_protected_count,
+    last_scanner_simulated_normal_at,
+    last_scanner_simulated_protected_at,
+    control_first_hit_at,
+    redeem_ok_at,
     normal_user_result,
     protected_user_result,
-    control_consumed_at: row.control_consumed_at ?? null,
-    protected_redeemed_at: row.protected_redeemed_at ?? null,
   });
 }
 

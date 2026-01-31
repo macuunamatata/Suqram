@@ -923,12 +923,24 @@ export default {
 
     // Admin API routes are handled above (before this point)
 
-    // Dashboard: GET /app - Dashboard UI (requires SAT login)
-    if (path === '/app' && request.method === 'GET') {
-      return handleDashboard(request, env);
+    // Safety net: GET /app or /start (dashboard pages) must be on the Pages site, not the Worker
+    const DASHBOARD_SITE_ORIGIN = 'https://suqram.com';
+    if (request.method === 'GET') {
+      if (path === '/app' || path === '/start') {
+        const target = `${DASHBOARD_SITE_ORIGIN}${path}${url.search}`;
+        return new Response(null, { status: 302, headers: { 'Location': target } });
+      }
+      if (path.startsWith('/app/') && path !== '/app/counters') {
+        const target = `${DASHBOARD_SITE_ORIGIN}${path}${url.search}`;
+        return new Response(null, { status: 302, headers: { 'Location': target } });
+      }
+      if (path.startsWith('/start/')) {
+        const target = `${DASHBOARD_SITE_ORIGIN}${path}${url.search}`;
+        return new Response(null, { status: 302, headers: { 'Location': target } });
+      }
     }
 
-    // Dashboard: POST /app/login - Login with SAT
+    // Dashboard API: POST /app/login - Login with SAT (Worker handles; redirects to Pages site)
     if (path === '/app/login' && request.method === 'POST') {
       return handleDashboardLogin(request, env);
     }

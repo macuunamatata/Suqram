@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
@@ -15,6 +15,8 @@ function getNextFromUrl(): string {
 export default function StartPageContent({ defaultNext }: Props) {
   const [nextPath, setNextPath] = useState(defaultNext);
   const [nextFull, setNextFull] = useState(defaultNext);
+  const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   useEffect(() => {
     const next = getNextFromUrl();
@@ -41,8 +43,41 @@ export default function StartPageContent({ defaultNext }: Props) {
     };
   }, []);
 
+  const handleCreateSite = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setCreateError(null);
+      setCreateSubmitting(true);
+      const base = getRailBaseUrl();
+      const formData = new FormData();
+      formData.set("next", nextFull);
+      try {
+        const res = await fetch(`${base}/app/create-site`, {
+          method: "POST",
+          body: formData,
+          credentials: "include",
+          redirect: "manual",
+        });
+        if (res.type === "opaqueredirect" || res.status === 302) {
+          window.location.href = nextPath;
+          return;
+        }
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setCreateError((data as { error?: string }).error ?? "Failed to create site");
+          setCreateSubmitting(false);
+          return;
+        }
+        window.location.href = nextPath;
+      } catch {
+        setCreateError("Network error");
+        setCreateSubmitting(false);
+      }
+    },
+    [nextFull, nextPath]
+  );
+
   const railBase = getRailBaseUrl();
-  const createAction = `${railBase}/app/create-site`;
   const loginAction = `${railBase}/app/login`;
   const showApiKeyForm = nextPath === "/app/api-keys";
 
@@ -92,10 +127,16 @@ export default function StartPageContent({ defaultNext }: Props) {
             </p>
 
             <div className="mt-10 card card-gradient-top border-[var(--accent)]/20 p-6 sm:p-8">
-              <form method="POST" action={createAction} className="space-y-4">
-                <input type="hidden" name="next" value={nextFull} />
-                <button type="submit" className="btn-hero w-full">
-                  Create your first site
+              <form onSubmit={handleCreateSite} className="space-y-4">
+                {createError && (
+                  <p className="text-sm text-[var(--error-muted)]">{createError}</p>
+                )}
+                <button
+                  type="submit"
+                  className="btn-hero w-full"
+                  disabled={createSubmitting}
+                >
+                  {createSubmitting ? "Creating…" : "Create your first site"}
                 </button>
               </form>
             </div>

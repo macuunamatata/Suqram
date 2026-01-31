@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getRailBaseUrl } from "@/lib/railBase";
+import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
 type Props = { defaultNext: string };
 
@@ -18,10 +18,9 @@ export default function StartPageContent({ defaultNext }: Props) {
 
   useEffect(() => {
     const next = getNextFromUrl();
-    setNextPath(next);
-    setNextFull(
-      `${window.location.origin}${next.startsWith("/") ? next : `/${next}`}`
-    );
+    const path = next.startsWith("/") ? next : `/${next}`;
+    setNextPath(path);
+    setNextFull(`${getSiteOrigin()}${path}`);
   }, []);
 
   useEffect(() => {
@@ -32,9 +31,8 @@ export default function StartPageContent({ defaultNext }: Props) {
         if (!mounted) return;
         if (res.ok) {
           const next = getNextFromUrl();
-          const origin = window.location.origin;
-          const target = next.startsWith("/") ? `${origin}${next}` : next;
-          window.location.href = target;
+          const path = next.startsWith("/") ? next : `/${next}`;
+          window.location.href = path;
         }
       })
       .catch(() => { /* not logged in */ });

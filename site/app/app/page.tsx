@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { getRailBaseUrl } from "@/lib/railBase";
+import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -43,7 +43,7 @@ function DashboardContent() {
   }
 
   const logoutUrl = `${getRailBaseUrl()}/app/logout?redirect=${encodeURIComponent(
-    typeof window !== "undefined" ? `${window.location.origin}/start` : "/start"
+    `${getSiteOrigin()}/start`
   )}`;
 
   return (

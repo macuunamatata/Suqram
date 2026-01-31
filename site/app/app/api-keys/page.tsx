@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getRailBaseUrl } from "@/lib/railBase";
+import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
 export default function ApiKeysPage() {
   const [status, setStatus] = useState<"checking" | "authenticated" | "redirecting">("checking");
@@ -39,7 +39,7 @@ export default function ApiKeysPage() {
   }
 
   const logoutUrl = `${getRailBaseUrl()}/app/logout?redirect=${encodeURIComponent(
-    typeof window !== "undefined" ? `${window.location.origin}/start` : "/start"
+    `${getSiteOrigin()}/start`
   )}`;
 
   return (

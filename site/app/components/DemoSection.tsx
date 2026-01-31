@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getRailBaseUrl } from "@/lib/railBase";
+import { getDemoApiBase } from "@/lib/railBase";
+
+const DEMO_API_WRONG_ORIGIN_MSG = "Demo API must be called on go.suqram.com";
 
 type DemoLinks = {
   tid: string;
@@ -17,8 +19,7 @@ export default function DemoSection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const base = getRailBaseUrl();
-    let tid: string | null = null;
+    const base = getDemoApiBase();
 
     (async () => {
       try {
@@ -26,19 +27,28 @@ export default function DemoSection() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
+        if (createRes.status === 405) {
+          setError(DEMO_API_WRONG_ORIGIN_MSG);
+          setLoading(false);
+          return;
+        }
         if (!createRes.ok) {
           const data = await createRes.json().catch(() => ({}));
-          throw new Error(data?.error ?? `Create failed: ${createRes.status}`);
+          throw new Error((data as { error?: string }).error ?? `Create failed: ${createRes.status}`);
         }
-        const createData = await createRes.json();
-        if (!createData.ok || !createData.tid) throw new Error("Invalid create response");
-        tid = createData.tid;
+        const createData = await createRes.json() as { ok?: boolean; tid?: string; unprotected_url?: string; protected_url?: string; unprotected_display?: string; protected_display?: string };
+        if (!createData?.ok || !createData.tid) {
+          setError("Invalid create response. Please try again.");
+          setLoading(false);
+          return;
+        }
+        const tid = createData.tid;
         setLinks({
-          tid: createData.tid,
-          unprotected_url: createData.unprotected_url,
-          protected_url: createData.protected_url,
-          unprotected_display: createData.unprotected_display ?? createData.unprotected_url,
-          protected_display: createData.protected_display ?? createData.protected_url,
+          tid,
+          unprotected_url: createData.unprotected_url ?? "",
+          protected_url: createData.protected_url ?? "",
+          unprotected_display: createData.unprotected_display ?? createData.unprotected_url ?? "",
+          protected_display: createData.protected_display ?? createData.protected_url ?? "",
         });
 
         const scanRes = await fetch(`${base}/demo/scan`, {
@@ -46,9 +56,13 @@ export default function DemoSection() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ tid }),
         });
-        if (!scanRes.ok) {
-          const data = await scanRes.json().catch(() => ({}));
-          throw new Error(data?.error ?? `Scan failed: ${scanRes.status}`);
+        if (scanRes.status === 405) {
+          setError(DEMO_API_WRONG_ORIGIN_MSG);
+          setLinks(null);
+        } else if (!scanRes.ok) {
+          const data = await scanRes.json().catch(() => ({})) as { error?: string };
+          setError(data?.error === "tid required" ? "Demo bug: scan requires tid. Please try again." : (data?.error ?? `Scan failed: ${scanRes.status}`));
+          setLinks(null);
         }
       } catch (e) {
         setError(e instanceof Error ? e.message : "Couldn't load demo");

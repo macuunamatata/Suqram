@@ -15,6 +15,17 @@ export function getRailBaseUrl(): string {
 }
 
 /**
+ * Demo API base: always the Worker (go.suqram.com) so demo/create and demo/scan
+ * never hit the Pages site (suqram.com). On localhost uses getRailBaseUrl() for dev.
+ */
+export function getDemoApiBase(): string {
+  if (typeof window === "undefined") return PRODUCTION_RAIL;
+  const host = window.location.hostname;
+  if (host === "localhost" || host === "127.0.0.1") return getRailBaseUrl();
+  return PRODUCTION_RAIL;
+}
+
+/**
  * Pages site origin (suqram.com) for redirect targets sent to the Worker.
  * Ensures post-login/logout redirects go to the dashboard site, not the Worker domain.
  */

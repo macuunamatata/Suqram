@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { getRailBaseUrl } from "@/lib/railBase";
+import { getDemoApiBase } from "@/lib/railBase";
+
+const DEMO_API_WRONG_ORIGIN_MSG = "Demo API must be called on go.suqram.com";
 
 type Mode = "unprotected" | "protected";
 type Phase = "idle" | "running" | "done";
@@ -81,7 +83,7 @@ export default function DemoBeforeAfter() {
     setActiveStep(1);
     setRunId((r) => r + 1);
 
-    const base = getRailBaseUrl();
+    const base = getDemoApiBase();
     let tid: string | null = null;
 
     try {
@@ -90,13 +92,24 @@ export default function DemoBeforeAfter() {
         headers: { "Content-Type": "application/json" },
         signal,
       });
+      if (createRes.status === 405) {
+        setError(DEMO_API_WRONG_ORIGIN_MSG);
+        setPhase("idle");
+        setActiveStep(0);
+        return;
+      }
       if (!createRes.ok) {
         const data = await createRes.json().catch(() => ({}));
-        const msg = data?.error ?? `Create failed: ${createRes.status}`;
+        const msg = (data as { error?: string }).error ?? `Create failed: ${createRes.status}`;
         throw new Error(msg);
       }
-      const createData = await createRes.json();
-      if (!createData.ok || !createData.tid) throw new Error("Invalid create response");
+      const createData = await createRes.json() as { ok?: boolean; tid?: string };
+      if (!createData?.ok || !createData.tid) {
+        setError("Invalid create response. Please try again.");
+        setPhase("idle");
+        setActiveStep(0);
+        return;
+      }
       tid = createData.tid;
 
       const scanRes = await fetch(`${base}/demo/scan`, {
@@ -105,10 +118,22 @@ export default function DemoBeforeAfter() {
         body: JSON.stringify({ tid }),
         signal,
       });
+      const scanData = await scanRes.json().catch(() => ({})) as { ok?: boolean; error?: string };
+      if (scanRes.status === 405) {
+        setError(DEMO_API_WRONG_ORIGIN_MSG);
+        setPhase("idle");
+        setActiveStep(0);
+        return;
+      }
       if (!scanRes.ok) {
-        const data = await scanRes.json().catch(() => ({}));
-        const msg = data?.error ?? `Scan failed: ${scanRes.status}`;
-        throw new Error(msg);
+        if (scanData?.error === "tid required") {
+          setError("Demo bug: scan requires tid. Please try again.");
+        } else {
+          setError(scanData?.error ?? `Scan failed: ${scanRes.status}`);
+        }
+        setPhase("idle");
+        setActiveStep(0);
+        return;
       }
     } catch (e) {
       if (signal.aborted) return;

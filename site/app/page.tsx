@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import DemoSection from "./components/DemoSection";
+import DemoBeforeAfter from "./components/DemoBeforeAfter";
 
 export const metadata: Metadata = {
   title: "Suqram — Magic links that survive Safe Links and security scanners",
@@ -51,8 +51,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Two-link demo: unprotected (expired) vs protected (success) */}
-      <DemoSection />
+      {/* Before / After demo: contained simulator, no navigation away */}
+      <DemoBeforeAfter />
 
       {/* Empty dashboard teaser */}
       <section className="pt-20 sm:pt-24 pb-24 sm:pb-32" aria-label="Product preview">

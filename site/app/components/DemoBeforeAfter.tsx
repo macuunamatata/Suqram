@@ -3,21 +3,22 @@
 import { useState, useCallback, useEffect } from "react";
 import { getRailBaseUrl } from "@/lib/railBase";
 
+type Mode = "unprotected" | "protected";
 type Phase = "idle" | "scanning" | "scanned" | "user";
-type VisibleSteps = 0 | 1 | 2;
+type VisibleRows = 0 | 1 | 2 | 3;
 
-const UNPROTECTED_PILL = "app.example.com/auth/verify?token=••••••••••••";
-const PROTECTED_PILL = "go.suqram.com/r/••••••••••••";
+const UNPROTECTED_URL = "https://app.example.com/auth/verify?token=••••••••••••";
+const PROTECTED_URL = "https://go.suqram.com/r/••••••••••••";
 
-const STEP1_MS = 200;
-const STEP2_MS = 650;
-const SCAN_DONE_MS = 1450;
-const JUST_ENABLED_PULSE_MS = 600;
+const ROW1_MS = 250;
+const ROW2_MS = 700;
+const SCAN_DONE_MS = 1500;
+const JUST_ENABLED_MS = 600;
 
 export default function DemoBeforeAfter() {
+  const [mode, setMode] = useState<Mode>("protected");
   const [phase, setPhase] = useState<Phase>("idle");
-  const [visibleSteps, setVisibleSteps] = useState<VisibleSteps>(0);
-  const [openAsUser, setOpenAsUser] = useState(false);
+  const [visibleRows, setVisibleRows] = useState<VisibleRows>(0);
   const [error, setError] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [justEnabledUserBtn, setJustEnabledUserBtn] = useState(false);
@@ -32,14 +33,14 @@ export default function DemoBeforeAfter() {
 
   useEffect(() => {
     if (!justEnabledUserBtn) return;
-    const t = setTimeout(() => setJustEnabledUserBtn(false), JUST_ENABLED_PULSE_MS);
+    const t = setTimeout(() => setJustEnabledUserBtn(false), JUST_ENABLED_MS);
     return () => clearTimeout(t);
   }, [justEnabledUserBtn]);
 
   const runScannerPreOpen = useCallback(async () => {
     setError(null);
     setPhase("scanning");
-    setVisibleSteps(0);
+    setVisibleRows(0);
 
     const base = getRailBaseUrl();
     let tid: string | null = null;
@@ -69,19 +70,19 @@ export default function DemoBeforeAfter() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Request failed");
       setPhase("idle");
-      setVisibleSteps(0);
+      setVisibleRows(0);
       return;
     }
 
     if (prefersReducedMotion) {
-      setVisibleSteps(2);
+      setVisibleRows(2);
       setPhase("scanned");
       setJustEnabledUserBtn(true);
       return;
     }
 
-    const t1 = setTimeout(() => setVisibleSteps(1), STEP1_MS);
-    const t2 = setTimeout(() => setVisibleSteps(2), STEP2_MS);
+    const t1 = setTimeout(() => setVisibleRows(1), ROW1_MS);
+    const t2 = setTimeout(() => setVisibleRows(2), ROW2_MS);
     const t3 = setTimeout(() => {
       setPhase("scanned");
       setJustEnabledUserBtn(true);
@@ -95,109 +96,118 @@ export default function DemoBeforeAfter() {
 
   const openAsUserClick = useCallback(() => {
     setPhase("user");
-    setOpenAsUser(true);
-  }, []);
+    if (prefersReducedMotion) {
+      setVisibleRows(3);
+    } else {
+      setTimeout(() => setVisibleRows(3), 100);
+    }
+  }, [prefersReducedMotion]);
 
   const resetDemo = useCallback(() => {
     setPhase("idle");
-    setVisibleSteps(0);
-    setOpenAsUser(false);
+    setVisibleRows(0);
     setError(null);
   }, []);
 
+  const previewUrl = mode === "unprotected" ? UNPROTECTED_URL : PROTECTED_URL;
+
   return (
-    <section id="demo" className="demo-before-after py-20 sm:py-24" aria-label="Before / After demo">
+    <section id="demo" className="demo-before-after py-20 sm:py-24" aria-label="Email link demo">
       <div
-        className="mx-auto w-full max-w-[1000px] px-4 sm:px-6"
+        className="mx-auto w-full max-w-[640px] px-4 sm:px-6"
         data-phase={phase}
+        data-mode={mode}
       >
         <h2 className="section-h2 text-center">
           Watch a scanner burn a token — then see it fail.
         </h2>
         <p className="mt-3 text-center text-[var(--text2)] max-w-xl mx-auto">
-          Simulate a security scanner pre-open. Compare unprotected vs protected links side-by-side.
+          Simulate a security scanner pre-open. Compare unprotected vs protected links.
         </p>
 
-        <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 min-h-[320px]">
-          {/* Before (Unprotected) */}
-          <div className="demo-column rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 flex flex-col transition-[border-color,box-shadow] duration-200 ease-out">
-            <h3 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide">
-              Before (Unprotected)
-            </h3>
-            <div className="mt-6 flex-1 flex flex-col">
-              <div className="demo-link-pill relative overflow-hidden">
-                <span className="demo-pill-text font-mono text-sm sm:text-base text-[var(--text2)] truncate relative z-[1]">
-                  {UNPROTECTED_PILL}
-                </span>
-                <span className="demo-pill-sheen" aria-hidden="true" />
-                <span className="demo-pill-orb" aria-hidden="true" />
-              </div>
-              <div className="mt-6 demo-timeline flex flex-col gap-3">
-                <div className={`demo-timeline-item ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot" />
-                  <span>Scanner opened the link</span>
-                </div>
-                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-red demo-timeline-dot-outcome" />
-                  <span className="text-[var(--error-muted)]">Token consumed</span>
-                </div>
-                <div className={`demo-timeline-item ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot" />
-                  <span>User clicks the link</span>
-                </div>
-                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-x demo-timeline-dot-outcome" aria-hidden>×</span>
-                  <span className="text-[var(--error-muted)]">Link expired</span>
-                </div>
-              </div>
-              {openAsUser && (
-                <div className="demo-status-card demo-status-card-error mt-6" role="status">
-                  <span className="demo-status-icon demo-status-icon-x" aria-hidden>×</span>
-                  <span>Link expired</span>
-                </div>
-              )}
-            </div>
+        {/* Mode toggle — no boxes */}
+        <div className="mt-10 flex justify-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMode("unprotected")}
+            disabled={phase !== "idle"}
+            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              mode === "unprotected"
+                ? "bg-[rgba(255,255,255,0.08)] text-[var(--text)]"
+                : "text-[var(--muted)] hover:text-[var(--text2)]"
+            } ${phase !== "idle" ? "opacity-60 cursor-not-allowed" : ""}`}
+          >
+            Unprotected
+          </button>
+          <span className="text-[var(--muted)] self-center px-1" aria-hidden>|</span>
+          <button
+            type="button"
+            onClick={() => setMode("protected")}
+            disabled={phase !== "idle"}
+            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+              mode === "protected"
+                ? "bg-[var(--accent-dim)] text-[var(--accent)]"
+                : "text-[var(--muted)] hover:text-[var(--text2)]"
+            } ${phase !== "idle" ? "opacity-60 cursor-not-allowed" : ""}`}
+          >
+            Protected by Suqram
+          </button>
+        </div>
+
+        {/* Email snippet + event log in one relative container for packet positioning */}
+        <div className="relative mt-8">
+          <div className="demo-email-line">
+          <p className="text-[var(--text2)] text-sm">Your sign-in link is ready.</p>
+          <div className="mt-3 flex flex-col items-start gap-1">
+            <button
+              type="button"
+              className="demo-real-link relative inline-block text-left"
+              aria-disabled={phase !== "idle" && phase !== "user"}
+              tabIndex={phase === "scanning" || phase === "scanned" ? -1 : 0}
+            >
+              <span className="relative z-[1]">Sign in to Example</span>
+              <span className="demo-sweep" aria-hidden />
+            </button>
+            <p className="text-xs font-mono text-[var(--muted)] truncate max-w-full" title={previewUrl}>
+              {previewUrl}
+            </p>
+          </div>
           </div>
 
-          {/* After (Protected by Suqram) */}
-          <div className="demo-column demo-column-right rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 flex flex-col border-[var(--accent-dim)] transition-[border-color,box-shadow] duration-200 ease-out">
-            <h3 className="text-sm font-medium text-[var(--accent)] uppercase tracking-wide">
-              After (Protected by Suqram)
-            </h3>
-            <div className="mt-6 flex-1 flex flex-col">
-              <div className="demo-link-pill demo-link-pill-right relative overflow-hidden">
-                <span className="demo-pill-text font-mono text-sm sm:text-base text-[var(--text2)] truncate relative z-[1]">
-                  {PROTECTED_PILL}
-                </span>
-                <span className="demo-pill-sheen" aria-hidden="true" />
-                <span className="demo-pill-orb" aria-hidden="true" />
-              </div>
-              <div className="mt-6 demo-timeline flex flex-col gap-3">
-                <div className={`demo-timeline-item ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot" />
-                  <span>Scanner opened the link</span>
-                </div>
-                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-green demo-timeline-dot-outcome" />
-                  <span className="text-[var(--accent)]">No token consumed</span>
-                </div>
-                <div className={`demo-timeline-item ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot" />
-                  <span>User clicks the link</span>
-                </div>
-                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-check demo-timeline-dot-outcome" aria-hidden>✓</span>
-                  <span className="text-[var(--accent)]">Still valid</span>
-                </div>
-              </div>
-              {openAsUser && (
-                <div className="demo-status-card demo-status-card-success mt-6" role="status">
-                  <span className="demo-status-icon demo-status-icon-check" aria-hidden>✓</span>
-                  <span>Success — user redeemed</span>
-                </div>
-              )}
-            </div>
+          {/* Packet(s) — scan: drop to row 1 then row 2; user: drop to row 3 */}
+          {phase === "scanning" && <span className="demo-packet demo-packet-scan" aria-hidden />}
+          {phase === "user" && <span className="demo-packet demo-packet-user" aria-hidden />}
+
+          {/* Event log — inline, not boxed */}
+          <div className="demo-event-log mt-8 space-y-2">
+          <div className={`demo-event-row ${visibleRows >= 1 ? "demo-event-row-visible" : ""}`}>
+            <span className="demo-event-dot" />
+            <span className="flex-1 text-sm text-[var(--text2)]">Scanner request detected</span>
+            {visibleRows >= 1 && (
+              <span className="demo-event-ok text-sm" aria-hidden>✓</span>
+            )}
           </div>
+          <div className={`demo-event-row ${visibleRows >= 2 ? "demo-event-row-visible" : ""}`}>
+            <span className="demo-event-dot" />
+            <span className="flex-1 text-sm text-[var(--text2)]">Token redemption attempt</span>
+            {visibleRows >= 2 && mode === "unprotected" && (
+              <span className="demo-event-bad text-sm">Token consumed ×</span>
+            )}
+            {visibleRows >= 2 && mode === "protected" && (
+              <span className="demo-event-ok text-sm">No redemption (blocked) ✓</span>
+            )}
+          </div>
+          <div className={`demo-event-row ${visibleRows >= 3 ? "demo-event-row-visible" : ""}`}>
+            <span className="demo-event-dot" />
+            <span className="flex-1 text-sm text-[var(--text2)]">User click</span>
+            {visibleRows >= 3 && mode === "unprotected" && (
+              <span className="demo-event-bad text-sm">Link expired ×</span>
+            )}
+            {visibleRows >= 3 && mode === "protected" && (
+              <span className="demo-event-ok text-sm">Redeemed successfully ✓</span>
+            )}
+          </div>
+        </div>
         </div>
 
         {error && (
@@ -206,46 +216,42 @@ export default function DemoBeforeAfter() {
           </p>
         )}
 
-        <div className="mt-10 flex flex-col items-center gap-4">
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={runScannerPreOpen}
-              disabled={phase === "scanning"}
-              className="demo-btn-primary min-w-[200px]"
-            >
-              {phase === "scanning" ? (
-                <>
-                  <span>Running scan</span>
-                  <span className="demo-btn-dots" aria-hidden>
-                    <span /><span /><span />
-                  </span>
-                </>
-              ) : (
-                "Run scanner pre-open"
-              )}
-            </button>
-            <button
-              type="button"
-              onClick={openAsUserClick}
-              disabled={phase !== "scanned"}
-              className={`demo-btn-secondary min-w-[200px] ${justEnabledUserBtn ? "demo-just-enabled" : ""}`}
-            >
-              Open as user
-            </button>
-            {(phase === "scanned" || phase === "user") && (
-              <button
-                type="button"
-                onClick={resetDemo}
-                className="demo-btn-ghost min-w-[120px]"
-              >
-                Reset
-              </button>
+        {/* Buttons — minimal, no big container */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={runScannerPreOpen}
+            disabled={phase === "scanning"}
+            className="demo-btn-primary min-w-[180px]"
+          >
+            {phase === "scanning" ? (
+              <>
+                <span>Running scan</span>
+                <span className="demo-btn-dots" aria-hidden>
+                  <span /><span /><span />
+                </span>
+              </>
+            ) : (
+              "Run scanner pre-open"
             )}
-          </div>
-          <div className="demo-progress w-full max-w-[420px]">
-            <div className="demo-progress-fill" />
-          </div>
+          </button>
+          <button
+            type="button"
+            onClick={openAsUserClick}
+            disabled={phase !== "scanned"}
+            className={`demo-btn-secondary min-w-[140px] ${justEnabledUserBtn ? "demo-just-enabled" : ""}`}
+          >
+            Click as user
+          </button>
+          {(phase === "scanned" || phase === "user") && (
+            <button
+              type="button"
+              onClick={resetDemo}
+              className="demo-btn-ghost min-w-[80px]"
+            >
+              Reset
+            </button>
+          )}
         </div>
       </div>
     </section>

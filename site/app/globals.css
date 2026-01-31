@@ -424,7 +424,121 @@ h3 {
     position: relative;
   }
 
-  /* Demo Before/After: link pill — masked URL, glow, gradient border, hover sheen */
+  /* Demo: email-like link + event log (no boxes) */
+  .demo-real-link {
+    color: #2b7cff;
+    text-decoration: underline;
+    font-size: 1rem;
+    font-weight: 400;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: color var(--duration-ui) var(--ease-out-smooth),
+      text-decoration-thickness var(--duration-ui) var(--ease-out-smooth),
+      transform var(--duration-ui) var(--ease-out-smooth);
+  }
+  .demo-real-link:hover {
+    color: #1a6ad4;
+    text-decoration-thickness: 2px;
+  }
+  .demo-real-link:active {
+    transform: translateY(1px);
+  }
+  .demo-email-line {
+    color: var(--text2);
+  }
+  .demo-sweep {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      transparent 40%,
+      rgba(255, 255, 255, 0.18) 50%,
+      transparent 60%,
+      transparent 100%
+    );
+    background-size: 50% 100%;
+    background-repeat: no-repeat;
+    background-position: -100% 0;
+    opacity: 0;
+  }
+  [data-phase="scanning"] .demo-sweep {
+    animation: demoLinkSweep 800ms var(--ease-out-smooth) forwards;
+  }
+  .demo-packet {
+    position: absolute;
+    left: 0.5rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+  }
+  .demo-packet-scan {
+    top: 2.25rem;
+  }
+  [data-phase="scanning"] .demo-packet-scan {
+    animation: demoPacketDropScan 1400ms var(--ease-out-smooth) forwards;
+  }
+  .demo-packet-user {
+    top: 2.25rem;
+  }
+  [data-phase="user"] .demo-packet-user {
+    animation: demoPacketDropUser 600ms var(--ease-out-smooth) forwards;
+  }
+  [data-phase="user"] .demo-real-link {
+    animation: demoTapLink 280ms var(--ease-out-smooth) both;
+  }
+  .demo-event-log {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .demo-event-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 1.5rem;
+    opacity: 0.4;
+    transform: translateY(4px);
+    transition: opacity 0.3s var(--ease-out-smooth), transform 0.3s var(--ease-out-smooth);
+  }
+  .demo-event-row.demo-event-row-visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: demoRowIn 0.3s var(--ease-out-smooth) both;
+  }
+  .demo-event-dot {
+    flex-shrink: 0;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+  }
+  .demo-event-row.demo-event-row-visible .demo-event-dot {
+    animation: demoDotPop 0.25s var(--ease-out-smooth) both;
+  }
+  .demo-event-ok {
+    color: #1eb8b0;
+    font-weight: 500;
+  }
+  .demo-event-bad {
+    color: rgba(220, 100, 100, 0.95);
+    font-weight: 500;
+  }
+
+  /* Demo Before/After: link pill — masked URL, glow, gradient border, hover sheen (legacy) */
   .demo-link-pill {
     position: relative;
     display: inline-flex;
@@ -635,6 +749,31 @@ h3 {
   }
 
   /* Demo keyframes — scan sweep, orb, pulse, tap, shake, dots, dot pop, soft in */
+  @keyframes demoLinkSweep {
+    from { background-position: -100% 0; opacity: 0; }
+    10% { opacity: 1; }
+    to { background-position: 200% 0; opacity: 1; }
+  }
+  @keyframes demoPacketDropScan {
+    0% { opacity: 0; transform: translateY(0); }
+    10% { opacity: 1; }
+    45% { opacity: 1; transform: translateY(2.5rem); }
+    55% { opacity: 1; transform: translateY(2.5rem); }
+    100% { opacity: 1; transform: translateY(5rem); }
+  }
+  @keyframes demoPacketDropUser {
+    0% { opacity: 0; transform: translateY(0); }
+    15% { opacity: 1; }
+    100% { opacity: 1; transform: translateY(7rem); }
+  }
+  @keyframes demoRowIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes demoTapLink {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
   @keyframes demoDots {
     0%, 100% { opacity: 0.35; }
     50% { opacity: 1; }
@@ -879,6 +1018,28 @@ h3 {
       animation: none !important;
     }
     .demo-btn-secondary.demo-just-enabled {
+      animation: none !important;
+    }
+    /* Email-link demo: no sweep, no packet, no row animation, no link tap */
+    .demo-sweep {
+      animation: none !important;
+      opacity: 0;
+    }
+    .demo-packet-scan,
+    .demo-packet-user {
+      animation: none !important;
+      opacity: 0;
+    }
+    [data-phase="user"] .demo-real-link {
+      animation: none !important;
+    }
+    .demo-event-row {
+      transition: none;
+    }
+    .demo-event-row.demo-event-row-visible {
+      animation: none !important;
+    }
+    .demo-event-row.demo-event-row-visible .demo-event-dot {
       animation: none !important;
     }
   }

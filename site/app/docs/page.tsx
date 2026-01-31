@@ -15,6 +15,12 @@ export default function DocsPage() {
           Get the rail running locally or with Supabase in under 15 minutes.
         </p>
 
+        <p className="mt-6">
+          <a href="/docs/supabase" className="link-accent text-sm">
+            Supabase setup guide →
+          </a>
+        </p>
+
         <section id="quickstart" className="mt-14">
           <h2 className="text-xl font-semibold text-[var(--text)]">Quickstart</h2>
 

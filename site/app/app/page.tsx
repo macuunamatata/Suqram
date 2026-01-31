@@ -55,18 +55,41 @@ function DashboardContent() {
               Dashboard
             </h1>
             <p className="mt-2 text-[var(--muted)]">
-              Connect your domain and deploy in minutes.
+              Create your site and get a protected link format for Supabase.
             </p>
           </div>
+          <div className="flex items-center gap-3 shrink-0">
+            <a
+              href="/docs/supabase"
+              className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+            >
+              Docs
+            </a>
+            <a
+              href={logoutUrl}
+              className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+            >
+              Sign out
+            </a>
+          </div>
+        </div>
+
+        <div className="mt-12 card card-gradient-top border-[var(--accent)]/20 p-6 sm:p-8">
+          <h2 className="text-lg font-semibold text-[var(--text)]">
+            Create site
+          </h2>
+          <p className="mt-2 text-sm text-[var(--muted)]">
+            Connect your domain and we&apos;ll give you a protected link format to paste into Supabase email templates.
+          </p>
           <a
-            href={logoutUrl}
-            className="shrink-0 text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+            href="/docs/supabase"
+            className="btn-hero mt-6 inline-flex w-full justify-center sm:w-auto"
           >
-            Sign out
+            Connect domain
           </a>
         </div>
 
-        <ol className="mt-12 space-y-6">
+        <ol className="mt-10 space-y-6">
           <li className="flex gap-4">
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[var(--accent-dim)] text-sm font-semibold text-[var(--accent)]">
               1
@@ -85,7 +108,7 @@ function DashboardContent() {
             <div>
               <p className="font-medium text-[var(--text)]">Set secret / allowlist</p>
               <p className="mt-1 text-sm text-[var(--muted)]">
-                Configure allowed destination hosts and optional SAT.
+                Configure allowed destination hosts in the worker.
               </p>
             </div>
           </li>
@@ -101,6 +124,11 @@ function DashboardContent() {
             </div>
           </li>
         </ol>
+        <p className="mt-8">
+          <a href="/docs/supabase" className="link-accent text-sm">
+            Supabase setup guide →
+          </a>
+        </p>
       </div>
     </div>
   );

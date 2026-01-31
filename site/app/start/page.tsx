@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import StartPageContent from "./StartPageContent";
 
 export const metadata: Metadata = {
-  title: "Integrate — Auth Link Rail",
-  description: "Generate protected links and paste into Supabase. Run the inbox test first.",
+  title: "Create your site — Suqram",
+  description: "Enter your access token to continue to the dashboard.",
 };
 
 /** Static default so /start prerenders; client reads ?next= from URL. */

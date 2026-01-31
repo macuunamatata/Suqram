@@ -70,7 +70,7 @@ export default function HomePage() {
                 Try the demo
               </Link>
               <Link href="/app" className="btn-secondary text-sm">
-                Deploy in 5 minutes
+                Deploy free
               </Link>
             </div>
             <div className="mt-8 flex flex-wrap gap-2">
@@ -150,46 +150,20 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Quickstart */}
-      <section className={SECTION_PY} id="quickstart" aria-label="Quickstart">
+      {/* Deploy free */}
+      <section className={SECTION_PY} id="quickstart" aria-label="Deploy">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
-            Deploy in &lt;5 minutes.
+            Deploy free in minutes
           </h2>
-          <div className="mt-12 max-w-xl mx-auto space-y-6">
-            <div className="flex gap-4">
-              <span className="shrink-0 w-8 h-8 rounded-full bg-[var(--accent-dim)] text-[var(--accent)] flex items-center justify-center text-sm font-semibold">
-                1
-              </span>
-              <div>
-                <p className="text-sm font-medium text-[var(--text)]">Point your link domain (go.yourapp.com) to Suqram</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <span className="shrink-0 w-8 h-8 rounded-full bg-[var(--accent-dim)] text-[var(--accent)] flex items-center justify-center text-sm font-semibold">
-                2
-              </span>
-              <div>
-                <p className="text-sm font-medium text-[var(--text)]">Set your allowlist / secret</p>
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <span className="shrink-0 w-8 h-8 rounded-full bg-[var(--accent-dim)] text-[var(--accent)] flex items-center justify-center text-sm font-semibold">
-                3
-              </span>
-              <div>
-                <p className="text-sm font-medium text-[var(--text)]">Swap one line in your auth email template</p>
-              </div>
-            </div>
-          </div>
-          <div className="mt-10 max-w-2xl mx-auto">
-            <pre className="surface p-4 sm:p-6 text-xs sm:text-sm font-mono text-[var(--text2)] overflow-x-auto">
-              <code>{`https://go.suqram.com/r/\${token}#u=\${encodeURIComponent(yourSuccessUrl)}`}</code>
-            </pre>
-          </div>
-          <p className="mt-6 text-center text-sm text-[var(--muted)]">
-            <Link href="/docs" className="link-accent">Docs</Link> for full setup.
+          <p className={`${SECTION_SUB} mt-4`}>
+            After you try the demo, create your site and we&apos;ll give you a protected link format to paste into Supabase email templates.
           </p>
+          <div className="mt-10 flex justify-center">
+            <Link href="/app" className="btn-hero">
+              Deploy free
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -205,8 +179,8 @@ export default function HomePage() {
                 <p className="text-sm font-semibold text-[var(--accent)]">Free</p>
                 <p className="mt-2 text-sm text-[var(--text2)]">1K redemptions / month — $0</p>
                 <p className="mt-1 text-xs text-[var(--muted)]">Get started</p>
-                <Link href="/start" className="btn-primary mt-6 w-full justify-center text-sm">
-                  Start free
+                <Link href="/app" className="btn-primary mt-6 w-full justify-center text-sm">
+                  Deploy free
                 </Link>
               </div>
               <div className="rounded-xl border border-[var(--border)] bg-[rgba(255,255,255,0.02)] p-6 flex flex-col">

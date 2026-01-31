@@ -2302,7 +2302,7 @@ async function handleDashboardLogin(request: Request, env: Env): Promise<Respons
   const isHttps = url.protocol === 'https:';
   
   if (!sat) {
-    const html = generateDashboardLoginHTML(hostname, 'Missing Site Access Token', isLocalDev, isHttps);
+    const html = generateDashboardLoginHTML(hostname, 'Missing access token', isLocalDev, isHttps);
     return new Response(html, {
       status: 400,
       headers: { 'Content-Type': 'text/html' },
@@ -2312,7 +2312,7 @@ async function handleDashboardLogin(request: Request, env: Env): Promise<Respons
   // Verify SAT
   const { site, error } = await verifySat(request, env, sat);
   if (!site) {
-    const html = generateDashboardLoginHTML(hostname, 'Invalid Site Access Token', isLocalDev, isHttps);
+    const html = generateDashboardLoginHTML(hostname, 'Invalid access token', isLocalDev, isHttps);
     const response = new Response(html, {
       status: 401,
       headers: { 'Content-Type': 'text/html' },
@@ -2521,16 +2521,16 @@ function generateDashboardLoginHTML(hostname: string, error?: string, isLocalDev
 <body>
   <div class="card">
     <h1>Site Dashboard</h1>
-    <p class="subtitle">Enter your Site Access Token to continue</p>
+    <p class="subtitle">Enter your access token to continue</p>
     ${error ? `<div class="error">${error}</div>` : ''}
     <form method="POST" action="/app/login">
-      <label for="sat">Site Access Token</label>
-      <input type="text" id="sat" name="sat" placeholder="Enter your SAT" required autofocus>
+      <label for="sat">Access token</label>
+      <input type="text" id="sat" name="sat" placeholder="Enter your access token" required autofocus>
       <button type="submit">Login</button>
     </form>
     ${isLocalDev ? `<div style="margin-top: 20px; padding: 10px; background: #e3f2fd; border-radius: 4px; font-size: 12px; color: #1976d2; font-family: monospace;">Host: ${hostname} | HTTPS: ${isHttps ? 'true' : 'false'}</div>` : ''}
     <div class="hint">
-      Your Site Access Token (SAT) was provided when this site was created via the Admin API. 
+      Your access token was provided when this site was created via the Admin API.
       Contact your administrator if you need a new token.
     </div>
   </div>

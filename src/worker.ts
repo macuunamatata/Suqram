@@ -2353,6 +2353,27 @@ function parseAndValidateNext(nextRaw: string | null, request: Request): string 
   return fallback;
 }
 
+/** Build dashboard redirect URL for create-site 200 JSON (Pages site origin, not Worker). */
+function getCreateSiteRedirectTo(nextRaw: string | null, request: Request): string {
+  const defaultOrigin = 'https://suqram.com';
+  const fallback = `${defaultOrigin}/app`;
+  if (!nextRaw || typeof nextRaw !== 'string') return fallback;
+  const s = nextRaw.trim();
+  if (!s) return fallback;
+  if (s.startsWith('/') && !s.startsWith('//')) {
+    const origin = request.headers.get('Origin');
+    const base = origin && ALLOWED_REDIRECT_ORIGINS.includes(origin) ? origin : defaultOrigin;
+    return `${base}${s}`;
+  }
+  try {
+    const u = new URL(s);
+    if (ALLOWED_REDIRECT_ORIGINS.some(origin => u.origin === origin)) return u.toString();
+  } catch {
+    // ignore
+  }
+  return fallback;
+}
+
 async function handleDashboardLogin(request: Request, env: Env): Promise<Response> {
   const formData = await request.formData();
   const sat = formData.get('sat') as string | null;
@@ -2402,7 +2423,7 @@ async function handleDashboardLogin(request: Request, env: Env): Promise<Respons
 
 /**
  * POST /app/create-site - Create first site without token (signup flow).
- * Generates a unique hostname, creates site via DO, sets session cookie, redirects to next.
+ * Returns 200 JSON { ok: true, redirect_to } with Set-Cookie; client navigates to redirect_to.
  */
 async function handleCreateSite(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url);
@@ -2457,15 +2478,18 @@ async function handleCreateSite(request: Request, env: Env): Promise<Response> {
   const sessionValue = `${site.siteId}:${site.hostname}`;
   const cookieDomain = (hostname === 'go.suqram.com') ? 'suqram.com' : undefined;
   const sessionCookie = buildSecureCookie('site_session', sessionValue, 604800, request, { domain: cookieDomain });
-  const redirectUrl = parseAndValidateNext(nextRaw, request);
+  const redirectTo = getCreateSiteRedirectTo(nextRaw, request);
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      'Location': redirectUrl,
-      'Set-Cookie': sessionCookie,
-    },
-  });
+  return new Response(
+    JSON.stringify({ ok: true, redirect_to: redirectTo }),
+    {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Set-Cookie': sessionCookie,
+      },
+    }
+  );
 }
 
 async function handleDashboardLogout(request: Request, env: Env): Promise<Response> {

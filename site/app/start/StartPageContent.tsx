@@ -65,12 +65,7 @@ export default function StartPageContent({ defaultNext }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ next: nextFull }),
           credentials: "include",
-          redirect: "manual",
         });
-        if (res.type === "opaqueredirect" || res.status === 302) {
-          window.location.href = nextPath;
-          return;
-        }
         if (!res.ok) {
           const text = await res.text();
           let errMsg: string;
@@ -84,7 +79,12 @@ export default function StartPageContent({ defaultNext }: Props) {
           setCreateSubmitting(false);
           return;
         }
-        window.location.href = nextPath;
+        const data = (await res.json()) as { ok?: boolean; redirect_to?: string };
+        const redirectTo =
+          data?.redirect_to && typeof data.redirect_to === "string"
+            ? data.redirect_to
+            : `${getSiteOrigin()}${nextPath}`;
+        window.location.href = redirectTo;
       } catch (e) {
         const message = e instanceof Error ? e.message : "Request failed";
         const isFailedToFetch = message === "Failed to fetch";

@@ -2,28 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Domained-style green-charcoal dark theme — color grading, grid, vignette, soft-white typography. */
+/* Ocean reliable theme — one smooth gradient, crisp text, glassy surfaces. */
 :root {
-  /* Base palette — green-tinted charcoal (not blue/neutral) */
-  --bg: #070A0B;
-  --bg2: #0A0F10;
-  --surface: #0C1415;
-  --surface2: #0E1718;
-  --border: rgba(255, 255, 255, 0.08);
-  --grid: rgba(255, 255, 255, 0.035); /* extremely subtle; never compete with text */
-
-  /* Typography — soft white, not pure */
-  --text: #E3E6E6;
-  --text2: rgba(227, 230, 230, 0.72);   /* muted paragraph */
-  --muted: rgba(227, 230, 230, 0.55);
+  /* Ocean palette */
+  --bg0: #06131a;
+  --bg1: #071b23;
+  --bg2: #0a2730;
+  --bg: var(--bg0);
+  --surface: var(--bg1);
+  --surface2: var(--bg2);
+  --border: rgba(255, 255, 255, 0.06);
+  --text: #eaf6f7;
+  --text2: rgba(234, 246, 247, 0.72);
+  --muted: rgba(234, 246, 247, 0.55);
 
   /* Accent (cyan) & warn */
-  --accent: #06B6D4;
+  --accent: #25e6d6;
   --warn: #EA840C;
-  --ctaBg: #ECFEFF;   /* off-white, cyan tint */
-  --ctaText: #070A0B;
+  --ctaBg: #e8fdfc;
+  --ctaText: #06131a;
 
-  /* Spacing rhythm: 8/12/16/24/32/48/72 */
+  /* Spacing rhythm */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -33,27 +32,25 @@
   --space-12: 3rem;
   --space-18: 4.5rem;
 
-  /* Aliases for components (derived from base palette) */
+  /* Aliases */
   --panel: var(--surface);
   --card: var(--surface2);
   --surface-elevated: var(--surface2);
-  --border-strong: rgba(255, 255, 255, 0.10);
-  --grid-line: var(--grid);
+  --border-strong: rgba(255, 255, 255, 0.09);
   --text-heading: var(--text);
   --text-muted: var(--muted);
   --text-muted-strong: var(--text2);
   --muted-strong: var(--text2);
-  --accent-dim: rgba(6, 182, 212, 0.12);
-  --accent-focus: rgba(6, 182, 212, 0.25);
-  --accent-glow: rgba(6, 182, 212, 0.35);
+  --accent-dim: rgba(37, 230, 214, 0.12);
+  --accent-focus: rgba(37, 230, 214, 0.22);
+  --accent-glow: rgba(37, 230, 214, 0.18);
   --warn-dim: rgba(234, 132, 12, 0.12);
   --error-muted: rgba(248, 113, 113, 0.9);
   --cta-bg: var(--ctaBg);
   --cta-text: var(--ctaText);
-  --cta-hover-bg: #E6E8E7;
+  --cta-hover-bg: #d8faf8;
   --ring: var(--accent);
 
-  /* Motion — premium easing; overridden by reduced-motion */
   --ease-out-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
   --duration-ui: 200ms;
 }
@@ -64,60 +61,65 @@
   }
 }
 
+html {
+  min-height: 100%;
+}
+
 body {
   color: var(--text);
-  background: linear-gradient(180deg, #070A0B 0%, #0A0E10 50%, #070A0B 100%);
+  background: linear-gradient(180deg, var(--bg0) 0%, var(--bg1) 40%, var(--bg2) 100%);
   background-attachment: fixed;
   min-height: 100vh;
-  overflow-x: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  position: relative;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(ellipse 80% 50% at 50% 20%, rgba(37, 230, 214, 0.08) 0%, transparent 55%);
+  opacity: 1;
+}
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
-/* Heading hierarchy — consistent sizes and weights */
+/* Heading hierarchy — crisp, no clipping */
 h1, h2, h3 {
   color: var(--text-heading);
   font-weight: 700;
+  line-height: 1.1;
 }
 
 h1 {
   letter-spacing: -0.03em;
-  line-height: 1.08;
   font-size: clamp(2rem, 5vw + 1rem, 3.75rem);
 }
 
 h2 {
   letter-spacing: -0.02em;
-  line-height: 1.2;
   font-size: clamp(1.5rem, 2.5vw + 0.5rem, 1.875rem);
 }
 
 h3 {
   letter-spacing: -0.01em;
-  line-height: 1.3;
   font-size: 1.125rem;
 }
 
-/* Hero H1 — soft-white via gradient + subtle depth; not pure white */
+/* Hero H1 — solid color for reliable rendering */
 .hero-h1 {
   font-weight: 500;
   letter-spacing: -0.025em;
   line-height: 1.1;
   font-size: clamp(2.25rem, 5.5vw + 1rem, 3.75rem);
   max-width: 60ch;
-  background: linear-gradient(#E8ECEC, #C9D0D0);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
-}
-/* Fallback when gradient clip not supported */
-@supports not (background-clip: text) {
-  .hero-h1 {
-    color: var(--text);
-    background: none;
-  }
+  color: var(--text);
 }
 
 /* Hero body — paragraph uses var(--text2) */
@@ -139,37 +141,49 @@ h3 {
   line-height: 1.6;
 }
 
-/* Section H2 — domained: 36px, weight 500 */
+/* Section H2 */
 .section-h2 {
   font-size: 1.875rem;
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.1;
   color: var(--text-heading);
 }
 @media (min-width: 640px) {
   .section-h2 {
-    font-size: 2.25rem; /* 36px */
+    font-size: 2.25rem;
   }
 }
 
 @layer components {
-  /* Cards: glass — transparent over dark, subtle border, inner highlight; hover minimal */
+  /* Surface — glassy, no metallic borders */
+  .surface {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transition: border-color var(--duration-ui) var(--ease-out-smooth), box-shadow var(--duration-ui) var(--ease-out-smooth);
+  }
+  .surface:hover {
+    border-color: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(37, 230, 214, 0.08);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .surface {
+      transition: none;
+    }
+  }
+
   .card {
-    transition: color var(--duration-ui) var(--ease-out-smooth),
-      background-color var(--duration-ui) var(--ease-out-smooth),
-      border-color var(--duration-ui) var(--ease-out-smooth),
-      box-shadow var(--duration-ui) var(--ease-out-smooth),
-      transform var(--duration-ui) var(--ease-out-smooth);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.03) 100%), var(--bg2);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    transition: border-color var(--duration-ui) var(--ease-out-smooth), box-shadow var(--duration-ui) var(--ease-out-smooth);
   }
   .card:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-    transform: translateY(-1px);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(37, 230, 214, 0.08);
   }
   @media (prefers-reduced-motion: reduce) {
     .card:hover {
@@ -177,18 +191,18 @@ h3 {
     }
   }
   .card-padded {
-    padding: 1rem 1.125rem; /* 16–18 mobile */
+    padding: 1rem 1.125rem;
   }
   @media (min-width: 640px) {
     .card-padded {
-      padding: 1.375rem 1.625rem; /* 22–26 desktop */
+      padding: 1.375rem 1.625rem;
     }
   }
   .card-gradient-top {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 50%, transparent 100%), var(--bg2);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   }
 
   /* Primary CTA: Domained — ctaBg/ctaText, pill, premium hover, no heavy shadow */
@@ -222,7 +236,7 @@ h3 {
     min-height: 48px;
     background: var(--accent);
     color: var(--ctaText);
-    border: 1px solid rgba(6, 182, 212, 0.35);
+    border: 1px solid rgba(37, 230, 214, 0.35);
     transition: filter 150ms ease, box-shadow 150ms ease;
   }
   .btn-primary:hover {
@@ -327,7 +341,7 @@ h3 {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
     background: var(--accent-dim);
     color: var(--accent);
-    border: 1px solid rgba(6, 182, 212, 0.25);
+    border: 1px solid rgba(37, 230, 214, 0.25);
   }
   /* "Most Popular" — solid accent bg, dark text */
   .pill-popular {
@@ -408,34 +422,6 @@ h3 {
   /* Hero: grid and vignette only in hero area; isolate so they don’t bleed */
   .hero-bg {
     position: relative;
-    background-color: var(--bg);
-    isolation: isolate;
-    overflow: hidden;
-  }
-  .hero-bg::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 0;
-    background-image:
-      repeating-linear-gradient(0deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 36px),
-      repeating-linear-gradient(90deg, var(--grid) 0, var(--grid) 1px, transparent 1px, transparent 36px);
-    background-size: 36px 36px;
-  }
-  .hero-bg::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 1;
-    background:
-      radial-gradient(closest-side at 50% 35%, rgba(255, 255, 255, 0.04), transparent 60%),
-      radial-gradient(1200px 600px at 50% 40%, transparent 0%, rgba(0, 0, 0, 0.28) 70%, rgba(0, 0, 0, 0.45) 100%);
-  }
-  .hero-bg > * {
-    position: relative;
-    z-index: 2;
   }
 
   /* Demo Before/After: link pill — masked URL, glow, gradient border, hover sheen */
@@ -463,13 +449,13 @@ h3 {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
   }
   .demo-link-pill-right {
-    border-color: rgba(6, 182, 212, 0.2);
+    border-color: rgba(37, 230, 214, 0.2);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.06),
       0 0 18px var(--accent-glow);
   }
   .demo-link-pill-right:hover {
-    border-color: rgba(6, 182, 212, 0.3);
+    border-color: rgba(37, 230, 214, 0.3);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 0 22px var(--accent-glow);
@@ -542,7 +528,7 @@ h3 {
     font-weight: 600;
     color: var(--ctaText);
     background: var(--accent);
-    border: 1px solid rgba(6, 182, 212, 0.35);
+    border: 1px solid rgba(37, 230, 214, 0.35);
     border-radius: 9999px;
     transition: transform 0.2s var(--ease-out-smooth), box-shadow 0.2s var(--ease-out-smooth), opacity 0.2s ease;
   }
@@ -632,8 +618,8 @@ h3 {
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
   }
   .demo-column-right:hover {
-    border-color: rgba(6, 182, 212, 0.28);
-    box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.06);
+    border-color: rgba(37, 230, 214, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(37, 230, 214, 0.06);
   }
   .demo-column:focus-within {
     box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
@@ -645,7 +631,7 @@ h3 {
     box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
   }
   .demo-column-right:hover:focus-within {
-    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus), inset 0 0 0 1px rgba(6, 182, 212, 0.06);
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus), inset 0 0 0 1px rgba(37, 230, 214, 0.06);
   }
 
   /* Demo keyframes — scan sweep, orb, pulse, tap, shake, dots, dot pop, soft in */
@@ -655,12 +641,12 @@ h3 {
   }
   @keyframes demoJustEnabledPulse {
     0% { box-shadow: 0 0 0 0 var(--accent-glow); }
-    40% { box-shadow: 0 0 0 8px rgba(6, 182, 212, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+    40% { box-shadow: 0 0 0 8px rgba(37, 230, 214, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 230, 214, 0); }
   }
   @keyframes demoDotPop {
-    from { transform: scale(0.85); opacity: 0.6; }
-    to { transform: scale(1); opacity: 1; }
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
   }
   @keyframes demoSoftIn {
     from { opacity: 0; transform: translateY(6px); }
@@ -715,7 +701,7 @@ h3 {
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.08),
         0 0 28px var(--accent-glow),
-        0 0 40px rgba(6, 182, 212, 0.18);
+        0 0 40px rgba(37, 230, 214, 0.18);
     }
   }
   @keyframes demoTap {
@@ -904,7 +890,7 @@ h3 {
   }
   .demo-status-card-success {
     background: var(--accent-dim);
-    border-color: rgba(6, 182, 212, 0.28);
+    border-color: rgba(37, 230, 214, 0.28);
     color: var(--accent);
   }
   .demo-status-icon {

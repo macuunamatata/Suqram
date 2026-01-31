@@ -25,12 +25,6 @@ const WHY_ITEMS = [
   "Users hit expired links → lost signups + support tickets",
 ];
 
-const PRICING_TIERS = [
-  { name: "Free", redemptions: "1K / month", desc: "Get started" },
-  { name: "Pro", redemptions: "10K / month", desc: "For growing apps" },
-  { name: "Scale", redemptions: "Custom", desc: "Enterprise" },
-];
-
 const FAQ_ITEMS = [
   {
     q: "Does this slow down login?",
@@ -101,7 +95,7 @@ export default function HomePage() {
       </section>
 
       {/* Why / Problem */}
-      <section className={`border-t border-[var(--border)] ${SECTION_PY}`} id="why" aria-label="Why">
+      <section className={SECTION_PY} id="why" aria-label="Why">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             Why users see &quot;Link expired&quot; even when you did everything right.
@@ -110,7 +104,7 @@ export default function HomePage() {
             {WHY_ITEMS.map((text, i) => (
               <div
                 key={i}
-                className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 text-center"
+                className="surface p-6 text-center"
               >
                 <span className="inline-flex w-8 h-8 items-center justify-center rounded-full bg-[rgba(255,255,255,0.06)] text-sm font-semibold text-[var(--text)] mb-4">
                   {i + 1}
@@ -125,27 +119,29 @@ export default function HomePage() {
       </section>
 
       {/* How it works */}
-      <section className={`border-t border-[var(--border)] ${SECTION_PY}`} id="how" aria-label="How it works">
+      <section className={SECTION_PY} id="how" aria-label="How it works">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             Human-only redemption, enforced at the edge.
           </h2>
-          <div className="mt-14 max-w-2xl mx-auto space-y-8">
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
-              <h3 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide mb-3">
+          <div className="mt-14 max-w-2xl mx-auto surface p-6 sm:p-8 space-y-6">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex rounded-full border border-[var(--border)] bg-[rgba(255,255,255,0.02)] px-2.5 py-1 text-xs font-medium text-[var(--muted)] uppercase tracking-wide">
                 Scanner path
-              </h3>
-              <p className="text-sm text-[var(--text2)] leading-relaxed">
-                Email link → Suqram edge → non-redeeming response → token remains unused.
-              </p>
+              </span>
+              <span className="text-sm text-[var(--text2)]">
+                Email link → Suqram edge → non-redeeming response → token remains unused
+              </span>
+              <span className="w-2 h-2 rounded-full bg-[var(--error-muted)] shrink-0" aria-hidden />
             </div>
-            <div className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6 border-[var(--accent-dim)]">
-              <h3 className="text-sm font-medium text-[var(--accent)] uppercase tracking-wide mb-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex rounded-full border border-[var(--accent-dim)] bg-[rgba(255,255,255,0.02)] px-2.5 py-1 text-xs font-medium text-[var(--accent)] uppercase tracking-wide">
                 Human path
-              </h3>
-              <p className="text-sm text-[var(--text2)] leading-relaxed">
-                Email link → Suqram edge → (optional confirm) → your app verifies token → success.
-              </p>
+              </span>
+              <span className="text-sm text-[var(--text2)]">
+                Email link → Suqram edge → confirm (only if needed) → your app verifies → success
+              </span>
+              <span className="w-2 h-2 rounded-full bg-[var(--accent)] shrink-0" aria-hidden />
             </div>
           </div>
           <p className="mt-6 text-center text-sm text-[var(--muted)]">
@@ -155,7 +151,7 @@ export default function HomePage() {
       </section>
 
       {/* Quickstart */}
-      <section className={`border-t border-[var(--border)] ${SECTION_PY}`} id="quickstart" aria-label="Quickstart">
+      <section className={SECTION_PY} id="quickstart" aria-label="Quickstart">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             Deploy in &lt;5 minutes.
@@ -187,7 +183,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="mt-10 max-w-2xl mx-auto">
-            <pre className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:p-6 text-xs sm:text-sm font-mono text-[var(--text2)] overflow-x-auto">
+            <pre className="surface p-4 sm:p-6 text-xs sm:text-sm font-mono text-[var(--text2)] overflow-x-auto">
               <code>{`https://go.suqram.com/r/\${token}#u=\${encodeURIComponent(yourSuccessUrl)}`}</code>
             </pre>
           </div>
@@ -198,51 +194,48 @@ export default function HomePage() {
       </section>
 
       {/* Pricing */}
-      <section className={`border-t border-[var(--border)] ${SECTION_PY}`} id="pricing" aria-label="Pricing">
+      <section className={SECTION_PY} id="pricing" aria-label="Pricing">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
-            Usage pricing based on redemptions.
+            Start free. Upgrade when usage grows.
           </h2>
-          <div className="mt-12 overflow-x-auto max-w-3xl mx-auto">
-            <table className="w-full border-collapse rounded-xl border border-[var(--border)] overflow-hidden">
-              <thead>
-                <tr className="border-b border-[var(--border)] bg-[var(--surface)]">
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-[var(--text)]">Tier</th>
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-[var(--text)]">Redemptions</th>
-                  <th className="text-left py-4 px-6 text-sm font-semibold text-[var(--text)]">Description</th>
-                </tr>
-              </thead>
-              <tbody>
-                {PRICING_TIERS.map((tier) => (
-                  <tr key={tier.name} className="border-b border-[var(--border)] last:border-b-0 bg-[var(--card)]">
-                    <td className="py-4 px-6 text-sm font-medium text-[var(--text)]">{tier.name}</td>
-                    <td className="py-4 px-6 text-sm text-[var(--text2)]">{tier.redemptions}</td>
-                    <td className="py-4 px-6 text-sm text-[var(--muted)]">{tier.desc}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <div className="mt-12 max-w-3xl mx-auto surface p-6 sm:p-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+              <div className="rounded-xl border border-[var(--accent)]/[0.22] bg-[rgba(37,230,214,0.06)] p-6 flex flex-col">
+                <p className="text-sm font-semibold text-[var(--accent)]">Free</p>
+                <p className="mt-2 text-sm text-[var(--text2)]">1K redemptions / month — $0</p>
+                <p className="mt-1 text-xs text-[var(--muted)]">Get started</p>
+                <Link href="/start" className="btn-primary mt-6 w-full justify-center text-sm">
+                  Start free
+                </Link>
+              </div>
+              <div className="rounded-xl border border-[var(--border)] bg-[rgba(255,255,255,0.02)] p-6 flex flex-col">
+                <p className="text-sm font-semibold text-[var(--text)]">Pro</p>
+                <p className="mt-2 text-sm text-[var(--text2)]">10K / month</p>
+                <p className="mt-1 text-xs text-[var(--muted)]">For growing apps</p>
+              </div>
+              <div className="rounded-xl border border-[var(--border)] bg-[rgba(255,255,255,0.02)] p-6 flex flex-col">
+                <p className="text-sm font-semibold text-[var(--text)]">Scale</p>
+                <p className="mt-2 text-sm text-[var(--text2)]">Custom</p>
+                <p className="mt-1 text-xs text-[var(--muted)]">Enterprise</p>
+              </div>
+            </div>
           </div>
           <p className="mt-6 text-center text-sm text-[var(--muted)] max-w-xl mx-auto">
             A redemption is a successful human-confirmed link use.
-          </p>
-          <p className="mt-4 text-center">
-            <Link href="/pricing" className="btn-secondary text-sm">
-              See pricing
-            </Link>
           </p>
         </div>
       </section>
 
       {/* FAQ */}
-      <section className={`border-t border-[var(--border)] ${SECTION_PY}`} id="faq" aria-label="FAQ">
+      <section className={SECTION_PY} id="faq" aria-label="FAQ">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             FAQ
           </h2>
           <dl className="mt-12 max-w-2xl mx-auto space-y-6">
             {FAQ_ITEMS.map(({ q, a }) => (
-              <div key={q} className="rounded-xl border border-[var(--border)] bg-[var(--card)] p-6">
+              <div key={q} className="surface p-6">
                 <dt className="text-sm font-semibold text-[var(--text)]">{q}</dt>
                 <dd className="mt-2 text-sm text-[var(--text2)] leading-relaxed">{a}</dd>
               </div>

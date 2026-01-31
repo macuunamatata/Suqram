@@ -440,6 +440,7 @@ h3 {
 
   /* Demo Before/After: link pill — masked URL, glow, gradient border, hover sheen */
   .demo-link-pill {
+    position: relative;
     display: inline-flex;
     align-items: center;
     padding: 0.75rem 1rem;
@@ -472,6 +473,147 @@ h3 {
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
       0 0 22px rgba(25, 195, 125, 0.12);
+  }
+  .demo-pill-text {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .demo-pill-sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      105deg,
+      transparent 0%,
+      transparent 35%,
+      rgba(255, 255, 255, 0.12) 50%,
+      transparent 65%,
+      transparent 100%
+    );
+    background-size: 60% 100%;
+    background-repeat: no-repeat;
+    background-position: -100% 0;
+  }
+  .demo-pill-orb {
+    position: absolute;
+    left: 0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0;
+  }
+
+  /* Demo keyframes — scan sweep, orb, pulse, tap, shake */
+  @keyframes demoSheenSweep {
+    from {
+      background-position: -60% 0;
+    }
+    to {
+      background-position: 160% 0;
+    }
+  }
+  @keyframes demoOrbTravel {
+    0% {
+      left: 0.5rem;
+      opacity: 0;
+    }
+    8% {
+      opacity: 1;
+    }
+    92% {
+      opacity: 1;
+    }
+    100% {
+      left: calc(100% - 1.5rem);
+      opacity: 0;
+    }
+  }
+  @keyframes demoPulseBad {
+    0%,
+    100% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 20px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 28px rgba(248, 113, 113, 0.35),
+        0 0 40px rgba(248, 113, 113, 0.2);
+    }
+  }
+  @keyframes demoPulseGood {
+    0%,
+    100% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.06),
+        0 0 18px rgba(25, 195, 125, 0.08);
+    }
+    50% {
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 0 28px rgba(25, 195, 125, 0.35),
+        0 0 40px rgba(25, 195, 125, 0.18);
+    }
+  }
+  @keyframes demoTap {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.015);
+    }
+  }
+  @keyframes demoShake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    25% {
+      transform: translateX(-3px);
+    }
+    50% {
+      transform: translateX(3px);
+    }
+    75% {
+      transform: translateX(-2px);
+    }
+  }
+
+  /* Phase: scanning — sheen + orb sweep, then red/green pulse */
+  [data-phase="scanning"] .demo-pill-sheen {
+    animation: demoSheenSweep 900ms ease both;
+  }
+  [data-phase="scanning"] .demo-pill-orb {
+    animation: demoOrbTravel 900ms ease both;
+  }
+  [data-phase="scanning"] .demo-link-pill:not(.demo-link-pill-right) {
+    animation: demoPulseBad 520ms ease 900ms both;
+  }
+  [data-phase="scanning"] .demo-link-pill.demo-link-pill-right {
+    animation: demoPulseGood 520ms ease 900ms both;
+  }
+
+  /* Phase: user — tap (both), then left shake / right green bloom */
+  [data-phase="user"] .demo-link-pill {
+    animation: demoTap 240ms ease both;
+  }
+  [data-phase="user"] .demo-link-pill:not(.demo-link-pill-right) {
+    animation: demoTap 240ms ease both, demoShake 420ms ease 260ms both;
+  }
+  [data-phase="user"] .demo-link-pill.demo-link-pill-right {
+    animation: demoTap 240ms ease both, demoPulseGood 520ms ease 260ms both;
   }
 
   /* Demo timeline — steps with opacity/transform */
@@ -560,6 +702,31 @@ h3 {
       animation: none;
     }
   }
+
+  /* Reduced motion: disable all demo animations; show final states only */
+  @media (prefers-reduced-motion: reduce) {
+    .demo-pill-sheen,
+    .demo-pill-orb {
+      animation: none !important;
+      opacity: 0;
+    }
+    .demo-link-pill,
+    .demo-link-pill.demo-link-pill-right {
+      animation: none !important;
+    }
+    [data-phase="scanning"] .demo-pill-sheen,
+    [data-phase="scanning"] .demo-pill-orb,
+    [data-phase="scanning"] .demo-link-pill,
+    [data-phase="user"] .demo-link-pill,
+    [data-phase="user"] .demo-link-pill:not(.demo-link-pill-right),
+    [data-phase="user"] .demo-link-pill.demo-link-pill-right {
+      animation: none !important;
+    }
+    .demo-timeline-item {
+      transition: none;
+    }
+  }
+
   .demo-status-card-error {
     background: rgba(248, 113, 113, 0.08);
     border-color: rgba(248, 113, 113, 0.25);

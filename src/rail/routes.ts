@@ -1,7 +1,7 @@
 // Auth Link Scanner Immunity Rail: GET /r/:rid (safe), POST /redeem (only spend path)
 
 import { RedemptionPermitDO } from './redemption-permit-do';
-import { generateRailBootloaderHTML } from './html';
+import { generateRailInterstitialHTML } from './html';
 import { validateDestinationUrl } from './validate';
 import { insertTelemetry, insertRedemptionLedger, type DstMeta } from './db';
 
@@ -47,36 +47,23 @@ function getOrCreateContinuityCookie(request: Request, continuityHash: string): 
 }
 
 /**
- * GET /r/:rid - ALWAYS safe. Returns bootloader HTML; sets continuity + CSRF cookies; issues nonce from DO. Never redeems.
+ * GET /r/:rid - ALWAYS safe. Returns 200 HTML interstitial only. No redirect, no nonce, no DO call.
+ * Scanners only ever see this page. Human confirms via POST /r/:rid/confirm.
  */
 export async function handleGetRail(request: Request, env: RailEnv, rid: string): Promise<Response> {
   const continuityHash = await generateContinuityHash(request);
   const continuityId = getOrCreateContinuityCookie(request, continuityHash);
   const csrfToken = generateCSRFToken();
 
-  const permitDOId = (env.REDEMPTION_PERMIT as DurableObjectNamespace).idFromName(`rid:${rid}`);
-  const permitDO = (env.REDEMPTION_PERMIT as DurableObjectNamespace).get(permitDOId);
-  const issueUrl = new URL('/issue', request.url);
-  issueUrl.searchParams.set('rid', rid);
-  issueUrl.searchParams.set('continuity_hash', continuityHash);
-  issueUrl.searchParams.set('ttl_ms', String(RAIL_NONCE_TTL_MS));
-
-  const issueResponse = await permitDO.fetch(issueUrl.toString());
-  if (!issueResponse.ok) {
-    return new Response(JSON.stringify({ error: 'Failed to issue permit' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
-  const { nonce, exp } = await issueResponse.json<{ nonce: string; exp: number }>();
-  const html = generateRailBootloaderHTML(nonce, csrfToken, rid);
+  const html = generateRailInterstitialHTML(rid, csrfToken);
 
   const url = new URL(request.url);
   const isSecure = url.protocol === 'https:';
   const secureFlag = isSecure ? '; Secure' : '';
   const headers = new Headers({
     'Content-Type': 'text/html',
+    'Cache-Control': 'no-store',
+    'X-Robots-Tag': 'noindex, nofollow',
     'Set-Cookie': [
       `rail_continuity=${continuityId}; SameSite=Lax; Path=/; Max-Age=86400`,
       `rail_csrf=${csrfToken}; SameSite=Lax; Path=/; HttpOnly; Max-Age=3600${secureFlag}`,
@@ -93,7 +80,107 @@ export async function handleGetRail(request: Request, env: RailEnv, rid: string)
     await insertRedemptionLedger(env.EIG_DB, rid, now, null, 'issued');
   } catch (_) {}
 
-  return new Response(html, { headers });
+  return new Response(html, { status: 200, headers });
+}
+
+/**
+ * POST /r/:rid/confirm - Human-confirmed handoff. Mints one-time handoff in DO (rid + fingerprint), then 302 to destination.
+ * Only path that redirects to destination. No redirect on GET.
+ */
+export async function handlePostConfirm(request: Request, env: RailEnv, rid: string): Promise<Response> {
+  const continuityId = getContinuityId(request);
+  if (!continuityId) {
+    return new Response('Missing continuity', { status: 400 });
+  }
+
+  const cookies = request.headers.get('Cookie') || '';
+  const csrfCookieMatch = cookies.match(/rail_csrf=([^;]+)/);
+  const csrfCookie = csrfCookieMatch ? csrfCookieMatch[1] : null;
+
+  let u = '';
+  const contentType = request.headers.get('Content-Type') || '';
+  if (contentType.includes('application/x-www-form-urlencoded')) {
+    const body = await request.formData();
+    u = (body.get('u') as string) ?? '';
+    const csrfValue = body.get('csrf') as string | null;
+    if (!csrfCookie || !csrfValue || csrfCookie !== csrfValue) {
+      await telemetryDenied(env, rid, 'csrf_mismatch');
+      return new Response('Forbidden', { status: 403 });
+    }
+  } else if (contentType.includes('application/json')) {
+    const body = await request.json<{ u?: string; csrf?: string }>();
+    u = typeof body?.u === 'string' ? body.u.trim() : '';
+    const csrfValue = body?.csrf;
+    if (!csrfCookie || !csrfValue || csrfCookie !== csrfValue) {
+      await telemetryDenied(env, rid, 'csrf_mismatch');
+      return new Response('Forbidden', { status: 403 });
+    }
+  } else {
+    return new Response('Bad request', { status: 400 });
+  }
+
+  if (!u) {
+    await telemetryDenied(env, rid, 'BAD_BODY');
+    return new Response('Missing destination', { status: 400 });
+  }
+
+  const dst = decodeDestination(u);
+  if (!dst) {
+    await telemetryDenied(env, rid, 'BAD_BODY');
+    return new Response('Invalid destination', { status: 400 });
+  }
+
+  const validation = validateDestinationUrl(dst, {
+    allowedHosts: env.ALLOWED_DEST_HOSTS,
+    allowedHostSuffixes: env.ALLOWED_DEST_HOST_SUFFIXES,
+    allowedPrivateIP: env.ALLOWED_PRIVATE_IP === '1' || env.ALLOWED_PRIVATE_IP === 'true',
+  });
+  if (!validation.valid) {
+    await telemetryDenied(env, rid, 'invalid_destination');
+    return new Response('Invalid destination', { status: 400 });
+  }
+
+  const continuityHash = await generateContinuityHash(request);
+  const permitDOId = (env.REDEMPTION_PERMIT as DurableObjectNamespace).idFromName(`rid:${rid}`);
+  const permitDO = (env.REDEMPTION_PERMIT as DurableObjectNamespace).get(permitDOId);
+  const confirmUrl = new URL('/confirm', request.url);
+  confirmUrl.searchParams.set('rid', rid);
+  confirmUrl.searchParams.set('continuity_hash', continuityHash);
+
+  const confirmResponse = await permitDO.fetch(confirmUrl.toString());
+  const confirmData = await confirmResponse.json() as { ok: boolean; reason?: string };
+
+  if (!confirmData.ok) {
+    const reason = confirmData.reason ?? 'confirm_failed';
+    await telemetryDenied(env, rid, reason);
+    return new Response(reason === 'REPLAY' ? 'Already used' : 'Confirm failed', { status: 409 });
+  }
+
+  const dstMeta: DstMeta = {
+    dst_host: new URL(dst).hostname,
+    dst_path_len: new URL(dst).pathname.length,
+    dst_hash: await sha256Hex(dst),
+  };
+  try {
+    await insertTelemetry(env.EIG_DB, rid, 'redeemed', undefined, dstMeta);
+  } catch (_) {}
+  const now = Date.now();
+  try {
+    await insertRedemptionLedger(env.EIG_DB, rid, 0, now, 'redeemed', undefined, dstMeta);
+  } catch (_) {}
+  try {
+    await env.EIG_DB.prepare('UPDATE live_tests SET protected_redeemed_at = ? WHERE protected_rid = ?').bind(now, rid).run();
+  } catch (_) {}
+  try {
+    const row = await env.EIG_DB.prepare('SELECT tid FROM live_tests WHERE protected_rid = ?').bind(rid).first<{ tid: string }>();
+    if (row?.tid) {
+      await env.EIG_DB.prepare(
+        'INSERT INTO live_test_events (id, tid, variant, kind, created_at, meta) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(crypto.randomUUID(), row.tid, '', 'redeem_ok', now, null).run();
+    }
+  } catch (_) {}
+
+  return new Response(null, { status: 302, headers: { Location: dst } });
 }
 
 /**

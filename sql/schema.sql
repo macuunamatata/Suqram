@@ -202,3 +202,10 @@ CREATE TABLE IF NOT EXISTS live_test_events (
 );
 CREATE INDEX IF NOT EXISTS idx_live_test_events_tid_created ON live_test_events(tid, created_at);
 CREATE INDEX IF NOT EXISTS idx_live_test_events_kind_created ON live_test_events(kind, created_at);
+
+CREATE TABLE IF NOT EXISTS control_tokens (
+  tid TEXT PRIMARY KEY,
+  token_hash TEXT NOT NULL,
+  consumed_at INTEGER,
+  consumed_by TEXT
+);

@@ -4,6 +4,8 @@
  * POST /test/send, GET /test/control, GET /test/status
  */
 
+import { handleGetRail, type RailEnv } from './rail/routes';
+
 const RESEND_API = 'https://api.resend.com/emails';
 const MARKETING_BASE = 'https://suqram.com';
 const RATE_LIMIT_PER_EMAIL = 3;
@@ -132,6 +134,9 @@ export async function handleTestSend(request: Request, env: LiveTestEnv, railBas
     `INSERT INTO live_tests (tid, created_at, email_hash, creator_ip_hash, protected_rid, control_token_hash)
      VALUES (?, ?, ?, ?, ?, ?)`
   ).bind(tid, now, emailHash, ipHash, rid, controlTokenHash).run();
+  await env.EIG_DB.prepare(
+    'INSERT INTO control_tokens (tid, token_hash) VALUES (?, ?)'
+  ).bind(tid, controlTokenHash).run();
   await insertLiveTestEvent(env, crypto.randomUUID(), tid, '', 'sent', now, null);
 
   return jsonResponse(200, { ok: true });
@@ -163,6 +168,9 @@ export async function handleTestCreate(request: Request, env: LiveTestEnv, railB
     `INSERT INTO live_tests (tid, created_at, email_hash, creator_ip_hash, protected_rid, control_token_hash)
      VALUES (?, ?, 'demo', ?, ?, ?)`
   ).bind(tid, now, ipHash, rid, controlTokenHash).run();
+  await env.EIG_DB.prepare(
+    'INSERT INTO control_tokens (tid, token_hash) VALUES (?, ?)'
+  ).bind(tid, controlTokenHash).run();
   await insertLiveTestEvent(
     env,
     crypto.randomUUID(),
@@ -254,12 +262,18 @@ export async function handleTestSimulate(request: Request, env: LiveTestEnv): Pr
     if (!link) {
       return jsonResponse(400, { ok: false, error: 'Demo session has no normal link' });
     }
-    // Simulate by invoking internal /test/control logic (no external fetch)
+    // Exact same handler as production GET /test/control (real scanner open)
     const syntheticRequest = new Request(link, {
       method: 'GET',
-      headers: new Headers({ 'User-Agent': SCANNER_UA }),
+      headers: new Headers({
+        'User-Agent': SCANNER_UA,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Sec-Fetch-Mode': 'navigate',
+      }),
     });
-    await handleTestControl(syntheticRequest, env);
+    const controlRes = await handleTestControl(syntheticRequest, env);
+    const consumed = controlRes.headers.get('X-Consumed') === 'true';
+    const reason = consumed ? 'first_hit' : 'already_consumed';
     await insertLiveTestEvent(
       env,
       crypto.randomUUID(),
@@ -267,14 +281,16 @@ export async function handleTestSimulate(request: Request, env: LiveTestEnv): Pr
       'normal',
       'scanner_simulated',
       now,
-      JSON.stringify({ fetch_status: 200, note: 'simulated' })
+      JSON.stringify({ fetch_status: controlRes.status, consumed, reason, note: 'simulated' })
     );
     return jsonResponse(200, {
       ok: true,
       tid,
       variant: 'normal',
       simulated_at: now,
-      fetch_status: 200,
+      fetch_status: controlRes.status,
+      consumed,
+      reason,
     });
   }
 
@@ -282,7 +298,31 @@ export async function handleTestSimulate(request: Request, env: LiveTestEnv): Pr
     if (!meta.protectedLink) {
       return jsonResponse(400, { ok: false, error: 'Demo session has no protected link' });
     }
-    // Protected rail: scanner GET does not redeem; just record simulation (no external fetch)
+    const ridMatch = meta.protectedLink.match(/\/r\/([^/#?]+)/);
+    const rid = ridMatch ? ridMatch[1] : null;
+    if (!rid) {
+      return jsonResponse(400, { ok: false, error: 'Invalid protected link' });
+    }
+    const railUrl = meta.protectedLink.split('#')[0];
+    const syntheticRequest = new Request(railUrl, {
+      method: 'GET',
+      headers: new Headers({ 'User-Agent': SCANNER_UA }),
+    });
+    const res = await handleGetRail(syntheticRequest, env as unknown as RailEnv, rid);
+    if (res.status !== 200) {
+      return jsonResponse(502, {
+        ok: false,
+        error: 'Rail returned non-200',
+        fetch_status: res.status,
+      });
+    }
+    if (res.headers.get('Location')) {
+      return jsonResponse(502, {
+        ok: false,
+        error: 'Rail must not redirect on GET (scanner-safe)',
+        fetch_status: res.status,
+      });
+    }
     await insertLiveTestEvent(
       env,
       crypto.randomUUID(),
@@ -290,7 +330,7 @@ export async function handleTestSimulate(request: Request, env: LiveTestEnv): Pr
       'protected',
       'scanner_simulated',
       now,
-      JSON.stringify({ fetch_status: 200, note: 'simulated' })
+      JSON.stringify({ fetch_status: 200, consumed: false, reason: 'interstitial_only', note: 'simulated' })
     );
     return jsonResponse(200, {
       ok: true,
@@ -298,13 +338,15 @@ export async function handleTestSimulate(request: Request, env: LiveTestEnv): Pr
       variant: 'protected',
       simulated_at: now,
       fetch_status: 200,
+      consumed: false,
+      reason: 'interstitial_only',
     });
   }
 
   return jsonResponse(400, { ok: false, error: 'Invalid variant' });
 }
 
-/** GET /test/control?tid=...&token=... — consume token, redirect to marketing result page */
+/** GET /test/control?tid=...&token=... — atomic consume on first valid request; 410 on replay. */
 export async function handleTestControl(request: Request, env: LiveTestEnv): Promise<Response> {
   const url = new URL(request.url);
   const tid = url.searchParams.get('tid')?.trim();
@@ -313,36 +355,43 @@ export async function handleTestControl(request: Request, env: LiveTestEnv): Pro
     return htmlResponse(400, 'Missing tid or token');
   }
 
-  const row = await env.EIG_DB.prepare(
-    'SELECT control_token_hash FROM live_tests WHERE tid = ?'
-  ).bind(tid).first<{ control_token_hash: string }>();
-  if (!row) {
-    return redirectResult(tid, 1);
-  }
   const tokenHash = await sha256Hex(token);
-  if (tokenHash !== row.control_token_hash) {
-    return redirectResult(tid, 1);
-  }
-
+  const ua = request.headers.get('User-Agent') || '';
+  const consumedBy = ua.includes('Safe Links') || ua.includes('Microsoft Office') ? 'scanner' : 'user';
   const now = Date.now();
-  const alreadyUsed = await env.EIG_DB.prepare(
-    "SELECT 1 FROM live_test_events WHERE tid = ? AND kind = 'control_first_hit' LIMIT 1"
-  ).bind(tid).first();
-  if (alreadyUsed) {
-    await insertLiveTestEvent(env, crypto.randomUUID(), tid, '', 'control_replay', now, null);
-    return redirectResult(tid, 1);
+
+  const result = await env.EIG_DB.prepare(
+    'UPDATE control_tokens SET consumed_at = ?, consumed_by = ? WHERE tid = ? AND token_hash = ? AND consumed_at IS NULL'
+  ).bind(now, consumedBy, tid, tokenHash).run();
+
+  const changed = (result as { meta?: { rows_written?: number } }).meta?.rows_written === 1;
+  if (changed) {
+    return redirectResult(tid, 0, true);
   }
 
-  await insertLiveTestEvent(env, crypto.randomUUID(), tid, '', 'control_first_hit', now, null);
-  return redirectResult(tid, 0);
+  const row = await env.EIG_DB.prepare(
+    'SELECT consumed_at FROM control_tokens WHERE tid = ? AND token_hash = ?'
+  ).bind(tid, tokenHash).first<{ consumed_at: number | null }>();
+  if (!row) {
+    return redirectResult(tid, 1, false);
+  }
+  return goneResponse(tid, false);
 }
 
-function redirectResult(tid: string, used: 0 | 1): Response {
+function redirectResult(tid: string, used: 0 | 1, consumed: boolean): Response {
   const loc = `${MARKETING_BASE}/test/control/result?tid=${encodeURIComponent(tid)}&used=${used}`;
-  return new Response(null, { status: 302, headers: { Location: loc } });
+  const headers = new Headers({ Location: loc, 'X-Consumed': consumed ? 'true' : 'false' });
+  return new Response(null, { status: 302, headers });
 }
 
-/** GET /test/status?tid=... — JSON status from live_test_events (counts, timestamps, user results) */
+function goneResponse(tid: string, consumed: boolean): Response {
+  return new Response('Gone', {
+    status: 410,
+    headers: { 'Content-Type': 'text/plain', 'X-Consumed': consumed ? 'true' : 'false' },
+  });
+}
+
+/** GET /test/status?tid=... — JSON status; normal_user_result from control_tokens.consumed_by. */
 export async function handleTestStatus(request: Request, env: LiveTestEnv): Promise<Response> {
   const url = new URL(request.url);
   const tid = url.searchParams.get('tid')?.trim();
@@ -356,6 +405,10 @@ export async function handleTestStatus(request: Request, env: LiveTestEnv): Prom
     return jsonResponse(404, { ok: false, error: 'not_found' });
   }
 
+  const controlRow = await env.EIG_DB.prepare(
+    'SELECT consumed_at, consumed_by FROM control_tokens WHERE tid = ?'
+  ).bind(tid).first<{ consumed_at: number | null; consumed_by: string | null }>();
+
   const events = await env.EIG_DB.prepare(
     'SELECT kind, variant, created_at FROM live_test_events WHERE tid = ? ORDER BY created_at ASC'
   ).bind(tid).all<{ kind: string; variant: string; created_at: number }>();
@@ -364,7 +417,6 @@ export async function handleTestStatus(request: Request, env: LiveTestEnv): Prom
   let scanner_simulated_protected_count = 0;
   let last_scanner_simulated_normal_at: number | null = null;
   let last_scanner_simulated_protected_at: number | null = null;
-  let control_first_hit_at: number | null = null;
   let redeem_ok_at: number | null = null;
 
   for (const e of events.results) {
@@ -374,19 +426,18 @@ export async function handleTestStatus(request: Request, env: LiveTestEnv): Prom
     } else if (e.kind === 'scanner_simulated' && e.variant === 'protected') {
       scanner_simulated_protected_count++;
       last_scanner_simulated_protected_at = e.created_at;
-    } else if (e.kind === 'control_first_hit') {
-      control_first_hit_at = e.created_at;
     } else if (e.kind === 'redeem_ok') {
       redeem_ok_at = e.created_at;
     }
   }
 
   const normal_user_result =
-    control_first_hit_at != null
-      ? (scanner_simulated_normal_count > 0 ? 'consumed_by_scanner' : 'consumed_by_user')
-      : scanner_simulated_normal_count > 0
-        ? 'consumed_by_scanner'
+    controlRow?.consumed_by === 'scanner'
+      ? 'consumed_by_scanner'
+      : controlRow?.consumed_by === 'user'
+        ? 'consumed_by_user'
         : 'available';
+  const control_consumed_at = controlRow?.consumed_at ?? null;
   const protected_user_result = redeem_ok_at != null ? 'redeemed' : 'available';
 
   return jsonResponse(200, {
@@ -397,7 +448,8 @@ export async function handleTestStatus(request: Request, env: LiveTestEnv): Prom
     scanner_simulated_protected_count,
     last_scanner_simulated_normal_at,
     last_scanner_simulated_protected_at,
-    control_first_hit_at,
+    control_consumed_at,
+    control_first_hit_at: control_consumed_at,
     redeem_ok_at,
     normal_user_result,
     protected_user_result,

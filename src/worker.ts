@@ -5,7 +5,7 @@ import { IntentNonceDO } from './eig/intent-nonce-do';
 import { TenantConfigDO } from './eig/tenant-config-do';
 import { TokenRefreshMutexDO } from './eig/token-refresh-mutex-do';
 import { RedemptionPermitDO } from './rail/redemption-permit-do';
-import { handleGetRail, handlePostRedeem } from './rail/routes';
+import { handleGetRail, handlePostRedeem, handlePostConfirm } from './rail/routes';
 import { handleTestSend, handleTestControl, handleTestStatus, handleTestCreate, handleTestSimulate } from './live-test';
 import { handleHealth, handleJWKS, handleVerify } from './eig/endpoints';
 import {
@@ -763,6 +763,11 @@ export default {
       return handlePostRedeem(request, env);
     }
 
+    const rRidConfirmMatch = path.match(/^\/r\/([^\/]+)\/confirm$/);
+    if (rRidConfirmMatch && request.method === 'POST') {
+      const rid = rRidConfirmMatch[1];
+      return handlePostConfirm(request, env, rid);
+    }
     const rRidMatch = path.match(/^\/r\/([^\/]+)$/);
     if (rRidMatch && request.method === 'GET') {
       const rid = rRidMatch[1];

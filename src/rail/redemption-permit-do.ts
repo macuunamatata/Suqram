@@ -49,8 +49,44 @@ export class RedemptionPermitDO implements DurableObject {
     if (path.startsWith('/redeem')) {
       return this.handleRedeem(request);
     }
+    if (path.startsWith('/confirm')) {
+      return this.handleConfirm(request);
+    }
 
     return new Response('Not Found', { status: 404 });
+  }
+
+  /**
+   * confirm(rid, continuity_hash) - One-time handoff for rid+fingerprint. No nonce issued on GET.
+   */
+  private async handleConfirm(request: Request): Promise<Response> {
+    const url = new URL(request.url);
+    const rid = url.searchParams.get('rid');
+    const continuityHash = url.searchParams.get('continuity_hash');
+
+    if (!rid || !continuityHash) {
+      return new Response(
+        JSON.stringify({ ok: false, reason: 'BAD_BODY' }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const key = `handoff:${rid}:${continuityHash}`;
+    const existing = await this.state.storage.get<number>(key);
+    if (existing) {
+      return new Response(
+        JSON.stringify({ ok: false, reason: 'REPLAY' }),
+        { status: 409, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const now = Date.now();
+    const ttlMs = 2 * 60 * 1000; // 2 min
+    await this.state.storage.put(key, now, { expirationTtl: Math.ceil(ttlMs / 1000) });
+
+    return new Response(JSON.stringify({ ok: true }), {
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   /**

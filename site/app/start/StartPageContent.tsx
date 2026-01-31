@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
+const CREATE_SITE_URL = "https://go.suqram.com/app/create-site";
+
 type Props = { defaultNext: string };
 
 function getNextFromUrl(): string {
@@ -48,11 +50,10 @@ export default function StartPageContent({ defaultNext }: Props) {
       e.preventDefault();
       setCreateError(null);
       setCreateSubmitting(true);
-      const base = getRailBaseUrl();
       const formData = new FormData();
       formData.set("next", nextFull);
       try {
-        const res = await fetch(`${base}/app/create-site`, {
+        const res = await fetch(CREATE_SITE_URL, {
           method: "POST",
           body: formData,
           credentials: "include",
@@ -63,14 +64,22 @@ export default function StartPageContent({ defaultNext }: Props) {
           return;
         }
         if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          setCreateError((data as { error?: string }).error ?? "Failed to create site");
+          const text = await res.text();
+          let errMsg: string;
+          try {
+            const data = text ? (JSON.parse(text) as { error?: string }) : {};
+            errMsg = data.error ?? text || res.statusText || "Failed to create site";
+          } catch {
+            errMsg = text || res.statusText || "Failed to create site";
+          }
+          setCreateError(`${res.status}: ${errMsg}`);
           setCreateSubmitting(false);
           return;
         }
         window.location.href = nextPath;
-      } catch {
-        setCreateError("Network error");
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Request failed";
+        setCreateError(message);
         setCreateSubmitting(false);
       }
     },

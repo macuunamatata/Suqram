@@ -71,6 +71,23 @@ function addCors(response: Response): Response {
   return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
 }
 
+/** Allowed origins for /app/create-site CORS (browser calls from Pages site). */
+const APP_CORS_ORIGINS = ['https://suqram.com', 'https://www.suqram.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+
+function getAppCorsOrigin(request: Request): string | null {
+  const origin = request.headers.get('Origin');
+  return origin && APP_CORS_ORIGINS.includes(origin) ? origin : null;
+}
+
+function addCorsApp(request: Request, response: Response): Response {
+  const origin = getAppCorsOrigin(request);
+  if (!origin) return response;
+  const headers = new Headers(response.headers);
+  headers.set('Access-Control-Allow-Origin', origin);
+  headers.set('Access-Control-Allow-Credentials', 'true');
+  return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+}
+
 /**
  * Get the global Durable Object stub for all operations.
  * All mint, redeem, and events operations use the same DO instance.
@@ -955,9 +972,25 @@ export default {
       return handleDashboardCounters(request, env);
     }
 
-    // Dashboard: POST /app/create-site - Create first site (no token), set session, redirect
-    if (path === '/app/create-site' && request.method === 'POST') {
-      return handleCreateSite(request, env);
+    // Dashboard: POST /app/create-site - Create first site (no token), set session, redirect (CORS for suqram.com)
+    if (path === '/app/create-site') {
+      if (request.method === 'OPTIONS') {
+        const origin = getAppCorsOrigin(request);
+        const headers: Record<string, string> = {
+          'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type',
+          'Access-Control-Max-Age': '86400',
+        };
+        if (origin) {
+          headers['Access-Control-Allow-Origin'] = origin;
+          headers['Access-Control-Allow-Credentials'] = 'true';
+        }
+        return new Response(null, { status: 204, headers });
+      }
+      if (request.method === 'POST') {
+        const res = await handleCreateSite(request, env);
+        return addCorsApp(request, res);
+      }
     }
 
     return new Response('Not Found', { status: 404 });
@@ -2399,7 +2432,7 @@ async function handleCreateSite(request: Request, env: Env): Promise<Response> {
   });
 
   if (!createRes.ok) {
-    const err = await createRes.json<{ error?: string }>().catch(() => ({}));
+    const err = await createRes.json<{ error?: string }>().catch(() => ({})) as { error?: string };
     return new Response(
       JSON.stringify({ error: err?.error || 'Failed to create site' }),
       { status: createRes.status, headers: { 'Content-Type': 'application/json' } }

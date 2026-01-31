@@ -166,13 +166,23 @@ export default function DemoBeforeAfter() {
               </div>
             </div>
 
-            {/* B) Vertical timeline (center) */}
-            <div className="demo-timeline mt-10 pt-4">
-              <div className="demo-line" aria-hidden />
-              <div className="demo-signal" aria-hidden />
+            {/* B) Vertical timeline: single SVG + fixed-height rows */}
+            <div className="demo-steps mt-10">
+              <svg
+                className="demo-steps-svg"
+                width={28}
+                height={156}
+                viewBox="0 0 28 156"
+                aria-hidden
+              >
+                <line className="demo-steps-line" x1={14} y1={10} x2={14} y2={146} />
+                <circle className="demo-steps-node" cx={14} cy={26} r={5} />
+                <circle className="demo-steps-node" cx={14} cy={78} r={5} />
+                <circle className="demo-steps-node" cx={14} cy={130} r={5} />
+                <circle className="demo-signal-dot" cx={14} cy={26} r={4} />
+              </svg>
 
-              <div className={`demo-step ${activeStep >= 1 ? "demo-step-active" : ""}`}>
-                <span className="demo-node" />
+              <div className={`demo-step-row ${activeStep >= 1 ? "demo-step-row-active" : ""}`}>
                 <span className="demo-step-label">Scanner pre-open</span>
                 <span className="demo-step-outcome-wrap">
                   {showOutcomes && activeStep >= 1 && (
@@ -183,8 +193,7 @@ export default function DemoBeforeAfter() {
                 </span>
               </div>
 
-              <div className={`demo-step ${activeStep >= 2 ? "demo-step-active" : ""} ${activeStep >= 2 ? (mode === "unprotected" ? "demo-step-bad" : "demo-step-ok") : ""}`}>
-                <span className="demo-node" />
+              <div className={`demo-step-row ${activeStep >= 2 ? "demo-step-row-active" : ""} ${activeStep >= 2 ? (mode === "unprotected" ? "demo-step-row-bad" : "demo-step-row-ok") : ""}`}>
                 <span className="demo-step-label">Redemption</span>
                 <span className="demo-step-outcome-wrap">
                   {showOutcomes && activeStep >= 2 && (
@@ -195,8 +204,7 @@ export default function DemoBeforeAfter() {
                 </span>
               </div>
 
-              <div className={`demo-step ${activeStep >= 3 ? "demo-step-active" : ""} ${activeStep >= 3 ? (mode === "unprotected" ? "demo-step-bad" : "demo-step-ok") : ""}`}>
-                <span className="demo-node" />
+              <div className={`demo-step-row ${activeStep >= 3 ? "demo-step-row-active" : ""} ${activeStep >= 3 ? (mode === "unprotected" ? "demo-step-row-bad" : "demo-step-row-ok") : ""}`}>
                 <span className="demo-step-label">User click</span>
                 <span className="demo-step-outcome-wrap">
                   {showOutcomes && activeStep >= 3 && (

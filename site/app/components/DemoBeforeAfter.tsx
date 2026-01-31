@@ -1,9 +1,14 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { getDemoApiBase } from "@/lib/railBase";
 
-const DEMO_API_WRONG_ORIGIN_MSG = "Demo API must be called on go.suqram.com";
+const DEMO_CREATE_URL = "https://go.suqram.com/demo/create";
+const DEMO_SCAN_URL = "https://go.suqram.com/demo/scan";
+
+function formatApiError(prefix: string, status: number, data: { error?: string } | null): string {
+  const part = data?.error ? `: ${data.error}` : "";
+  return `${prefix} (${status})${part}`;
+}
 
 type Mode = "unprotected" | "protected";
 type Phase = "idle" | "running" | "done";
@@ -83,54 +88,38 @@ export default function DemoBeforeAfter() {
     setActiveStep(1);
     setRunId((r) => r + 1);
 
-    const base = getDemoApiBase();
     let tid: string | null = null;
 
     try {
-      const createRes = await fetch(`${base}/demo/create`, {
+      const createRes = await fetch(DEMO_CREATE_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         signal,
       });
-      if (createRes.status === 405) {
-        setError(DEMO_API_WRONG_ORIGIN_MSG);
+      const createJson = await createRes.json().catch(() => ({})) as { ok?: boolean; tid?: string; error?: string };
+      if (!createRes.ok) {
+        setError(formatApiError("Create failed", createRes.status, createJson));
         setPhase("idle");
         setActiveStep(0);
         return;
       }
-      if (!createRes.ok) {
-        const data = await createRes.json().catch(() => ({}));
-        const msg = (data as { error?: string }).error ?? `Create failed: ${createRes.status}`;
-        throw new Error(msg);
-      }
-      const createData = await createRes.json() as { ok?: boolean; tid?: string };
-      if (!createData?.ok || !createData.tid) {
+      if (!createJson?.ok || !createJson.tid) {
         setError("Invalid create response. Please try again.");
         setPhase("idle");
         setActiveStep(0);
         return;
       }
-      tid = createData.tid;
+      tid = createJson.tid;
 
-      const scanRes = await fetch(`${base}/demo/scan`, {
+      const scanRes = await fetch(DEMO_SCAN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tid }),
         signal,
       });
-      const scanData = await scanRes.json().catch(() => ({})) as { ok?: boolean; error?: string };
-      if (scanRes.status === 405) {
-        setError(DEMO_API_WRONG_ORIGIN_MSG);
-        setPhase("idle");
-        setActiveStep(0);
-        return;
-      }
+      const scanJson = await scanRes.json().catch(() => ({})) as { ok?: boolean; error?: string };
       if (!scanRes.ok) {
-        if (scanData?.error === "tid required") {
-          setError("Demo bug: scan requires tid. Please try again.");
-        } else {
-          setError(scanData?.error ?? `Scan failed: ${scanRes.status}`);
-        }
+        setError(formatApiError("Scan failed", scanRes.status, scanJson));
         setPhase("idle");
         setActiveStep(0);
         return;

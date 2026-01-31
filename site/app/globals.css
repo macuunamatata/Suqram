@@ -52,6 +52,8 @@
   --ring: var(--accent);
 
   --ease-out-smooth: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-out-entrance: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-move: cubic-bezier(0.2, 0.8, 0.2, 1);
   --duration-ui: 200ms;
 }
 
@@ -424,118 +426,237 @@ h3 {
     position: relative;
   }
 
-  /* Demo: email-like link + event log (no boxes) */
+  /* Demo: hero-scale cinematic block */
+  .demo-hero {
+    position: relative;
+  }
+  .demo-hero-inner {
+    margin-top: 1.5rem;
+  }
+  .demo-glass {
+    background: rgba(255, 255, 255, 0.03);
+    position: relative;
+    overflow: hidden;
+  }
+  .demo-waterline {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+      ellipse 120% 80% at 50% 50%,
+      rgba(37, 230, 214, 0.04) 0%,
+      transparent 60%
+    );
+    animation: demoWaterline 12s ease-in-out infinite;
+  }
+  .demo-toggle {
+    min-height: 40px;
+  }
   .demo-real-link {
-    color: #2b7cff;
-    text-decoration: underline;
-    font-size: 1rem;
-    font-weight: 400;
     padding: 0;
     border: none;
     background: none;
     cursor: pointer;
-    border-radius: 2px;
-    transition: color var(--duration-ui) var(--ease-out-smooth),
-      text-decoration-thickness var(--duration-ui) var(--ease-out-smooth),
-      transform var(--duration-ui) var(--ease-out-smooth);
+    border-radius: 4px;
+    color: #2b7cff;
+    font-weight: 400;
+    font-size: clamp(1.25rem, 2.5vw + 0.5rem, 1.75rem);
+    transition: color var(--duration-ui) var(--ease-out-move), transform var(--duration-ui) var(--ease-out-move);
   }
   .demo-real-link:hover {
     color: #1a6ad4;
-    text-decoration-thickness: 2px;
   }
   .demo-real-link:active {
     transform: translateY(1px);
   }
-  .demo-email-line {
-    color: var(--text2);
+  .demo-real-link-inner {
+    position: relative;
+    display: inline-block;
   }
-  .demo-sweep {
+  .demo-real-link-text {
+    position: relative;
+    z-index: 1;
+  }
+  .demo-underline {
     position: absolute;
     left: 0;
     right: 0;
+    bottom: 2px;
+    height: 2px;
+    background: currentColor;
+    transform-origin: left;
+    transform: scaleX(1);
+  }
+  [data-phase="scanning"] .demo-underline {
+    animation: demoUnderlineDraw 400ms var(--ease-out-entrance) forwards;
+  }
+  [data-phase="scanning"] .demo-real-link-text {
+    animation: demoLinkBrighten 400ms var(--ease-out-entrance) forwards;
+  }
+  .demo-beam {
+    position: absolute;
+    left: 0;
     top: 0;
     bottom: 0;
+    width: 80px;
+    max-width: 40%;
     pointer-events: none;
-    z-index: 0;
+    z-index: 2;
     background: linear-gradient(
       90deg,
       transparent 0%,
-      transparent 40%,
-      rgba(255, 255, 255, 0.18) 50%,
-      transparent 60%,
+      rgba(255, 255, 255, 0.12) 30%,
+      rgba(255, 255, 255, 0.2) 50%,
+      rgba(255, 255, 255, 0.12) 70%,
       transparent 100%
     );
-    background-size: 50% 100%;
-    background-repeat: no-repeat;
-    background-position: -100% 0;
+    filter: blur(2px);
     opacity: 0;
+    transform: translateX(-100%);
   }
-  [data-phase="scanning"] .demo-sweep {
-    animation: demoLinkSweep 800ms var(--ease-out-smooth) forwards;
+  [data-phase="scanning"] .demo-beam {
+    animation: demoBeamSweep 800ms var(--ease-out-move) 400ms forwards;
   }
-  .demo-packet {
+  .demo-orb {
     position: absolute;
-    left: 0.5rem;
-    width: 6px;
-    height: 6px;
+    left: 0.75rem;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
     opacity: 0;
   }
-  .demo-packet-scan {
-    top: 2.25rem;
+  .demo-orb-scan[data-target="1"] {
+    top: 3.5rem;
+    animation: demoOrbFly1 1400ms var(--ease-out-move) 500ms forwards;
   }
-  [data-phase="scanning"] .demo-packet-scan {
-    animation: demoPacketDropScan 1400ms var(--ease-out-smooth) forwards;
+  .demo-orb-scan[data-target="2"] {
+    top: 3.5rem;
+    animation: demoOrbFly2 1400ms var(--ease-out-move) 1200ms forwards;
   }
-  .demo-packet-user {
-    top: 2.25rem;
+  .demo-orb-user[data-target="3"] {
+    top: 3.5rem;
+    animation: demoOrbFly3 600ms var(--ease-out-move) forwards;
   }
-  [data-phase="user"] .demo-packet-user {
-    animation: demoPacketDropUser 600ms var(--ease-out-smooth) forwards;
-  }
-  [data-phase="user"] .demo-real-link {
-    animation: demoTapLink 280ms var(--ease-out-smooth) both;
+  .demo-url-preview {
+    font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    font-size: clamp(0.875rem, 1.5vw + 0.25rem, 1rem);
   }
   .demo-event-log {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    position: relative;
+    z-index: 1;
   }
   .demo-event-row {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    min-height: 1.5rem;
-    opacity: 0.4;
-    transform: translateY(4px);
-    transition: opacity 0.3s var(--ease-out-smooth), transform 0.3s var(--ease-out-smooth);
+    gap: 0.75rem;
+    min-height: 2rem;
+    font-size: clamp(1rem, 1.5vw + 0.25rem, 1.125rem);
+    opacity: 0.35;
+    transform: translateY(10px);
+    transition: opacity 0.35s var(--ease-out-entrance), transform 0.35s var(--ease-out-entrance);
   }
   .demo-event-row.demo-event-row-visible {
     opacity: 1;
     transform: translateY(0);
-    animation: demoRowIn 0.3s var(--ease-out-smooth) both;
+    animation: demoRowIn 0.4s var(--ease-out-entrance) both;
+  }
+  .demo-event-row.demo-event-row-visible.demo-event-row-ok::after {
+    animation: demoRippleGood 0.6s var(--ease-out-entrance) both;
+  }
+  .demo-event-row.demo-event-row-visible.demo-event-row-bad::after {
+    animation: demoRippleBad 0.6s var(--ease-out-entrance) both;
+  }
+  .demo-event-row::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0);
   }
   .demo-event-dot {
     flex-shrink: 0;
-    width: 5px;
-    height: 5px;
+    width: 12px;
+    height: 12px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.25);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: background 0.25s var(--ease-out-entrance), border-color 0.25s var(--ease-out-entrance);
   }
   .demo-event-row.demo-event-row-visible .demo-event-dot {
-    animation: demoDotPop 0.25s var(--ease-out-smooth) both;
+    background: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.4);
+    animation: demoDotPop 0.3s var(--ease-out-entrance) both;
+  }
+  .demo-event-row.demo-event-row-ok .demo-event-dot {
+    background: rgba(30, 184, 176, 0.5);
+    border-color: rgba(30, 184, 176, 0.4);
+  }
+  .demo-event-row.demo-event-row-bad .demo-event-dot {
+    background: rgba(200, 100, 100, 0.4);
+    border-color: rgba(200, 100, 100, 0.35);
+  }
+  .demo-event-label {
+    flex: 1;
+    color: var(--text2);
+  }
+  .demo-event-outcome {
+    font-weight: 600;
   }
   .demo-event-ok {
     color: #1eb8b0;
-    font-weight: 500;
   }
   .demo-event-bad {
-    color: rgba(220, 100, 100, 0.95);
-    font-weight: 500;
+    color: rgba(210, 110, 110, 0.95);
+  }
+  [data-phase="user"] .demo-real-link {
+    animation: demoTap 320ms var(--ease-out-move) both;
+  }
+  [data-phase="user"][data-mode="unprotected"] .demo-real-link {
+    animation: demoTapThenShake 800ms var(--ease-out-move) both;
+  }
+  [data-phase="user"][data-mode="unprotected"] .demo-real-link-text {
+    opacity: 0.7;
+  }
+  [data-phase="user"][data-mode="protected"] .demo-real-link {
+    animation: demoTap 320ms var(--ease-out-move) both;
+  }
+  [data-phase="user"][data-mode="protected"] .demo-real-link-inner {
+    animation: demoSettlePulse 800ms var(--ease-out-entrance) 360ms both;
+  }
+  .demo-btn-secondary.demo-just-enabled {
+    animation: demoBtnShimmer 1s var(--ease-out-entrance) both;
+  }
+  .demo-btn-ghost {
+    height: 44px;
+    min-height: 44px;
+    padding: 0 1.25rem;
+    font-size: 1rem;
+  }
+  .demo-hero .demo-btn-primary {
+    height: 54px;
+    min-height: 54px;
+    padding: 0 2rem;
+    font-size: clamp(1rem, 1.5vw + 0.25rem, 1.125rem);
+  }
+  .demo-hero .demo-btn-secondary {
+    height: 54px;
+    min-height: 54px;
+    padding: 0 2rem;
+    font-size: clamp(1rem, 1.5vw + 0.25rem, 1.125rem);
   }
 
   /* Demo Before/After: link pill — masked URL, glow, gradient border, hover sheen (legacy) */
@@ -748,7 +869,88 @@ h3 {
     box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus), inset 0 0 0 1px rgba(37, 230, 214, 0.06);
   }
 
-  /* Demo keyframes — scan sweep, orb, pulse, tap, shake, dots, dot pop, soft in */
+  /* Demo keyframes — cinematic hero */
+  @keyframes demoWaterline {
+    0%, 100% { opacity: 0.6; transform: scale(1) translate(0, 0); }
+    33% { opacity: 0.8; transform: scale(1.02) translate(1%, 0.5%); }
+    66% { opacity: 0.7; transform: scale(0.98) translate(-0.5%, -0.3%); }
+  }
+  @keyframes demoUnderlineDraw {
+    0% { transform: scaleX(0); }
+    100% { transform: scaleX(1); }
+  }
+  @keyframes demoLinkBrighten {
+    from { filter: brightness(1); }
+    to { filter: brightness(1.08); }
+  }
+  @keyframes demoBeamSweep {
+    0% { opacity: 0; transform: translateX(-100%); }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% { opacity: 0; transform: translateX(200%); }
+  }
+  @keyframes demoOrbFly1 {
+    0% { opacity: 0; transform: translateY(0) scale(0.8); }
+    12% { opacity: 1; }
+    100% { opacity: 1; transform: translateY(3.5rem) scale(1); }
+  }
+  @keyframes demoOrbFly2 {
+    0% { opacity: 0; transform: translateY(0) scale(0.8); }
+    12% { opacity: 1; }
+    100% { opacity: 1; transform: translateY(6.5rem) scale(1); }
+  }
+  @keyframes demoOrbFly3 {
+    0% { opacity: 0; transform: translateY(0) scale(0.8); }
+    15% { opacity: 1; }
+    100% { opacity: 1; transform: translateY(9.5rem) scale(1); }
+  }
+  @keyframes demoRowIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes demoRippleBad {
+    0% { transform: translate(-50%, -50%) scale(0); border-color: rgba(210, 110, 110, 0.4); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(3); border-color: rgba(210, 110, 110, 0); opacity: 0; }
+  }
+  @keyframes demoRippleGood {
+    0% { transform: translate(-50%, -50%) scale(0); border-color: rgba(30, 184, 176, 0.35); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(3); border-color: rgba(30, 184, 176, 0); opacity: 0; }
+  }
+  @keyframes demoBtnShimmer {
+    0% { box-shadow: 0 0 0 0 var(--accent-glow); }
+    30% { box-shadow: 0 0 0 12px rgba(37, 230, 214, 0.15); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 230, 214, 0); }
+  }
+  @keyframes demoTap {
+    0% { transform: scale(0.99); }
+    45% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+  }
+  @keyframes demoShakeTiny {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-2px); }
+    40% { transform: translateX(2px); }
+    60% { transform: translateX(-1px); }
+    80% { transform: translateX(1px); }
+  }
+  @keyframes demoTapThenShake {
+    0% { transform: scale(0.99); }
+    25% { transform: scale(1.01); }
+    35% { transform: scale(1) translateX(0); }
+    50% { transform: scale(1) translateX(-2px); }
+    65% { transform: scale(1) translateX(2px); }
+    80% { transform: scale(1) translateX(-1px); }
+    100% { transform: scale(1) translateX(0); }
+  }
+  @keyframes demoSettlePulse {
+    0% { box-shadow: 0 0 0 0 rgba(37, 230, 214, 0.2); }
+    50% { box-shadow: 0 0 16px 4px rgba(37, 230, 214, 0.12); }
+    100% { box-shadow: 0 0 0 0 rgba(37, 230, 214, 0); }
+  }
+  @keyframes demoDotPop {
+    from { opacity: 0; transform: scale(0.6); }
+    to { opacity: 1; transform: scale(1); }
+  }
   @keyframes demoLinkSweep {
     from { background-position: -100% 0; opacity: 0; }
     10% { opacity: 1; }
@@ -765,10 +967,6 @@ h3 {
     0% { opacity: 0; transform: translateY(0); }
     15% { opacity: 1; }
     100% { opacity: 1; transform: translateY(7rem); }
-  }
-  @keyframes demoRowIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
   }
   @keyframes demoTapLink {
     0%, 100% { transform: scale(1); }
@@ -1040,6 +1238,35 @@ h3 {
       animation: none !important;
     }
     .demo-event-row.demo-event-row-visible .demo-event-dot {
+      animation: none !important;
+    }
+    /* Hero cinematic demo: no waterline, beam, orb, underline draw, ripple, tap, shimmer */
+    .demo-waterline {
+      animation: none !important;
+      opacity: 0.5;
+    }
+    [data-phase="scanning"] .demo-underline {
+      animation: none !important;
+      transform: scaleX(1);
+    }
+    [data-phase="scanning"] .demo-real-link-text {
+      animation: none !important;
+    }
+    .demo-beam {
+      animation: none !important;
+      opacity: 0;
+    }
+    .demo-orb {
+      animation: none !important;
+      opacity: 0;
+    }
+    .demo-event-row.demo-event-row-visible.demo-event-row-ok::after,
+    .demo-event-row.demo-event-row-visible.demo-event-row-bad::after {
+      animation: none !important;
+      transform: translate(-50%, -50%) scale(0);
+    }
+    [data-phase="user"] .demo-real-link,
+    [data-phase="user"] .demo-real-link-inner {
       animation: none !important;
     }
   }

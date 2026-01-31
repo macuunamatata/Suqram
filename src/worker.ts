@@ -364,29 +364,33 @@ function addSecurityHeaders(response: Response, turnstileSiteKey?: string): Resp
 
 /**
  * Build a secure cookie string with conditional Secure flag
- * Secure flag is only set if HTTPS and not localhost
+ * Secure flag is only set if HTTPS and not localhost.
+ * Optional domain (e.g. suqram.com) shares cookie across subdomains.
  */
-function buildSecureCookie(name: string, value: string, maxAge: number, request: Request): string {
+function buildSecureCookie(name: string, value: string, maxAge: number, request: Request, options?: { domain?: string }): string {
   const url = new URL(request.url);
   const isHttps = url.protocol === 'https:';
   const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
   
   const secureFlag = (isHttps && !isLocalhost) ? '; Secure' : '';
+  const domainPart = options?.domain ? `; Domain=${options.domain}` : '';
   
-  return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secureFlag}`;
+  return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}${secureFlag}${domainPart}`;
 }
 
 /**
- * Build a cookie clearing string with conditional Secure flag
+ * Build a cookie clearing string with conditional Secure flag.
+ * Pass same options.domain as used when setting the cookie.
  */
-function buildClearCookie(name: string, request: Request): string {
+function buildClearCookie(name: string, request: Request, options?: { domain?: string }): string {
   const url = new URL(request.url);
   const isHttps = url.protocol === 'https:';
   const isLocalhost = url.hostname === 'localhost' || url.hostname === '127.0.0.1';
   
   const secureFlag = (isHttps && !isLocalhost) ? '; Secure' : '';
+  const domainPart = options?.domain ? `; Domain=${options.domain}` : '';
   
-  return `${name}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secureFlag}`;
+  return `${name}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${secureFlag}${domainPart}`;
 }
 
 /**
@@ -929,8 +933,8 @@ export default {
       return handleDashboardLogin(request, env);
     }
 
-    // Dashboard: POST /app/logout - Logout and clear session
-    if (path === '/app/logout' && request.method === 'POST') {
+    // Dashboard: GET or POST /app/logout - Logout and clear session
+    if (path === '/app/logout' && (request.method === 'GET' || request.method === 'POST')) {
       return handleDashboardLogout(request, env);
     }
 
@@ -2262,11 +2266,37 @@ async function handleDashboard(request: Request, env: Env): Promise<Response> {
   return addSecurityHeaders(response);
 }
 
+/** Allowed redirect origins for post-login (dashboard on marketing site) */
+const ALLOWED_REDIRECT_ORIGINS = ['https://suqram.com', 'https://www.suqram.com', 'http://localhost:3000', 'http://127.0.0.1:3000'];
+
+function parseAndValidateNext(nextRaw: string | null, request: Request): string {
+  const fallback = new URL('/app', request.url).toString();
+  if (!nextRaw || typeof nextRaw !== 'string') return fallback;
+  const s = nextRaw.trim();
+  if (!s) return fallback;
+  // Path-only: same-origin redirect
+  if (s.startsWith('/') && !s.startsWith('//')) {
+    const u = new URL(s, request.url);
+    return u.toString();
+  }
+  // Full URL: allow only allowlisted origins
+  try {
+    const u = new URL(s);
+    if (ALLOWED_REDIRECT_ORIGINS.some(origin => u.origin === origin)) return u.toString();
+  } catch {
+    // ignore invalid URL
+  }
+  return fallback;
+}
+
 async function handleDashboardLogin(request: Request, env: Env): Promise<Response> {
   const formData = await request.formData();
   const sat = formData.get('sat') as string | null;
-  
+  const nextForm = formData.get('next') as string | null;
   const url = new URL(request.url);
+  const nextQuery = url.searchParams.get('next');
+  const nextRaw = nextForm ?? nextQuery;
+  
   const hostname = url.host;
   const isLocalDev = isLocalDevHost(hostname);
   const isHttps = url.protocol === 'https:';
@@ -2290,13 +2320,13 @@ async function handleDashboardLogin(request: Request, env: Env): Promise<Respons
     return addSecurityHeaders(response);
   }
   
-  // Set session cookie (siteId:hostname)
-  // Expires in 7 days (604800 seconds)
+  // Set session cookie (siteId:hostname). Expires in 7 days (604800 seconds).
+  // Use Domain=suqram.com when on go.suqram.com so cookie is sent from suqram.com.
   const sessionValue = `${site.siteId}:${site.hostname}`;
-  const sessionCookie = buildSecureCookie('site_session', sessionValue, 604800, request);
+  const cookieDomain = (hostname === 'go.suqram.com') ? 'suqram.com' : undefined;
+  const sessionCookie = buildSecureCookie('site_session', sessionValue, 604800, request, { domain: cookieDomain });
   
-  // Redirect to /app
-  const redirectUrl = new URL('/app', request.url).toString();
+  const redirectUrl = parseAndValidateNext(nextRaw, request);
   return new Response(null, {
     status: 302,
     headers: {
@@ -2307,11 +2337,27 @@ async function handleDashboardLogin(request: Request, env: Env): Promise<Respons
 }
 
 async function handleDashboardLogout(request: Request, env: Env): Promise<Response> {
-  // Clear session cookie by setting it to expire immediately
-  const clearCookie = buildClearCookie('site_session', request);
-  
-  // Redirect to /app (which will show login)
-  const redirectUrl = new URL('/app', request.url).toString();
+  const url = new URL(request.url);
+  const redirectParam = url.searchParams.get('redirect');
+  const hostname = url.host;
+  const cookieDomain = (hostname === 'go.suqram.com') ? 'suqram.com' : undefined;
+  const clearCookie = buildClearCookie('site_session', request, { domain: cookieDomain });
+
+  let redirectUrl: string;
+  if (redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')) {
+    redirectUrl = new URL(redirectParam, request.url).toString();
+  } else if (redirectParam) {
+    try {
+      const u = new URL(redirectParam);
+      if (ALLOWED_REDIRECT_ORIGINS.some(origin => u.origin === origin)) redirectUrl = u.toString();
+      else redirectUrl = new URL('/start', request.url).toString();
+    } catch {
+      redirectUrl = new URL('/start', request.url).toString();
+    }
+  } else {
+    redirectUrl = new URL('/start', request.url).toString();
+  }
+
   return new Response(null, {
     status: 302,
     headers: {

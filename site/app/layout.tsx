@@ -58,6 +58,9 @@ export default function RootLayout({
               <a href="#demo" className="btn-nav-cta">
                 Try the demo
               </a>
+              <a href="/app" className="btn-nav-cta">
+                Dashboard
+              </a>
             </div>
           </div>
         </header>

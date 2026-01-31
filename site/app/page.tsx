@@ -69,7 +69,7 @@ export default function HomePage() {
               <Link href="#demo" className="btn-hero">
                 Try the demo
               </Link>
-              <Link href="#quickstart" className="btn-secondary text-sm">
+              <Link href="/app" className="btn-secondary text-sm">
                 Deploy in 5 minutes
               </Link>
             </div>

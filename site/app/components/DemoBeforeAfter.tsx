@@ -9,9 +9,10 @@ type VisibleSteps = 0 | 1 | 2;
 const UNPROTECTED_PILL = "app.example.com/auth/verify?token=••••••••••••";
 const PROTECTED_PILL = "go.suqram.com/r/••••••••••••";
 
-const STEP1_MS = 250;
+const STEP1_MS = 200;
 const STEP2_MS = 650;
 const SCAN_DONE_MS = 1450;
+const JUST_ENABLED_PULSE_MS = 600;
 
 export default function DemoBeforeAfter() {
   const [phase, setPhase] = useState<Phase>("idle");
@@ -19,6 +20,7 @@ export default function DemoBeforeAfter() {
   const [openAsUser, setOpenAsUser] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const [justEnabledUserBtn, setJustEnabledUserBtn] = useState(false);
 
   useEffect(() => {
     const m = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -27,6 +29,12 @@ export default function DemoBeforeAfter() {
     m.addEventListener("change", handler);
     return () => m.removeEventListener("change", handler);
   }, []);
+
+  useEffect(() => {
+    if (!justEnabledUserBtn) return;
+    const t = setTimeout(() => setJustEnabledUserBtn(false), JUST_ENABLED_PULSE_MS);
+    return () => clearTimeout(t);
+  }, [justEnabledUserBtn]);
 
   const runScannerPreOpen = useCallback(async () => {
     setError(null);
@@ -68,12 +76,16 @@ export default function DemoBeforeAfter() {
     if (prefersReducedMotion) {
       setVisibleSteps(2);
       setPhase("scanned");
+      setJustEnabledUserBtn(true);
       return;
     }
 
     const t1 = setTimeout(() => setVisibleSteps(1), STEP1_MS);
     const t2 = setTimeout(() => setVisibleSteps(2), STEP2_MS);
-    const t3 = setTimeout(() => setPhase("scanned"), SCAN_DONE_MS);
+    const t3 = setTimeout(() => {
+      setPhase("scanned");
+      setJustEnabledUserBtn(true);
+    }, SCAN_DONE_MS);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
@@ -86,6 +98,13 @@ export default function DemoBeforeAfter() {
     setOpenAsUser(true);
   }, []);
 
+  const resetDemo = useCallback(() => {
+    setPhase("idle");
+    setVisibleSteps(0);
+    setOpenAsUser(false);
+    setError(null);
+  }, []);
+
   return (
     <section id="demo" className="demo-before-after py-20 sm:py-24" aria-label="Before / After demo">
       <div
@@ -93,15 +112,15 @@ export default function DemoBeforeAfter() {
         data-phase={phase}
       >
         <h2 className="section-h2 text-center">
-          See Safe Links break a magic link — in 5 seconds.
+          Watch a scanner burn a token — then see it fail.
         </h2>
         <p className="mt-3 text-center text-[var(--text2)] max-w-xl mx-auto">
-          Security scanners pre-open links. One-time tokens get consumed.
+          Simulate a security scanner pre-open. Compare unprotected vs protected links side-by-side.
         </p>
 
         <div className="mt-14 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 min-h-[320px]">
           {/* Before (Unprotected) */}
-          <div className="demo-column rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 flex flex-col">
+          <div className="demo-column rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 flex flex-col transition-[border-color,box-shadow] duration-200 ease-out">
             <h3 className="text-sm font-medium text-[var(--muted)] uppercase tracking-wide">
               Before (Unprotected)
             </h3>
@@ -118,16 +137,16 @@ export default function DemoBeforeAfter() {
                   <span className="demo-timeline-dot" />
                   <span>Scanner opened the link</span>
                 </div>
-                <div className={`demo-timeline-item ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-red" />
+                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
+                  <span className="demo-timeline-dot demo-timeline-dot-red demo-timeline-dot-outcome" />
                   <span className="text-[var(--error-muted)]">Token consumed</span>
                 </div>
                 <div className={`demo-timeline-item ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
                   <span className="demo-timeline-dot" />
                   <span>User clicks the link</span>
                 </div>
-                <div className={`demo-timeline-item ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-x" aria-hidden>×</span>
+                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
+                  <span className="demo-timeline-dot demo-timeline-dot-x demo-timeline-dot-outcome" aria-hidden>×</span>
                   <span className="text-[var(--error-muted)]">Link expired</span>
                 </div>
               </div>
@@ -141,7 +160,7 @@ export default function DemoBeforeAfter() {
           </div>
 
           {/* After (Protected by Suqram) */}
-          <div className="demo-column rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 flex flex-col border-[var(--accent-dim)]">
+          <div className="demo-column demo-column-right rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 sm:p-8 flex flex-col border-[var(--accent-dim)] transition-[border-color,box-shadow] duration-200 ease-out">
             <h3 className="text-sm font-medium text-[var(--accent)] uppercase tracking-wide">
               After (Protected by Suqram)
             </h3>
@@ -158,16 +177,16 @@ export default function DemoBeforeAfter() {
                   <span className="demo-timeline-dot" />
                   <span>Scanner opened the link</span>
                 </div>
-                <div className={`demo-timeline-item ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-green" />
+                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 1 ? "demo-timeline-visible" : ""}`}>
+                  <span className="demo-timeline-dot demo-timeline-dot-green demo-timeline-dot-outcome" />
                   <span className="text-[var(--accent)]">No token consumed</span>
                 </div>
                 <div className={`demo-timeline-item ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
                   <span className="demo-timeline-dot" />
                   <span>User clicks the link</span>
                 </div>
-                <div className={`demo-timeline-item ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
-                  <span className="demo-timeline-dot demo-timeline-dot-check" aria-hidden>✓</span>
+                <div className={`demo-timeline-item demo-timeline-outcome ${visibleSteps >= 2 ? "demo-timeline-visible" : ""}`}>
+                  <span className="demo-timeline-dot demo-timeline-dot-check demo-timeline-dot-outcome" aria-hidden>✓</span>
                   <span className="text-[var(--accent)]">Still valid</span>
                 </div>
               </div>
@@ -187,23 +206,46 @@ export default function DemoBeforeAfter() {
           </p>
         )}
 
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={runScannerPreOpen}
-            disabled={phase === "scanning"}
-            className="btn-primary min-w-[200px] disabled:opacity-60 disabled:pointer-events-none"
-          >
-            {phase === "scanning" ? "Running scan…" : "Run scanner pre-open"}
-          </button>
-          <button
-            type="button"
-            onClick={openAsUserClick}
-            disabled={phase !== "scanned"}
-            className="btn-secondary min-w-[200px] disabled:opacity-50 disabled:pointer-events-none"
-          >
-            Open as user
-          </button>
+        <div className="mt-10 flex flex-col items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              type="button"
+              onClick={runScannerPreOpen}
+              disabled={phase === "scanning"}
+              className="demo-btn-primary min-w-[200px]"
+            >
+              {phase === "scanning" ? (
+                <>
+                  <span>Running scan</span>
+                  <span className="demo-btn-dots" aria-hidden>
+                    <span /><span /><span />
+                  </span>
+                </>
+              ) : (
+                "Run scanner pre-open"
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={openAsUserClick}
+              disabled={phase !== "scanned"}
+              className={`demo-btn-secondary min-w-[200px] ${justEnabledUserBtn ? "demo-just-enabled" : ""}`}
+            >
+              Open as user
+            </button>
+            {(phase === "scanned" || phase === "user") && (
+              <button
+                type="button"
+                onClick={resetDemo}
+                className="demo-btn-ghost min-w-[120px]"
+              >
+                Reset
+              </button>
+            )}
+          </div>
+          <div className="demo-progress w-full max-w-[420px]">
+            <div className="demo-progress-fill" />
+          </div>
         </div>
       </div>
     </section>

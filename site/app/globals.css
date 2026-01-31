@@ -17,10 +17,10 @@
   --text2: rgba(227, 230, 230, 0.72);   /* muted paragraph */
   --muted: rgba(227, 230, 230, 0.55);
 
-  /* Accent & warn */
-  --accent: #19C37D;
+  /* Accent (cyan) & warn */
+  --accent: #06B6D4;
   --warn: #EA840C;
-  --ctaBg: #F1F3F2;   /* off-white, slightly warm */
+  --ctaBg: #ECFEFF;   /* off-white, cyan tint */
   --ctaText: #070A0B;
 
   /* Spacing rhythm: 8/12/16/24/32/48/72 */
@@ -43,9 +43,9 @@
   --text-muted: var(--muted);
   --text-muted-strong: var(--text2);
   --muted-strong: var(--text2);
-  --accent-dim: rgba(25, 195, 125, 0.12);
-  --accent-focus: rgba(25, 195, 125, 0.25);
-  --accent-glow: rgba(25, 195, 125, 0.35);
+  --accent-dim: rgba(6, 182, 212, 0.12);
+  --accent-focus: rgba(6, 182, 212, 0.25);
+  --accent-glow: rgba(6, 182, 212, 0.35);
   --warn-dim: rgba(234, 132, 12, 0.12);
   --error-muted: rgba(248, 113, 113, 0.9);
   --cta-bg: var(--ctaBg);
@@ -222,12 +222,12 @@ h3 {
     min-height: 48px;
     background: var(--accent);
     color: var(--ctaText);
-    border: 1px solid rgba(25, 195, 125, 0.35);
+    border: 1px solid rgba(6, 182, 212, 0.35);
     transition: filter 150ms ease, box-shadow 150ms ease;
   }
   .btn-primary:hover {
     filter: brightness(1.04);
-    box-shadow: 0 0 16px var(--accent-glow);
+    box-shadow: 0 0 20px var(--accent-glow);
   }
   .btn-primary:focus-visible {
     outline: none;
@@ -315,7 +315,7 @@ h3 {
     height: 6px;
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 14px rgba(25, 195, 125, 0.35);
+    box-shadow: 0 0 14px var(--accent-glow);
   }
   .pill {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
@@ -327,7 +327,7 @@ h3 {
     @apply inline-flex items-center rounded-full px-3 py-1 text-xs font-medium;
     background: var(--accent-dim);
     color: var(--accent);
-    border: 1px solid rgba(25, 195, 125, 0.25);
+    border: 1px solid rgba(6, 182, 212, 0.25);
   }
   /* "Most Popular" — solid accent bg, dark text */
   .pill-popular {
@@ -463,16 +463,16 @@ h3 {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.04) 100%);
   }
   .demo-link-pill-right {
-    border-color: rgba(25, 195, 125, 0.2);
+    border-color: rgba(6, 182, 212, 0.2);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 0 18px rgba(25, 195, 125, 0.08);
+      0 0 18px var(--accent-glow);
   }
   .demo-link-pill-right:hover {
-    border-color: rgba(25, 195, 125, 0.3);
+    border-color: rgba(6, 182, 212, 0.3);
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.08),
-      0 0 22px rgba(25, 195, 125, 0.12);
+      0 0 22px var(--accent-glow);
   }
   .demo-pill-text {
     font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
@@ -513,7 +513,159 @@ h3 {
     opacity: 0;
   }
 
-  /* Demo keyframes — scan sweep, orb, pulse, tap, shake */
+  /* Demo progress bar — under buttons */
+  .demo-progress {
+    height: 4px;
+    width: 100%;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+  }
+  .demo-progress-fill {
+    height: 100%;
+    width: 0;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-glow));
+    transition: width 1100ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* Demo buttons — tactile micro-interactions */
+  .demo-btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-width: 200px;
+    height: 48px;
+    padding: 0 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ctaText);
+    background: var(--accent);
+    border: 1px solid rgba(6, 182, 212, 0.35);
+    border-radius: 9999px;
+    transition: transform 0.2s var(--ease-out-smooth), box-shadow 0.2s var(--ease-out-smooth), opacity 0.2s ease;
+  }
+  .demo-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px var(--accent-glow);
+  }
+  .demo-btn-primary:active:not(:disabled) {
+    transform: translateY(0) scale(0.99);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+  .demo-btn-primary:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .demo-btn-dots {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .demo-btn-dots span {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: currentColor;
+    opacity: 0.5;
+    animation: demoDots 1s ease-in-out infinite;
+  }
+  .demo-btn-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .demo-btn-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  .demo-btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    height: 48px;
+    padding: 0 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: 9999px;
+    transition: transform 0.2s var(--ease-out-smooth), box-shadow 0.2s var(--ease-out-smooth), background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+  }
+  .demo-btn-secondary:hover:not(:disabled) {
+    background: var(--surface-elevated);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+  .demo-btn-secondary:active:not(:disabled) {
+    transform: scale(0.99);
+  }
+  .demo-btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .demo-btn-secondary.demo-just-enabled {
+    animation: demoJustEnabledPulse 600ms ease-out;
+  }
+
+  .demo-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 40px;
+    padding: 0 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  }
+  .demo-btn-ghost:hover {
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--border);
+  }
+
+  /* Column hover + focus affordance */
+  .demo-column:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+  .demo-column-right:hover {
+    border-color: rgba(6, 182, 212, 0.28);
+    box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.06);
+  }
+  .demo-column:focus-within {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
+  }
+  .demo-column:hover:focus-within {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  }
+  .demo-column-right:focus-within {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus);
+  }
+  .demo-column-right:hover:focus-within {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent-focus), inset 0 0 0 1px rgba(6, 182, 212, 0.06);
+  }
+
+  /* Demo keyframes — scan sweep, orb, pulse, tap, shake, dots, dot pop, soft in */
+  @keyframes demoDots {
+    0%, 100% { opacity: 0.35; }
+    50% { opacity: 1; }
+  }
+  @keyframes demoJustEnabledPulse {
+    0% { box-shadow: 0 0 0 0 var(--accent-glow); }
+    40% { box-shadow: 0 0 0 8px rgba(6, 182, 212, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+  }
+  @keyframes demoDotPop {
+    from { transform: scale(0.85); opacity: 0.6; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  @keyframes demoSoftIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
   @keyframes demoSheenSweep {
     from {
       background-position: -60% 0;
@@ -557,13 +709,13 @@ h3 {
     100% {
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.06),
-        0 0 18px rgba(25, 195, 125, 0.08);
+        0 0 18px var(--accent-glow);
     }
     50% {
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.08),
-        0 0 28px rgba(25, 195, 125, 0.35),
-        0 0 40px rgba(25, 195, 125, 0.18);
+        0 0 28px var(--accent-glow),
+        0 0 40px rgba(6, 182, 212, 0.18);
     }
   }
   @keyframes demoTap {
@@ -591,7 +743,10 @@ h3 {
     }
   }
 
-  /* Phase: scanning — sheen + orb sweep, then red/green pulse */
+  /* Phase: scanning — progress fill, sheen + orb sweep, then red/green pulse */
+  [data-phase="scanning"] .demo-progress-fill {
+    width: 100%;
+  }
   [data-phase="scanning"] .demo-pill-sheen {
     animation: demoSheenSweep 900ms ease both;
   }
@@ -637,9 +792,21 @@ h3 {
     transform: translateY(0);
     color: var(--text2);
   }
+  .demo-timeline-outcome.demo-timeline-visible {
+    transition-delay: 120ms;
+  }
+  .demo-timeline-item.demo-timeline-visible .demo-timeline-dot-outcome {
+    animation: demoDotPop 0.25s var(--ease-out-smooth) forwards;
+  }
   @media (prefers-reduced-motion: reduce) {
     .demo-timeline-item {
       transition: none;
+    }
+    .demo-timeline-outcome.demo-timeline-visible {
+      transition-delay: 0;
+    }
+    .demo-timeline-dot-outcome {
+      animation: none !important;
     }
   }
   .demo-timeline-dot {
@@ -674,7 +841,7 @@ h3 {
     color: var(--accent);
   }
 
-  /* Demo status cards — inline result (no navigation) */
+  /* Demo status cards — inline result (no navigation), soft entrance */
   .demo-status-card {
     display: flex;
     align-items: center;
@@ -684,18 +851,9 @@ h3 {
     font-size: 0.95rem;
     font-weight: 500;
     border: 1px solid;
-    transition: opacity 0.3s var(--ease-out-smooth), transform 0.3s var(--ease-out-smooth);
-    animation: demo-status-in 0.35s var(--ease-out-smooth) forwards;
-  }
-  @keyframes demo-status-in {
-    from {
-      opacity: 0;
-      transform: translateY(-4px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    transition: opacity 0.22s var(--ease-out-smooth), transform 0.22s var(--ease-out-smooth);
+    animation: demoSoftIn 0.22s var(--ease-out-smooth) forwards;
   }
   @media (prefers-reduced-motion: reduce) {
     .demo-status-card {
@@ -705,6 +863,12 @@ h3 {
 
   /* Reduced motion: disable all demo animations; show final states only */
   @media (prefers-reduced-motion: reduce) {
+    .demo-progress-fill {
+      transition: none;
+    }
+    [data-phase="scanning"] .demo-progress-fill {
+      width: 100%;
+    }
     .demo-pill-sheen,
     .demo-pill-orb {
       animation: none !important;
@@ -725,6 +889,12 @@ h3 {
     .demo-timeline-item {
       transition: none;
     }
+    .demo-btn-dots span {
+      animation: none !important;
+    }
+    .demo-btn-secondary.demo-just-enabled {
+      animation: none !important;
+    }
   }
 
   .demo-status-card-error {
@@ -734,7 +904,7 @@ h3 {
   }
   .demo-status-card-success {
     background: var(--accent-dim);
-    border-color: rgba(25, 195, 125, 0.28);
+    border-color: rgba(6, 182, 212, 0.28);
     color: var(--accent);
   }
   .demo-status-icon {

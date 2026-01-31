@@ -13,11 +13,18 @@ export const metadata: Metadata = {
   },
 };
 
-const CENTER_NAV = [{ href: "/pricing", label: "Pricing" }];
+const CENTER_NAV = [
+  { href: "#how", label: "How it works" },
+  { href: "#quickstart", label: "Quickstart" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "#faq", label: "FAQ" },
+];
 
 const FOOTER_LINKS = [
+  { href: "/docs", label: "Docs" },
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
+  { href: "mailto:support@suqram.com", label: "Contact" },
 ];
 
 export default function RootLayout({
@@ -48,14 +55,8 @@ export default function RootLayout({
               ))}
             </nav>
             <div className="flex items-center gap-3 shrink-0">
-              <a
-                href="/start"
-                className="btn-ghost hidden sm:inline-flex text-sm py-2.5 px-4 min-h-0 h-10"
-              >
-                Log in
-              </a>
-              <a href="/start" className="btn-nav-cta">
-                Integrate
+              <a href="#demo" className="btn-nav-cta">
+                Try the demo
               </a>
             </div>
           </div>
@@ -65,24 +66,18 @@ export default function RootLayout({
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
             <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
               <p className="text-sm text-[var(--text)]">
-                Suqram — Scanner-proof auth links.
+                Suqram — Scanner-proof magic links.
               </p>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap justify-center">
                 {FOOTER_LINKS.map(({ href, label }) => (
                   <a
-                    key={href}
+                    key={label}
                     href={href}
                     className="text-xs text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
                   >
                     {label}
                   </a>
                 ))}
-                <a
-                  href="mailto:support@suqram.com"
-                  className="text-xs text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
-                >
-                  support@suqram.com
-                </a>
               </div>
             </div>
           </div>

@@ -10,19 +10,20 @@ type ActiveStep = 0 | 1 | 2 | 3;
 const UNPROTECTED_URL = "https://app.example.com/auth/verify?token=••••••••••••";
 const PROTECTED_URL = "https://go.suqram.com/r/••••••••••••";
 
-const STEP1_MS = 450;
-const STEP2_MS = 1050;
-const STEP3_MS = 1700;
-const DONE_MS = 2100;
+const STEP2_MS = 650;
+const STEP3_MS = 1300;
+const DONE_MS = 1700;
 
 export default function DemoBeforeAfter() {
   const [mode, setMode] = useState<Mode>("protected");
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeStep, setActiveStep] = useState<ActiveStep>(0);
   const [hasRun, setHasRun] = useState(false);
+  const [runId, setRunId] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const isFirstMount = useRef(true);
 
   useEffect(() => {
     const m = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -37,11 +38,42 @@ export default function DemoBeforeAfter() {
     timersRef.current = [];
   }, []);
 
+  const startRun = useCallback(() => {
+    clearTimers();
+    setPhase("running");
+    setActiveStep(1);
+    setRunId((r) => r + 1);
+
+    if (prefersReducedMotion) {
+      setActiveStep(3);
+      setPhase("done");
+      setHasRun(true);
+      return;
+    }
+
+    const t2 = setTimeout(() => setActiveStep(2), STEP2_MS);
+    const t3 = setTimeout(() => setActiveStep(3), STEP3_MS);
+    const t4 = setTimeout(() => {
+      setPhase("done");
+      setHasRun(true);
+    }, DONE_MS);
+    timersRef.current = [t2, t3, t4];
+  }, [prefersReducedMotion, clearTimers]);
+
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+    startRun();
+  }, [mode, startRun]);
+
   const runDemo = useCallback(async () => {
     setError(null);
-    setPhase("running");
-    setActiveStep(0);
     clearTimers();
+    setPhase("running");
+    setActiveStep(1);
+    setRunId((r) => r + 1);
 
     const base = getRailBaseUrl();
     let tid: string | null = null;
@@ -75,23 +107,8 @@ export default function DemoBeforeAfter() {
       return;
     }
 
-    if (prefersReducedMotion) {
-      setActiveStep(3);
-      setPhase("done");
-      setHasRun(true);
-      return;
-    }
-
-    const t1 = setTimeout(() => setActiveStep(1), STEP1_MS);
-    const t2 = setTimeout(() => setActiveStep(2), STEP2_MS);
-    const t3 = setTimeout(() => setActiveStep(3), STEP3_MS);
-    const t4 = setTimeout(() => {
-      setPhase("done");
-      setHasRun(true);
-    }, DONE_MS);
-    timersRef.current = [t1, t2, t3, t4];
-    return () => clearTimers();
-  }, [prefersReducedMotion, clearTimers]);
+    startRun();
+  }, [startRun, clearTimers]);
 
   useEffect(() => () => clearTimers(), [clearTimers]);
 
@@ -105,6 +122,7 @@ export default function DemoBeforeAfter() {
         data-phase={phase}
         data-mode={mode}
         data-active-step={activeStep}
+        data-run-id={runId}
       >
         <h2 className="section-h2 text-center">
           Watch a scanner burn a token — then see it fail.
@@ -114,7 +132,6 @@ export default function DemoBeforeAfter() {
         </p>
 
         <div className="demo-hero-inner mt-10 sm:mt-12">
-          {/* Mode toggle — always enabled */}
           <div className="flex justify-center gap-1 mb-8">
             <button
               type="button"
@@ -144,7 +161,6 @@ export default function DemoBeforeAfter() {
           <div className="demo-glass relative rounded-[32px] p-8 sm:p-10">
             <div className="demo-waterline" aria-hidden />
 
-            {/* A) Email snippet (top) */}
             <div className="demo-email-line relative z-[1]">
               <p className="text-[var(--text2)] text-lg sm:text-xl">Your sign-in link is ready.</p>
               <div className="mt-4 flex flex-col items-start gap-2">
@@ -166,53 +182,58 @@ export default function DemoBeforeAfter() {
               </div>
             </div>
 
-            {/* B) Vertical timeline: single SVG + fixed-height rows */}
             <div className="demo-steps mt-10">
               <svg
                 className="demo-steps-svg"
                 width={28}
-                height={156}
-                viewBox="0 0 28 156"
+                height={216}
+                viewBox="0 0 28 216"
                 aria-hidden
               >
-                <line className="demo-steps-line" x1={14} y1={10} x2={14} y2={146} />
-                <circle className="demo-steps-node" cx={14} cy={26} r={5} />
-                <circle className="demo-steps-node" cx={14} cy={78} r={5} />
-                <circle className="demo-steps-node" cx={14} cy={130} r={5} />
-                <circle className="demo-signal-dot" cx={14} cy={26} r={4} />
+                <line className="demo-steps-line" x1={14} y1={10} x2={14} y2={206} />
+                <circle className="demo-steps-node" cx={14} cy={36} r={5} />
+                <circle className="demo-steps-node" cx={14} cy={108} r={5} />
+                <circle className="demo-steps-node" cx={14} cy={180} r={5} />
+                <circle className="demo-signal-dot" cx={14} cy={36} r={4} />
               </svg>
 
-              <div className={`demo-step-row ${activeStep >= 1 ? "demo-step-row-active" : ""}`}>
-                <span className="demo-step-label">Scanner pre-open</span>
-                <span className="demo-step-outcome-wrap">
+              <div className={`demo-step-block ${activeStep >= 1 ? "demo-step-block-active" : ""}`}>
+                <div className="demo-step-head">
+                  <span className="demo-step-label">Scanner pre-open</span>
+                </div>
+                <div className="demo-step-outcome">
                   {showOutcomes && activeStep >= 1 && (
-                    <span key="step1-outcome" className="demo-step-outcome demo-step-outcome-ok demo-outcome-visible">
+                    <span key={`step1-${runId}`} className="demo-step-outcome-text demo-step-outcome-ok demo-outcome-visible">
                       Detected ✓
                     </span>
                   )}
-                </span>
+                </div>
               </div>
 
-              <div className={`demo-step-row ${activeStep >= 2 ? "demo-step-row-active" : ""} ${activeStep >= 2 ? (mode === "unprotected" ? "demo-step-row-bad" : "demo-step-row-ok") : ""}`}>
-                <span className="demo-step-label">Redemption</span>
-                <span className="demo-step-outcome-wrap">
+              <div className={`demo-step-block ${activeStep >= 2 ? "demo-step-block-active" : ""} ${activeStep >= 2 ? (mode === "unprotected" ? "demo-step-block-bad" : "demo-step-block-ok") : ""}`}>
+                <div className="demo-step-head">
+                  <span className="demo-step-label">Redemption</span>
+                </div>
+                <div className="demo-step-outcome">
                   {showOutcomes && activeStep >= 2 && (
-                    <span key={`step2-${mode}`} className={`demo-step-outcome demo-outcome-visible ${mode === "unprotected" ? "demo-step-outcome-bad" : "demo-step-outcome-ok"}`}>
+                    <span key={`step2-${mode}-${runId}`} className={`demo-step-outcome-text demo-outcome-visible ${mode === "unprotected" ? "demo-step-outcome-bad" : "demo-step-outcome-ok"}`}>
                       {mode === "unprotected" ? "Consumed ×" : "Blocked ✓"}
                     </span>
                   )}
-                </span>
+                </div>
               </div>
 
-              <div className={`demo-step-row ${activeStep >= 3 ? "demo-step-row-active" : ""} ${activeStep >= 3 ? (mode === "unprotected" ? "demo-step-row-bad" : "demo-step-row-ok") : ""}`}>
-                <span className="demo-step-label">User click</span>
-                <span className="demo-step-outcome-wrap">
+              <div className={`demo-step-block ${activeStep >= 3 ? "demo-step-block-active" : ""} ${activeStep >= 3 ? (mode === "unprotected" ? "demo-step-block-bad" : "demo-step-block-ok") : ""}`}>
+                <div className="demo-step-head">
+                  <span className="demo-step-label">User click</span>
+                </div>
+                <div className="demo-step-outcome">
                   {showOutcomes && activeStep >= 3 && (
-                    <span key={`step3-${mode}`} className={`demo-step-outcome demo-outcome-visible ${mode === "unprotected" ? "demo-step-outcome-bad" : "demo-step-outcome-ok"}`}>
+                    <span key={`step3-${mode}-${runId}`} className={`demo-step-outcome-text demo-outcome-visible ${mode === "unprotected" ? "demo-step-outcome-bad" : "demo-step-outcome-ok"}`}>
                       {mode === "unprotected" ? "Expired ×" : "Redeemed ✓"}
                     </span>
                   )}
-                </span>
+                </div>
               </div>
             </div>
           </div>
@@ -223,7 +244,6 @@ export default function DemoBeforeAfter() {
             </p>
           )}
 
-          {/* C) Controls (bottom) */}
           <div className="mt-10 flex flex-wrap items-center justify-center">
             <button
               type="button"

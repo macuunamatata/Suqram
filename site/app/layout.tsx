@@ -50,7 +50,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} scroll-smooth`}>
       <body className="relative min-h-screen flex flex-col antialiased font-sans">
-        <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-50 border-b border-[#e9edf3] bg-white">
           <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-8 px-6 sm:px-8">
             <a
               href="/"
@@ -70,14 +70,14 @@ export default function RootLayout({
               ))}
             </nav>
             <div className="flex items-center shrink-0">
-              <Button asChild size="sm" className="h-9 px-4">
+              <Button asChild size="sm" className="h-9 px-4 font-semibold text-primary-foreground">
                 <Link href="#demo">Try the demo</Link>
               </Button>
             </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-border/60 py-8 bg-background/50">
+        <footer className="border-t border-[#e9edf3] py-8 bg-white">
           <div className="mx-auto max-w-[1200px] px-6 sm:px-8">
             <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
               <p className="text-sm text-muted-foreground">

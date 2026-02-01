@@ -22,6 +22,8 @@ const CONTAINER = "mx-auto w-full max-w-[1200px] px-6 sm:px-8";
 const SECTION_PY = "py-16 sm:py-20 lg:py-24";
 const SECTION_HEADING = "text-2xl sm:text-3xl font-semibold tracking-tight text-foreground";
 const SECTION_SUB = "mt-3 text-base text-muted-foreground max-w-2xl leading-relaxed";
+const BORDER_SUBTLE = "border-[#e9edf3]";
+const SEPARATOR_SUBTLE = "bg-[#e9edf3]";
 
 const INVARIANT_TILES = [
   {
@@ -55,51 +57,52 @@ const HERO_CHIPS = ["View-safe", "Exactly-once redeem", "Replay-safe retries", "
 export default function HomePage() {
   return (
     <>
-      {/* Hero: two-column on desktop, stack on mobile */}
-      <section className="pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24" id="hero">
+      {/* Hero: headline + subhead on left only */}
+      <section className="pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-16" id="hero">
         <div className={CONTAINER}>
           <SectionFade>
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-              <div className="lg:col-span-5 flex flex-col">
-                <Badge variant="secondary" className="mb-4 w-fit font-medium text-xs">
-                  Protocol-grade auth links
-                </Badge>
-                <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-tight text-foreground leading-[1.1]">
-                  Links that survive the real world.
-                </h1>
-                <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed">
-                  Email scanners pre-open links and burn one-time tokens. Suqram runs at the edge so only an interactive redemption counts—your one-time links stay unbreakable.
-                </p>
-                <div className="mt-8 flex flex-wrap gap-2">
-                  {HERO_CHIPS.map((label) => (
-                    <Badge key={label} variant="outline" className="font-normal text-muted-foreground text-xs">
-                      {label}
-                    </Badge>
-                  ))}
-                </div>
-                <div className="mt-10 flex flex-col sm:flex-row items-start gap-4">
-                  <Button asChild size="lg" className="h-12 px-8 text-base">
-                    <Link href="#demo">Run demo</Link>
-                  </Button>
-                  <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base">
-                    <Link href="/app">Create site</Link>
-                  </Button>
-                </div>
-                <p className="mt-4 text-sm text-muted-foreground">
-                  For login, verify, invites, and reset links.
-                </p>
+            <div className="max-w-2xl">
+              <Badge variant="secondary" className="mb-4 w-fit font-medium text-xs text-foreground/90">
+                Protocol-grade auth links
+              </Badge>
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-tight text-foreground leading-[1.1]">
+                Links that survive the real world.
+              </h1>
+              <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed">
+                Email scanners pre-open links and burn one-time tokens. Suqram runs at the edge so only an interactive redemption counts—your one-time links stay unbreakable.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-2">
+                {HERO_CHIPS.map((label) => (
+                  <Badge key={label} variant="outline" className="font-normal text-muted-foreground text-xs border-[#e9edf3]">
+                    {label}
+                  </Badge>
+                ))}
               </div>
-              <div id="demo" className="lg:col-span-7 flex items-start justify-center lg:justify-end scroll-mt-24">
-                <div className="w-full max-w-[520px] lg:max-w-none">
-                  <DemoBeforeAfter />
-                </div>
+              <div className="mt-10 flex flex-col sm:flex-row items-start gap-4">
+                <Button asChild size="lg" className="h-12 px-8 text-base font-semibold text-primary-foreground">
+                  <Link href="#demo">Run demo</Link>
+                </Button>
+                <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base font-medium text-foreground border-[#e9edf3]">
+                  <Link href="/app">Create site</Link>
+                </Button>
               </div>
+              <p className="mt-4 text-sm text-muted-foreground">
+                For login, verify, invites, and reset links.
+              </p>
             </div>
           </SectionFade>
         </div>
       </section>
 
-      <Separator className="max-w-[1200px] mx-auto opacity-60" />
+      {/* Demo: full-width section, title + two links */}
+      <section id="demo" className={`demo-hero-section bg-white border-y ${BORDER_SUBTLE} scroll-mt-24`} aria-label="Try the demo">
+        <div className="demo-hero-inner">
+          <h2 className="demo-hero-title">Click both links.</h2>
+          <DemoBeforeAfter />
+        </div>
+      </section>
+
+      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
 
       {/* Invariants */}
       <section className={SECTION_PY} id="invariants" aria-label="Invariants">
@@ -113,7 +116,7 @@ export default function HomePage() {
               {INVARIANT_TILES.map(({ title, body }) => (
                 <div
                   key={title}
-                  className="rounded-xl border border-border/80 bg-card/50 p-6 shadow-sm"
+                  className={`rounded-xl border ${BORDER_SUBTLE} bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
                 >
                   <h3 className="text-base font-semibold text-foreground tracking-tight">{title}</h3>
                   <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{body}</p>
@@ -127,7 +130,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Separator className="max-w-[1200px] mx-auto opacity-60" />
+      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
 
       {/* How it works */}
       <section className={SECTION_PY} id="how" aria-label="How it works">
@@ -151,7 +154,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Separator className="max-w-[1200px] mx-auto opacity-60" />
+      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
 
       {/* Deploy */}
       <section className={SECTION_PY} id="quickstart" aria-label="Deploy">
@@ -165,7 +168,7 @@ export default function HomePage() {
               Works with login, verify email, invites, and password reset.
             </p>
             <div className="mt-10 flex justify-center">
-              <Button asChild size="lg" className="h-12 px-8">
+              <Button asChild size="lg" className="h-12 px-8 font-semibold text-primary-foreground">
                 <Link href="/app">Create site</Link>
               </Button>
             </div>
@@ -173,7 +176,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Separator className="max-w-[1200px] mx-auto opacity-60" />
+      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
 
       {/* Pricing: Start free first */}
       <section className={SECTION_PY} id="pricing" aria-label="Pricing">
@@ -181,37 +184,37 @@ export default function HomePage() {
           <SectionFade>
             <h2 className={`${SECTION_HEADING} text-center`}>Start free. Scale when you need it.</h2>
             <div className="mt-16 max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
-              <div className="rounded-xl border border-primary/20 bg-card/50 p-8 shadow-sm flex flex-col order-first">
+              <div className={`rounded-xl border border-primary/15 ${BORDER_SUBTLE} bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)] flex flex-col order-first`}>
                 <h3 className="text-xl font-semibold tracking-tight text-foreground">Free</h3>
                 <p className="mt-2 text-sm text-muted-foreground">1K redemptions / month</p>
                 <p className="mt-6 text-3xl font-bold text-primary">$0</p>
                 <p className="text-sm text-muted-foreground">/ month</p>
                 <p className="mt-4 text-sm text-muted-foreground">No credit card.</p>
                 <div className="mt-auto pt-8">
-                  <Button asChild className="w-full h-12">
+                  <Button asChild className="w-full h-12 font-semibold text-primary-foreground">
                     <Link href="/start">Create free site</Link>
                   </Button>
                 </div>
               </div>
-              <div className="rounded-xl border border-border/80 bg-card/50 p-8 shadow-sm flex flex-col">
+              <div className={`rounded-xl border ${BORDER_SUBTLE} bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)] flex flex-col`}>
                 <h3 className="text-xl font-semibold tracking-tight text-foreground">Pro</h3>
                 <p className="mt-2 text-sm text-muted-foreground">10K redemptions / month</p>
                 <p className="mt-6 text-2xl font-semibold text-foreground">$19</p>
                 <p className="text-sm text-muted-foreground">/ month</p>
                 <p className="mt-4 text-sm text-muted-foreground">Growing apps.</p>
                 <div className="mt-auto pt-8">
-                  <Button asChild variant="outline" className="w-full h-12">
+                  <Button asChild variant="outline" className={`w-full h-12 font-medium text-foreground ${BORDER_SUBTLE}`}>
                     <Link href="/pricing">Learn more</Link>
                   </Button>
                 </div>
               </div>
-              <div className="rounded-xl border border-border/80 bg-card/50 p-8 shadow-sm flex flex-col">
+              <div className={`rounded-xl border ${BORDER_SUBTLE} bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)] flex flex-col`}>
                 <h3 className="text-xl font-semibold tracking-tight text-foreground">Scale</h3>
                 <p className="mt-2 text-sm text-muted-foreground">High volume</p>
                 <p className="mt-6 text-2xl font-semibold text-foreground">Custom pricing</p>
                 <p className="mt-4 text-sm text-muted-foreground">Enterprise.</p>
                 <div className="mt-auto pt-8">
-                  <Button asChild variant="outline" className="w-full h-12">
+                  <Button asChild variant="outline" className={`w-full h-12 font-medium text-foreground ${BORDER_SUBTLE}`}>
                     <Link href="/pricing">Learn more</Link>
                   </Button>
                 </div>
@@ -224,7 +227,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Separator className="max-w-[1200px] mx-auto opacity-60" />
+      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
 
       {/* FAQ */}
       <section className={SECTION_PY} id="faq" aria-label="FAQ">
@@ -232,9 +235,9 @@ export default function HomePage() {
           <SectionFade>
             <h2 className={`${SECTION_HEADING} text-center`}>FAQ</h2>
             <div className="mt-12 max-w-2xl mx-auto">
-              <Accordion type="single" collapsible className="rounded-xl border border-border/80 bg-card/50 px-6 shadow-sm">
+              <Accordion type="single" collapsible className={`rounded-xl border ${BORDER_SUBTLE} bg-white px-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}>
                 {FAQ_ITEMS.map(({ q, a }) => (
-                  <AccordionItem key={q} value={q} className="border-border/60">
+                  <AccordionItem key={q} value={q} className={BORDER_SUBTLE}>
                     <AccordionTrigger className="text-left hover:no-underline py-5">
                       {q}
                     </AccordionTrigger>

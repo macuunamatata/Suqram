@@ -2,22 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Premium token-based design system — protocol-grade dev infra */
+/* Premium white SaaS — clean, high readability, AA+ contrast */
 :root {
-  /* Core tokens */
-  --bg: #F8FAFC;
-  --surface: #FFFFFF;
-  --border: #E2E8F0;
-  --text: #0F172A;
-  --muted: #475569;
-  --accent: #2563EB;
-  --accent-soft: #EFF6FF;
-  --success-text: #065F46;
-  --success-bg: #ECFDF5;
-  --success-border: #A7F3D0;
-  --danger-text: #991B1B;
-  --danger-bg: #FEF2F2;
-  --danger-border: #FECACA;
+  /* Core tokens: solid white page, very subtle separation */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --border: #e9edf3;
+  --text: #0f172a;
+  --muted: #64748b;
+  --accent: #2563eb;
+  --accent-soft: #eff6ff;
+  --success-text: #047857;
+  --success-bg: #ecfdf5;
+  --success-border: #a7f3d0;
+  --danger-text: #b91c1c;
+  --danger-bg: #fef2f2;
+  --danger-border: #fecaca;
 
   /* Type scale */
   --text-xs: 0.75rem;
@@ -50,9 +50,9 @@
   --radius-lg: 10px;
   --radius-xl: 12px;
 
-  /* Shadows — soft only */
-  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06);
-  --shadow-cta: 0 2px 6px rgba(37, 99, 235, 0.15);
+  /* Shadows — barely visible, no heavy outlines */
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-cta: 0 1px 3px rgba(37, 99, 235, 0.12);
 
   /* Typography */
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -69,6 +69,8 @@
   --panel: var(--surface);
   --card: var(--surface);
   --bg2: var(--bg);
+  --surface-tint: #ffffff;
+  --border-strong: #e9edf3;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1138,11 +1140,41 @@ h3 {
     .demo-real-link, .demo-real-url { transition: none; }
   }
 
+  /* ─── Full-width demo hero section ─── */
+  .demo-hero-section {
+    width: 100%;
+    padding: var(--space-16) var(--space-6) var(--space-20);
+    min-width: 0;
+  }
+  @media (min-width: 640px) {
+    .demo-hero-section {
+      padding: var(--space-20) var(--space-8) var(--space-24);
+    }
+  }
+  .demo-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .demo-hero-title {
+    font-size: var(--text-xl);
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 var(--space-10);
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+  }
+  @media (min-width: 640px) {
+    .demo-hero-title {
+      font-size: var(--text-2xl);
+      margin-bottom: var(--space-12);
+    }
+  }
+
   /* ─── Demo: links-only (two email-style links, click = inline result) ─── */
   .demo-links-only {
     display: flex;
     flex-direction: column;
-    gap: var(--space-8);
+    gap: var(--space-10);
     padding: 0;
     min-width: 0;
   }
@@ -1162,7 +1194,7 @@ h3 {
     letter-spacing: 0.02em;
   }
   .demo-link-email {
-    font-size: var(--text-lg);
+    font-size: 1.25rem;
     font-weight: 500;
     color: var(--accent);
     text-decoration: none;
@@ -1174,7 +1206,12 @@ h3 {
   }
   @media (min-width: 640px) {
     .demo-link-email {
-      font-size: var(--text-xl);
+      font-size: 1.5rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .demo-link-email {
+      font-size: 1.75rem;
     }
   }
   .demo-link-email:hover {
@@ -1265,8 +1302,8 @@ code, .font-mono {
 
 @layer base {
   :root {
-    /* Map to Tailwind HSL (no hsl() wrapper) — match design tokens */
-    --background: 210 40% 98%;
+    /* Tailwind HSL — white background, high-contrast text and CTAs */
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -1274,16 +1311,16 @@ code, .font-mono {
     --popover-foreground: 222 47% 11%;
     --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 40% 96%;
+    --secondary: 220 14% 96%;
     --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 20% 47%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 215 16% 47%;
     --accent: 214 100% 97%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
+    --border: 220 20% 93%;
+    --input: 220 20% 93%;
     --ring: 221 83% 53%;
     --radius: 0.5rem;
   }
@@ -1291,7 +1328,7 @@ code, .font-mono {
     border-color: var(--border);
   }
   body {
-    background: var(--bg);
+    background: #ffffff;
     color: var(--text);
   }
 }

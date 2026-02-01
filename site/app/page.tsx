@@ -30,6 +30,10 @@ const INVARIANT_TILES = [
     title: "Works with existing auth",
     body: "Point your link domain to the rail. No SDK; swap the URL in your email template.",
   },
+  {
+    title: "AI Spend Authorization Rail",
+    body: "One lane. One outcome: No request can burn variable AI cost unless it carries an edge-minted spend permit.",
+  },
 ];
 
 const FAQ_ITEMS = [

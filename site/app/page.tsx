@@ -28,7 +28,7 @@ const INVARIANT_TILES = [
   },
   {
     title: "Exactly-once redeem",
-    body: "One successful redemption per link. Replay and pre-open don't burn the token.",
+    body: "One successful redemption per link. Replay and pre-open do not burn the token.",
   },
   {
     title: "Replay-safe retries",
@@ -37,10 +37,6 @@ const INVARIANT_TILES = [
   {
     title: "Works with existing auth",
     body: "Point your link domain to the rail. No SDK; swap the URL in your email template.",
-  },
-  {
-    title: "AI Spend Authorization Rail",
-    body: "One lane. One outcome: No request can burn variable AI cost unless it carries an edge-minted spend permit.",
   },
 ];
 
@@ -58,8 +54,8 @@ const FAQ_ITEMS = [
     a: "No. Point your link domain to Suqram and swap the link in your email template.",
   },
   {
-    q: "Works with Supabase / Firebase / custom?",
-    a: "Yes. Works with any auth that uses one-time links in email.",
+    q: "Does it work with my existing auth?",
+    a: "Yes. If your auth uses one-time links in email (login, verify, reset, invite), you can protect them—custom code, frameworks, or hosted providers.",
   },
   {
     q: "What about passkeys?",
@@ -82,20 +78,20 @@ export default function HomePage() {
               Links that survive the real world.
             </h1>
             <p className="mt-5 body-hero text-[var(--text-secondary)] leading-relaxed">
-              Email scanners pre-open links and burn one-time tokens. Suqram runs at the edge so only a real click redeems—your magic links stay unbreakable.
+              Email scanners pre-open links and burn one-time tokens. Suqram runs at the edge so only an interactive redemption counts—your one-time links stay unbreakable.
             </p>
-            <ul className="mt-6 benefit-list" aria-label="Key benefits">
+            <ul className="mt-6 benefit-list benefit-chips" aria-label="Key invariants">
               <li className="benefit-item">
-                <BenefitCheck className="benefit-check" aria-hidden />
-                View-safe
+                <span className="benefit-chip">View-safe</span>
               </li>
               <li className="benefit-item">
-                <BenefitCheck className="benefit-check" aria-hidden />
-                Exactly-once redeem
+                <span className="benefit-chip">Exactly-once redeem</span>
               </li>
               <li className="benefit-item">
-                <BenefitCheck className="benefit-check" aria-hidden />
-                No SDK
+                <span className="benefit-chip">No SDK</span>
+              </li>
+              <li className="benefit-item">
+                <span className="benefit-chip">Works with any auth</span>
               </li>
             </ul>
             <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
@@ -106,6 +102,9 @@ export default function HomePage() {
                 Create site
               </Link>
             </div>
+            <p className="mt-3 text-sm text-[var(--muted)]">
+              For login, verify, invites, and reset links.
+            </p>
           </div>
         </div>
       </section>
@@ -142,30 +141,33 @@ export default function HomePage() {
               </div>
             ))}
           </div>
+          <p className="mt-8 text-center text-sm text-[var(--muted)] max-w-xl mx-auto">
+            Works with any auth provider that sends one-time links: custom auth, frameworks, and hosted providers.
+          </p>
+          <div className="mt-14 pt-10 border-t border-[var(--border)]">
+            <h3 className="text-sm font-semibold text-[var(--muted)] uppercase tracking-wide text-center">
+              Other rails (coming soon)
+            </h3>
+            <p className="mt-2 text-center text-sm text-[var(--muted)] max-w-md mx-auto">
+              AI Spend Authorization Rail: edge-minted spend permits so variable AI cost is only burned on permitted requests.
+            </p>
+          </div>
         </div>
       </section>
 
-      {/* How: interactive redemption — one surface, dividers */}
+      {/* How: interactive redemption — simple text rows, no heavy boxes */}
       <section className={SECTION_PY} id="how" aria-label="How it works">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
-            Interactive redemption, enforced at the edge
+            Interactive redemption, enforced at the edge.
           </h2>
-          <div className="mt-12 max-w-2xl mx-auto surface p-6 sm:p-8 space-y-0">
-            <div className="flex flex-wrap items-center gap-2 pb-5 border-b border-[var(--border)]">
-              <span className="pill text-xs">Scanner path</span>
-              <span className="text-sm text-[var(--text-secondary)]">
-                Email link → Suqram edge → non-redeeming response → token remains unused
-              </span>
-              <span className="w-2 h-2 rounded-full bg-[var(--status-error)] shrink-0" aria-hidden />
-            </div>
-            <div className="flex flex-wrap items-center gap-2 pt-5">
-              <span className="pill-accent text-xs">Interactive path</span>
-              <span className="text-sm text-[var(--text-secondary)]">
-                Email link → Suqram edge → confirm (only if needed) → your app verifies → success
-              </span>
-              <span className="w-2 h-2 rounded-full bg-[var(--status-success)] shrink-0" aria-hidden />
-            </div>
+          <div className="mt-12 max-w-2xl mx-auto space-y-4">
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              <span className="font-medium text-[var(--text)]">Scanner path:</span> Email link → Suqram edge → non-redeeming response → token remains unused.
+            </p>
+            <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+              <span className="font-medium text-[var(--text)]">Interactive path:</span> Email link → Suqram edge → (optional confirm) → your app verifies → success.
+            </p>
           </div>
           <p className="mt-6 text-center text-sm text-[var(--muted)]">
             Scanner requests don&apos;t redeem tokens. Only interactive redemption does.
@@ -177,10 +179,13 @@ export default function HomePage() {
       <section className={SECTION_PY} id="quickstart" aria-label="Deploy">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
-            Deploy in minutes
+            Deploy in minutes.
           </h2>
           <p className={`${SECTION_SUB} mt-2`}>
-            Create your site and get a protected link format to paste into Supabase (or any) email templates.
+            Create your site and get a protected link format to paste into your auth emails.
+          </p>
+          <p className="mt-2 text-center text-sm text-[var(--muted)] max-w-xl mx-auto">
+            Works with login, verify email, invites, and password reset.
           </p>
           <div className="mt-8 flex justify-center">
             <Link href="/app" className="btn-hero">
@@ -199,10 +204,10 @@ export default function HomePage() {
           <div className="mt-12 max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
             <div className="pricing-tier pricing-tier-featured flex flex-col p-6">
               <h3 className="text-xl font-semibold tracking-tight text-[var(--text)]">Free</h3>
-              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">1K redemptions/mo</p>
+              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">1K redemptions / month</p>
               <p className="mt-4 text-2xl font-bold tracking-tight text-[var(--primary)]">$0</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">/month</p>
-              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">No credit card. One domain.</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">/ month</p>
+              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">No credit card.</p>
               <div className="mt-auto pt-6">
                 <Link href="/start" className="pricing-cta-primary block w-full text-center">
                   Create free site
@@ -211,10 +216,10 @@ export default function HomePage() {
             </div>
             <div className="pricing-tier pricing-tier-quiet flex flex-col">
               <h3 className="text-xl font-semibold tracking-tight text-[var(--text)]">Pro</h3>
-              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">10K redemptions/mo</p>
+              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">10K redemptions / month</p>
               <p className="mt-4 text-xl font-semibold tracking-tight text-[var(--text)]">$19</p>
-              <p className="mt-1 text-sm text-[var(--muted)]">/month</p>
-              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">Growing apps. Multiple domains.</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">/ month</p>
+              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">Growing apps.</p>
               <div className="mt-auto pt-6">
                 <Link href="/pricing" className="pricing-cta-quiet">
                   Learn more
@@ -224,8 +229,8 @@ export default function HomePage() {
             <div className="pricing-tier pricing-tier-quiet flex flex-col">
               <h3 className="text-xl font-semibold tracking-tight text-[var(--text)]">Scale</h3>
               <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">High volume</p>
-              <p className="mt-4 text-xl font-semibold tracking-tight text-[var(--text)]">Custom</p>
-              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">Enterprise. Dedicated support.</p>
+              <p className="mt-4 text-xl font-semibold tracking-tight text-[var(--text)]">Custom pricing</p>
+              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">Enterprise.</p>
               <div className="mt-auto pt-6">
                 <Link href="/pricing" className="pricing-cta-quiet">
                   Learn more

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 type Clicked = null | "unprotected" | "protected";
@@ -12,8 +12,23 @@ export default function DemoBeforeAfter() {
   const [clicked, setClicked] = useState<Clicked>(null);
   const [runFirstLink, setRunFirstLink] = useState<RunFirstLink>(null);
 
+  // When user clicks "Run demo" (href="#demo"), focus the simulate button after scroll
+  useEffect(() => {
+    const focusSimulate = () => {
+      if (typeof window !== "undefined" && window.location.hash === "#demo") {
+        const t = setTimeout(() => document.getElementById("demo-simulate")?.focus(), 150);
+        return () => clearTimeout(t);
+      }
+    };
+    focusSimulate();
+    const onHash = () => { focusSimulate(); };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
   const onSimulate = () => {
     setRunFirstLink(null);
+    setClicked(null);
     setSimulated(true);
   };
 
@@ -37,11 +52,12 @@ export default function DemoBeforeAfter() {
 
   return (
     <section className="demo-section" aria-label="Demo">
-      <div className="demo-wrap">
+      <div className="demo-wrap demo-email-snippet">
         <div className="demo-email">
           <header className="demo-email-header">
             <p className="demo-email-eyebrow">Your sign-in link is ready.</p>
             <button
+              id="demo-simulate"
               type="button"
               className="demo-email-btn"
               onClick={onSimulate}
@@ -53,8 +69,9 @@ export default function DemoBeforeAfter() {
           </header>
 
           <div className="demo-email-links">
-            {/* Unprotected row */}
+            {/* Broken today */}
             <div className="demo-link-row">
+              <p className="demo-section-label">Broken today</p>
               <a
                 href="#"
                 className="demo-link"
@@ -68,13 +85,13 @@ export default function DemoBeforeAfter() {
               </p>
               {!simulated && runFirstLink === "unprotected" && (
                 <p className="demo-inline-hint" aria-live="polite">
-                  Run scanner simulation first
+                  Run scanner simulation first.
                 </p>
               )}
               {simulated && (
                 <>
-                  <p className="demo-inline-outcome demo-inline-outcome-fail" aria-live="polite">
-                    Token consumed by scanner
+                  <p className="demo-inline-outcome" aria-live="polite">
+                    Token consumed by scanner → Link expired
                   </p>
                   <AnimatePresence>
                     {clicked === "unprotected" && (
@@ -94,31 +111,29 @@ export default function DemoBeforeAfter() {
               )}
             </div>
 
-            {/* Protected row */}
+            {/* Protected with Suqram */}
             <div className="demo-link-row">
-              <div className="demo-link-row-head">
-                <a
-                  href="#"
-                  className="demo-link demo-link-protected"
-                  onClick={onProtectedClick}
-                  aria-label={simulated ? "Protected link" : "Run scanner simulation first"}
-                >
-                  Sign in to Example
-                </a>
-                <span className="demo-badge">Protected</span>
-              </div>
+              <p className="demo-section-label">Protected with Suqram</p>
+              <a
+                href="#"
+                className="demo-link demo-link-protected"
+                onClick={onProtectedClick}
+                aria-label={simulated ? "Protected link" : "Run scanner simulation first"}
+              >
+                Sign in to Example
+              </a>
               <p className="demo-link-url" aria-hidden>
                 https://go.suqram.com/r/•••••••
               </p>
               {!simulated && runFirstLink === "protected" && (
                 <p className="demo-inline-hint" aria-live="polite">
-                  Run scanner simulation first
+                  Run scanner simulation first.
                 </p>
               )}
               {simulated && (
                 <>
                   <p className="demo-inline-outcome demo-inline-outcome-ok" aria-live="polite">
-                    Scanner views don&apos;t redeem
+                    Scanner views don&apos;t redeem → First real click succeeds
                   </p>
                   <AnimatePresence>
                     {clicked === "protected" && (

@@ -33,11 +33,11 @@ export default function HomePage() {
               <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
                 Suqram runs at the edge so only an interactive click redeems. Preview bots fetch the page; tokens stay valid until a human clicks.
               </p>
-              <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
+              <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
                 <Button asChild size="lg" className="rounded-full h-12 px-8 font-medium bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link href="/start">Get started</Link>
                 </Button>
-                <Link href="#pricing" className="inline-flex items-center gap-1.5 text-base font-medium text-muted-foreground hover:text-foreground transition-colors mt-2 sm:mt-0">
+                <Link href="#pricing" className="inline-flex items-center gap-1.5 text-base font-medium text-muted-foreground hover:text-foreground transition-colors">
                   Pricing
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M12 5l7 7-7 7" /></svg>
                 </Link>
@@ -72,7 +72,7 @@ export default function HomePage() {
               </li>
               <li className="flex gap-3">
                 <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
-                <span>Every redemption is a ReceiptClicked event with proof (EIG-signed). Use it for audit or downstream workflows.</span>
+                <span>Every redemption produces a signed click receipt (EIG-signed). Use it for audit or downstream workflows.</span>
               </li>
             </ul>
           </div>

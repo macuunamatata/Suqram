@@ -11,8 +11,8 @@ const STEPS = [
   },
   {
     step: 3,
-    title: "(Optional) Connect destination",
-    detail: "HubSpot, webhook, or custom redirect after redemption.",
+    title: "(Optional) Send signed receipts",
+    detail: "Send signed receipts to HubSpot or a webhook endpoint.",
   },
 ];
 

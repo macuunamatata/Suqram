@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "next build && npx @cloudflare/next-on-pages",
+    "check:pages-output": "node -e \"const fs=require('fs');const p='.vercel/output/static';if(fs.existsSync(p)){console.log('OK: '+p);}else{console.log('MISSING: '+p);process.exit(1);}\"",
     "start": "next start -p 3000",
     "lint": "next lint"
   },
@@ -25,6 +26,8 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@cloudflare/next-on-pages": "1.13.10",
+    "cross-env": "^7.0.3",
     "@types/node": "^20.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

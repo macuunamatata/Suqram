@@ -55,6 +55,8 @@ export interface Env {
   RESEND_API_KEY?: string;
   /** Live inbox test: from address (e.g. noreply@suqram.com) */
   TEST_FROM_EMAIL?: string;
+  /** Sync user from Next.js after Google login (Bearer token or X-Sync-Secret) */
+  SYNC_USER_SECRET?: string;
 }
 
 async function sha256Hex(input: string): Promise<string> {
@@ -1040,6 +1042,23 @@ export default {
       if (path.startsWith('/start/')) {
         const target = `${DASHBOARD_SITE_ORIGIN}${path}${url.search}`;
         return new Response(null, { status: 302, headers: { 'Location': target } });
+      }
+    }
+
+    // Dashboard API: POST /app/sync-user — upsert user from Next.js after Google login (server-only; CORS)
+    if (path === '/app/sync-user') {
+      if (request.method === 'OPTIONS') {
+        const origin = getAppCorsOrigin(request);
+        const headers = new Headers(CORS_APP_HEADERS);
+        if (origin) {
+          headers.set('Access-Control-Allow-Origin', origin);
+          headers.set('Access-Control-Allow-Credentials', 'true');
+        }
+        return new Response(null, { status: 204, headers });
+      }
+      if (request.method === 'POST') {
+        const res = await handleSyncUser(request, env);
+        return addCorsApp(request, res);
       }
     }
 
@@ -2540,6 +2559,72 @@ async function handleCreateSite(request: Request, env: Env): Promise<Response> {
       },
     }
   );
+}
+
+/**
+ * POST /app/sync-user — upsert user from Next.js after Google login (server-only).
+ * Body: { email: string, name?: string, provider?: string }. Auth: Authorization: Bearer SYNC_USER_SECRET or X-Sync-Secret.
+ */
+async function handleSyncUser(request: Request, env: Env): Promise<Response> {
+  const secret = env.SYNC_USER_SECRET;
+  if (!secret || typeof secret !== 'string' || !secret.trim()) {
+    return new Response(JSON.stringify({ error: 'sync not configured' }), {
+      status: 501,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const authHeader = request.headers.get('Authorization');
+  const syncSecret = request.headers.get('X-Sync-Secret');
+  const provided = (authHeader?.startsWith('Bearer ') ? authHeader.slice(7).trim() : null) ?? syncSecret?.trim() ?? null;
+  if (!provided || provided !== secret) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  let body: { email?: string; name?: string; provider?: string };
+  try {
+    body = await request.json();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const email = typeof body?.email === 'string' ? body.email.trim() : null;
+  if (!email) {
+    return new Response(JSON.stringify({ error: 'email required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const name = typeof body?.name === 'string' ? body.name.trim() || null : null;
+  const provider = typeof body?.provider === 'string' ? body.provider.trim() || 'google' : 'google';
+  const now = Date.now();
+  const userId = await sha256Hex(`${provider}:${email}`);
+  try {
+    const existing = await env.EIG_DB.prepare(
+      'SELECT user_id FROM users WHERE user_id = ?'
+    ).bind(userId).first<{ user_id: string }>();
+    if (existing) {
+      await env.EIG_DB.prepare(
+        'UPDATE users SET last_login_at = ?, name = ? WHERE user_id = ?'
+      ).bind(now, name ?? null, userId).run();
+    } else {
+      await env.EIG_DB.prepare(
+        'INSERT INTO users (user_id, email, name, provider, created_at, last_login_at) VALUES (?, ?, ?, ?, ?, ?)'
+      ).bind(userId, email, name, provider, now, now).run();
+    }
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'db error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 /**

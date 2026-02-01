@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Button } from "@/components/ui/button";
+import { Providers } from "./components/Providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -71,16 +72,18 @@ export default function RootLayout({
               ))}
             </nav>
             <div className="site-header__actions">
-              <Link href="/app" className="site-header__link site-header__link--log">
+              <Link href="/login" className="site-header__link site-header__link--log">
                 Log in
               </Link>
               <Button asChild size="sm" className="site-btn site-btn--primary">
-                <Link href="/start">Get started</Link>
+                <Link href="/login">Get started</Link>
               </Button>
             </div>
           </div>
         </header>
-        <main className="flex-1">{children}</main>
+        <main className="flex-1">
+          <Providers>{children}</Providers>
+        </main>
         <footer className="site-footer">
           <div className="site-footer__inner site-footer__inner--minimal">
             <nav className="site-footer__nav-minimal" aria-label="Footer">

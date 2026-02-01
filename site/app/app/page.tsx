@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
 const BOOTSTRAP_URL = "https://go.suqram.com/app/bootstrap";
@@ -11,8 +12,78 @@ const BOOTSTRAP_TIMEOUT_MS = 1500;
 
 type Bootstrap = { logged_in: false } | { logged_in: true; site: { site_id: string; hostname: string } };
 
+function DashboardHeader({ session }: { session: { user?: { email?: string | null; name?: string | null } } | null }) {
+  const signOutUrl = "/api/auth/signout?callbackUrl=/login";
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
+          Dashboard
+        </h1>
+        <p className="mt-2 text-[var(--muted)]">
+          Manage your link rail and generate protected links.
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-3 shrink-0">
+        <Link href="/docs" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+          Docs
+        </Link>
+        <Link href="/docs/setup" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+          Setup guides
+        </Link>
+        <Link href="/app/api-keys" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+          Advanced: use an API key
+        </Link>
+        {session?.user?.email && (
+          <span className="text-sm text-[var(--muted)]" title={session.user.email}>
+            {session.user.email}
+          </span>
+        )}
+        <a href={signOutUrl} className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+          Sign out
+        </a>
+      </div>
+    </div>
+  );
+}
+
+function CreateFirstSiteButton() {
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const nextFull = `${getSiteOrigin()}/app`;
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+    try {
+      const res = await fetch(BOOTSTRAP_URL.replace("/bootstrap", "/create-site"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ next: nextFull }),
+      });
+      const data = (await res.json()) as { ok?: boolean; redirect_to?: string };
+      if (!res.ok) throw new Error((data as { error?: string }).error || `Error ${res.status}`);
+      if (data.redirect_to) window.location.href = data.redirect_to;
+      else window.location.href = nextFull;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed");
+      setSubmitting(false);
+    }
+  };
+  return (
+    <form onSubmit={handleCreate} className="mt-6">
+      <button type="submit" className="btn-hero" disabled={submitting}>
+        {submitting ? "Creating…" : "Create your first site"}
+      </button>
+      {error && <p className="mt-3 text-sm text-[var(--error-muted)]">{error}</p>}
+    </form>
+  );
+}
+
 function DashboardContent() {
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
   const [status, setStatus] = useState<"checking" | "authenticated" | "not_logged_in">("checking");
   const [bootstrap, setBootstrap] = useState<Bootstrap | null>(null);
   const [destUrl, setDestUrl] = useState("");
@@ -89,20 +160,15 @@ function DashboardContent() {
   }
 
   if (status === "not_logged_in") {
-    const nextPath = `/app${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
-    const startUrl = `/start?next=${encodeURIComponent(nextPath)}`;
-    const signInUrl = `/start?next=${encodeURIComponent(nextPath)}&mode=signin`;
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="mx-auto max-w-md px-4 text-center">
-          <p className="text-sm text-[var(--muted)]">You’re not signed in.</p>
-          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link href={startUrl} className="btn-hero w-full sm:w-auto">
-              Create free site
-            </Link>
-            <Link href={signInUrl} className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-              Sign in
-            </Link>
+      <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-20">
+        <div className="max-w-2xl">
+          <DashboardHeader session={session} />
+          <div className="mt-12 flex min-h-[40vh] flex-col items-center justify-center">
+            <p className="text-center text-[var(--muted)]">
+              Create your first link rail to get started.
+            </p>
+            <CreateFirstSiteButton />
           </div>
         </div>
       </div>
@@ -110,35 +176,11 @@ function DashboardContent() {
   }
 
   const site = bootstrap?.logged_in ? bootstrap.site : null;
-  const logoutUrl = `${getRailBaseUrl()}/app/logout?redirect=${encodeURIComponent(`${getSiteOrigin()}/start`)}`;
 
   return (
     <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-20">
       <div className="max-w-2xl">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
-              Dashboard
-            </h1>
-            <p className="mt-2 text-[var(--muted)]">
-              Manage your link rail and generate protected links.
-            </p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <Link href="/docs" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-              Docs
-            </Link>
-            <Link href="/docs/setup" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-              Setup guides
-            </Link>
-            <Link href="/app/api-keys" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-              Advanced: use an API key
-            </Link>
-            <a href={logoutUrl} className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-              Sign out
-            </a>
-          </div>
-        </div>
+        <DashboardHeader session={session} />
 
         {/* Section 1: Site */}
         <section className="mt-12 card border-[var(--border)] p-6 sm:p-8">

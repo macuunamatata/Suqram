@@ -72,6 +72,7 @@ Set these via **Cloudflare Secrets** (not in `wrangler.toml`):
 
 - **`ALLOWED_DEST_HOSTS`** — Comma-separated hosts the rail may redirect to (e.g. your Supabase project + app host). Example: `yourproject.supabase.co,app.suqram.com`
 - **`ALLOWED_DEST_HOST_SUFFIXES`** (optional) — Comma-separated host suffixes, e.g. `.supabase.co`
+- **`SYNC_USER_SECRET`** (optional) — Shared secret so the marketing site can sync user records to D1 after Google login; same value as the site’s `SYNC_USER_SECRET`
 
 ```bash
 wrangler secret put ALLOWED_DEST_HOSTS

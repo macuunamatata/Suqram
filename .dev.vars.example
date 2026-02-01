@@ -1,5 +1,8 @@
 ADMIN_API_KEY=change-me
 
+# Sync user from Next.js after Google login (Bearer token); same value as site SYNC_USER_SECRET
+# SYNC_USER_SECRET=your-sync-secret
+
 # Rail: for local smoke tests only (required for npm run smoke)
 ALLOWED_DEST_HOSTS=example.com
 

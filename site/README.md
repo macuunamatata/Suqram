@@ -1,24 +1,32 @@
 # Auth Link Rail — Marketing site
 
-Next.js (App Router) static export + Tailwind. Routes: `/`, `/live-test/`, `/start/`, `/pricing/`, `/docs/`, `/terms/`, `/privacy/`.
+Next.js (App Router) + Tailwind. Login-first: Google OAuth at `/login`; dashboard at `/app`. Routes: `/`, `/login`, `/app`, `/start`, `/live-test/`, `/pricing/`, `/docs/`, `/terms/`, `/privacy/`.
 
 **Run locally**
 
 ```bash
 cd site
 npm install
+cp .env.example .env.local
+# Edit .env.local: set AUTH_SECRET, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET (see below)
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000). Use `/login` to sign in with Google; after login you are redirected to `/app` (dashboard).
 
-**Build (static export)**
+**Environment variables (see `.env.example`)**
+
+- `AUTH_SECRET` (or `NEXTAUTH_SECRET`) — required for NextAuth; e.g. `openssl rand -base64 32`
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — from [Google Cloud Console](https://console.cloud.google.com/apis/credentials) (OAuth 2.0 Client ID, redirect URI `http://localhost:3000/api/auth/callback/google` for dev)
+- `SYNC_USER_SECRET` — optional; same value as worker secret so the site can sync user records to D1 after login
+
+**Build**
 
 ```bash
 npm run build
 ```
 
-Output is in `out/`. All routes are static HTML (e.g. `out/index.html`, `out/start/index.html`).
+Build produces a Node-compatible app (API routes for auth). For static hosting, auth routes require a server or serverless (e.g. Vercel).
 
 ---
 

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { Button } from "@/components/ui/button";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -28,9 +30,8 @@ export const metadata: Metadata = {
 
 const CENTER_NAV = [
   { href: "#invariants", label: "Invariants" },
-  { href: "#demo", label: "Demo" },
-  { href: "#quickstart", label: "Quickstart" },
-  { href: "/pricing", label: "Pricing" },
+  { href: "#how", label: "How it works" },
+  { href: "#pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
 ];
 
@@ -49,48 +50,45 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} scroll-smooth`}>
       <body className="relative min-h-screen flex flex-col antialiased font-sans">
-        <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-sm">
-          <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-6 px-4 sm:px-6">
+        <header className="sticky top-0 z-50 border-b border-border/80 bg-background/80 backdrop-blur-sm">
+          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-8 px-6 sm:px-8">
             <a
               href="/"
-              className="text-base font-semibold text-[var(--text)] shrink-0 whitespace-nowrap"
+              className="text-lg font-semibold text-foreground shrink-0 whitespace-nowrap"
             >
               Suqram
             </a>
-            <nav className="hidden sm:flex items-center gap-6 flex-1 min-w-0 px-6" aria-label="Main">
+            <nav className="hidden sm:flex items-center gap-8 flex-1 min-w-0 justify-center" aria-label="Main">
               {CENTER_NAV.map(({ href, label }) => (
                 <a
                   key={href}
                   href={href}
-                  className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {label}
                 </a>
               ))}
             </nav>
-            <div className="flex items-center gap-2 shrink-0">
-              <a href="#demo" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
-                Demo
-              </a>
-              <a href="/app" className="btn-hero !h-9 !min-h-9 !py-0 !text-sm">
-                Dashboard
-              </a>
+            <div className="flex items-center shrink-0">
+              <Button asChild size="sm" className="h-9 px-4">
+                <Link href="#demo">Try the demo</Link>
+              </Button>
             </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-[var(--border)] py-6 bg-[var(--surface)]">
-          <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
-            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <p className="text-sm text-[var(--text-secondary)]">
+        <footer className="border-t border-border/60 py-8 bg-background/50">
+          <div className="mx-auto max-w-[1200px] px-6 sm:px-8">
+            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
+              <p className="text-sm text-muted-foreground">
                 Suqram — Protocol-grade auth links.
               </p>
-              <div className="flex items-center gap-6 flex-wrap justify-center">
+              <div className="flex flex-wrap gap-8 justify-center">
                 {FOOTER_LINKS.map(({ href, label }) => (
                   <a
                     key={label}
                     href={href}
-                    className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors"
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {label}
                   </a>

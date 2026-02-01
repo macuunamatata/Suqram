@@ -1,146 +1,54 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
-import { Check, ShieldAlert } from "lucide-react";
+import { useState, useCallback } from "react";
+import { Check, X } from "lucide-react";
 
-const DEMO_CREATE_URL = "https://go.suqram.com/demo/create";
-const DEMO_SCAN_URL = "https://go.suqram.com/demo/scan";
-
-type Session = {
-  tid: string;
-  unprotected_url: string;
-  protected_url: string;
+type Result = null | {
+  kind: "success" | "error";
+  title: string;
+  detail: string;
 };
 
-type Result = "idle" | "loading" | "expired" | "signedin";
-
 export default function ScannerDemo() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [resultUnprotected, setResultUnprotected] = useState<Result>("idle");
-  const [resultProtected, setResultProtected] = useState<Result>("idle");
-  const runIdRef = useRef(0);
+  const [result, setResult] = useState<Result>(null);
 
-  const runUnprotected = useCallback(async () => {
-    const runId = runIdRef.current + 1;
-    runIdRef.current = runId;
-    setResultProtected("idle");
-    setResultUnprotected("loading");
-    try {
-      let tid: string;
-      let unprotectedUrl: string;
-      let protectedUrl: string;
-      if (session) {
-        ({ tid, unprotected_url: unprotectedUrl, protected_url: protectedUrl } = session);
-      } else {
-        const createRes = await fetch(DEMO_CREATE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-        const createJson = (await createRes.json().catch(() => ({}))) as {
-          ok?: boolean;
-          tid?: string;
-          unprotected_url?: string;
-          protected_url?: string;
-        };
-        if (!createRes.ok || !createJson?.ok || !createJson.tid) {
-          if (runId !== runIdRef.current) return;
-          setResultUnprotected("idle");
-          return;
-        }
-        tid = createJson.tid;
-        unprotectedUrl = createJson.unprotected_url ?? "";
-        protectedUrl = createJson.protected_url ?? "";
-        const scanRes = await fetch(DEMO_SCAN_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tid }),
-        });
-        if (!scanRes.ok) {
-          if (runId !== runIdRef.current) return;
-          setResultUnprotected("idle");
-          return;
-        }
-        setSession({ tid, unprotected_url: unprotectedUrl, protected_url: protectedUrl });
+  const showError = useCallback((e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    setResult({
+      kind: "error",
+      title: "Error",
+      detail: "preview bot blocked. Token NOT consumed.",
+    });
+  }, []);
+
+  const showSuccess = useCallback((e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    setResult({
+      kind: "success",
+      title: "Success",
+      detail: "link opened by a human. Token NOT consumed by preview.",
+    });
+  }, []);
+
+  const onUnsafeKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        showError(e);
       }
-      await fetch(unprotectedUrl, { method: "GET", redirect: "follow" });
-      if (runId !== runIdRef.current) return;
-      setResultUnprotected("expired");
-    } catch {
-      if (runId !== runIdRef.current) return;
-      setResultUnprotected("idle");
-    }
-  }, [session]);
-
-  const runProtected = useCallback(async () => {
-    const runId = runIdRef.current + 1;
-    runIdRef.current = runId;
-    setResultUnprotected("idle");
-    setResultProtected("loading");
-    try {
-      let tid: string;
-      let unprotectedUrl: string;
-      let protectedUrl: string;
-      if (session) {
-        ({ tid, unprotected_url: unprotectedUrl, protected_url: protectedUrl } = session);
-      } else {
-        const createRes = await fetch(DEMO_CREATE_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        });
-        const createJson = (await createRes.json().catch(() => ({}))) as {
-          ok?: boolean;
-          tid?: string;
-          unprotected_url?: string;
-          protected_url?: string;
-        };
-        if (!createRes.ok || !createJson?.ok || !createJson.tid) {
-          if (runId !== runIdRef.current) return;
-          setResultProtected("idle");
-          return;
-        }
-        tid = createJson.tid;
-        unprotectedUrl = createJson.unprotected_url ?? "";
-        protectedUrl = createJson.protected_url ?? "";
-        const scanRes = await fetch(DEMO_SCAN_URL, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tid }),
-        });
-        if (!scanRes.ok) {
-          if (runId !== runIdRef.current) return;
-          setResultProtected("idle");
-          return;
-        }
-        setSession({ tid, unprotected_url: unprotectedUrl, protected_url: protectedUrl });
-      }
-      await fetch(protectedUrl, { method: "GET", redirect: "follow" });
-      if (runId !== runIdRef.current) return;
-      setResultProtected("signedin");
-    } catch {
-      if (runId !== runIdRef.current) return;
-      setResultProtected("idle");
-    }
-  }, [session]);
-
-  const onUnsafe = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (resultUnprotected === "loading") return;
-      runUnprotected();
     },
-    [resultUnprotected, runUnprotected]
+    [showError]
   );
 
-  const onSafe = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      if (resultProtected === "loading") return;
-      runProtected();
+  const onSafeKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        showSuccess(e);
+      }
     },
-    [resultProtected, runProtected]
+    [showSuccess]
   );
-
-  const activeLink = resultUnprotected === "loading" ? "unsafe" : resultProtected === "loading" ? "safe" : null;
 
   return (
     <div className="scanner-demo">
@@ -157,9 +65,10 @@ export default function ScannerDemo() {
             <div className="scanner-demo__link-block">
               <a
                 href="#"
-                onClick={onUnsafe}
-                className={`scanner-demo__link ${activeLink === "unsafe" ? "scanner-demo__link--active" : ""}`}
-                aria-label="Unprotected link"
+                onClick={showError}
+                onKeyDown={onUnsafeKeyDown}
+                className="scanner-demo__link"
+                aria-label="Unprotected link (preview bot blocked)"
               >
                 Sign in to Example
               </a>
@@ -168,9 +77,10 @@ export default function ScannerDemo() {
             <div className="scanner-demo__link-block">
               <a
                 href="#"
-                onClick={onSafe}
-                className={`scanner-demo__link ${activeLink === "safe" ? "scanner-demo__link--active" : ""}`}
-                aria-label="Protected link"
+                onClick={showSuccess}
+                onKeyDown={onSafeKeyDown}
+                className="scanner-demo__link"
+                aria-label="Protected link (opened by human)"
               >
                 Sign in to Example
               </a>
@@ -178,21 +88,21 @@ export default function ScannerDemo() {
             </div>
           </div>
           <div className="scanner-demo__output" aria-live="polite">
-            {resultUnprotected === "expired" && (
-              <div className="scanner-demo__result scanner-demo__result--error">
-                <ShieldAlert className="scanner-demo__result-icon" aria-hidden />
-                <span>Link expired. Preview consumed the token.</span>
-              </div>
-            )}
-            {resultProtected === "signedin" && (
-              <div className="scanner-demo__result scanner-demo__result--success">
-                <Check className="scanner-demo__result-icon" aria-hidden />
-                <span>Signed in. Only a real click redeemed the link.</span>
-              </div>
-            )}
-            {resultUnprotected !== "expired" && resultProtected !== "signedin" && (
+            {result === null && (
               <div className="scanner-demo__result scanner-demo__result--idle">
                 <span>Click a link above to see the result.</span>
+              </div>
+            )}
+            {result?.kind === "error" && (
+              <div className="scanner-demo__result scanner-demo__result--error">
+                <X className="scanner-demo__result-icon" aria-hidden />
+                <span>{result.title}: {result.detail}</span>
+              </div>
+            )}
+            {result?.kind === "success" && (
+              <div className="scanner-demo__result scanner-demo__result--success">
+                <Check className="scanner-demo__result-icon" aria-hidden />
+                <span>{result.title}: {result.detail}</span>
               </div>
             )}
           </div>

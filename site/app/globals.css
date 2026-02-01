@@ -4,9 +4,9 @@
 
 /* Finta-inspired: warm off-white, airy spacing, premium minimal */
 :root {
-  /* Core: warm off-white (Finta-style), near-black slate */
-  --bg: #fdfbf7;
-  --bg-warm: #faf8f5;
+  /* Core: pure white page */
+  --bg: #ffffff;
+  --bg-warm: #ffffff;
   --surface: #ffffff;
   --border: #e7e5e4;
   --text: #1c1917;
@@ -1273,13 +1273,12 @@ h3 {
     }
   }
 
-  /* ─── Announcement bar (Finta-style: light pill, subtle border) ─── */
+  /* ─── Announcement bar ─── */
   .announcement-bar {
     background: var(--surface);
     color: var(--text);
     padding: 0.5rem 1rem;
     text-align: center;
-    border-bottom: 1px solid var(--border);
   }
   .announcement-bar__text {
     margin: 0;
@@ -1307,7 +1306,6 @@ h3 {
     top: 0;
     z-index: 50;
     background: var(--bg-warm);
-    border-bottom: 1px solid var(--border);
   }
   .site-header__inner {
     max-width: 1200px;
@@ -1401,7 +1399,6 @@ h3 {
     gap: 6px;
     padding: 10px 14px;
     background: #f5f5f4;
-    border-bottom: 1px solid var(--border);
   }
   .scanner-demo__dot {
     width: 8px;
@@ -1441,8 +1438,9 @@ h3 {
   .scanner-demo__link {
     font-size: 1rem;
     font-weight: 500;
-    color: var(--brand);
+    color: #2563eb !important;
     text-decoration: none;
+    text-underline-offset: 3px;
     cursor: pointer;
     line-height: 1.4;
     transition: color var(--duration-ui) var(--ease-out), text-decoration-color var(--duration-ui) var(--ease-out);
@@ -1453,12 +1451,13 @@ h3 {
     }
   }
   .scanner-demo__link:hover {
+    color: #2563eb !important;
     text-decoration: underline;
   }
-  .scanner-demo__link--active {
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 2px;
+  .scanner-demo__link:focus-visible {
+    outline: none;
+    border-radius: 4px;
+    box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px rgba(37, 99, 235, 0.4);
   }
   .scanner-demo__domain {
     font-size: 0.75rem;
@@ -1503,7 +1502,6 @@ h3 {
 
   /* ─── Site footer ─── */
   .site-footer {
-    border-top: 1px solid var(--border);
     background: var(--bg-warm);
     padding: 3rem 1.5rem 2rem;
   }
@@ -1592,8 +1590,8 @@ code, .font-mono {
 
 @layer base {
   :root {
-    /* Tailwind HSL — warm off-white, near-black text, blue primary */
-    --background: 40 9% 98%;
+    /* Tailwind HSL — pure white, near-black text, blue primary */
+    --background: 0 0% 100%;
     --foreground: 24 10% 10%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;

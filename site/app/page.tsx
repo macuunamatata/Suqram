@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ScannerDemo from "./components/ScannerDemo";
+import ViewSafeDiagram from "./components/diagrams/ViewSafeDiagram";
+import ExactlyOnceDiagram from "./components/diagrams/ExactlyOnceDiagram";
+import NoSdkDiagram from "./components/diagrams/NoSdkDiagram";
 import { Button } from "@/components/ui/button";
+
+const FEATURE_DIAGRAMS = [ViewSafeDiagram, ExactlyOnceDiagram, NoSdkDiagram] as const;
 
 export const metadata: Metadata = {
   title: "Suqram — Scanner-safe auth links",
@@ -107,8 +112,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trusted by (Finta-style: centered heading, monochrome logos) */}
-      <section className="py-14 sm:py-16 border-b border-border/60" id="trusted">
+      {/* Trusted by */}
+      <section className="py-14 sm:py-16" id="trusted">
         <div className={CONTAINER}>
           <h2 className="text-center text-base font-semibold tracking-tight text-foreground mb-10">
             Trusted by fast-growing teams
@@ -189,8 +194,11 @@ export default function HomePage() {
                 </ul>
               </div>
               <div className={`rounded-xl border border-border bg-card/50 p-8 min-h-[200px] flex items-center justify-center ${side === "left" ? "lg:col-start-1 lg:row-start-1" : ""}`}>
-                <div className="w-full max-w-[280px] h-32 rounded-lg bg-muted/50 border border-border flex items-center justify-center">
-                  <span className="text-xs font-medium text-muted-foreground">Diagram / mock</span>
+                <div className="w-full max-w-[280px] flex items-center justify-center text-muted-foreground">
+                  {(() => {
+                    const Diagram = FEATURE_DIAGRAMS[i];
+                    return <Diagram />;
+                  })()}
                 </div>
               </div>
             </div>

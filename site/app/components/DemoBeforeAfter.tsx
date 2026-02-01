@@ -24,8 +24,8 @@ const TRACE_LINES = [
   "User: link still valid for interactive redemption",
 ] as const;
 
-const UNPROTECTED_DISPLAY_URL = "https://app.example.com/auth/verify?token=••••••••••••";
-const PROTECTED_DISPLAY_URL = "https://go.suqram.com/r/••••••••••••";
+const UNPROTECTED_URL = "https://app.example.com/auth/verify?token=••••••••••••";
+const PROTECTED_URL = "https://go.suqram.com/r/••••••••••••";
 
 const STEP_MS = 500;
 
@@ -33,12 +33,12 @@ const container = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
   },
 };
 
-const tile = {
-  hidden: { opacity: 0, y: 10 },
+const item = {
+  hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0 },
 };
 
@@ -53,9 +53,7 @@ export default function DemoBeforeAfter() {
   useEffect(() => {
     const m = window.matchMedia("(prefers-reduced-motion: reduce)");
     reduceMotionRef.current = m.matches;
-    const h = () => {
-      reduceMotionRef.current = m.matches;
-    };
+    const h = () => { reduceMotionRef.current = m.matches; };
     m.addEventListener("change", h);
     return () => m.removeEventListener("change", h);
   }, []);
@@ -67,12 +65,10 @@ export default function DemoBeforeAfter() {
     const signal = abortRef.current.signal;
     runIdRef.current += 1;
     const thisRunId = runIdRef.current;
-
     const bail = () => thisRunId !== runIdRef.current || signal.aborted;
 
     setStatus("running");
 
-    let tid: string | null = null;
     try {
       const createRes = await fetch(DEMO_CREATE_URL, {
         method: "POST",
@@ -87,16 +83,15 @@ export default function DemoBeforeAfter() {
         return;
       }
       if (!createJson?.ok || !createJson.tid) {
-        setError("Invalid create response. Please try again.");
+        setError("Invalid response. Try again.");
         setStatus("idle");
         return;
       }
-      tid = createJson.tid;
 
       const scanRes = await fetch(DEMO_SCAN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tid }),
+        body: JSON.stringify({ tid: createJson.tid }),
         signal,
       });
       const scanJson = (await scanRes.json().catch(() => ({}))) as { ok?: boolean; error?: string };
@@ -115,14 +110,11 @@ export default function DemoBeforeAfter() {
     }
 
     abortRef.current = null;
-
-    const reduceMotionVal = reduceMotionRef.current;
-    if (reduceMotionVal) {
+    if (reduceMotionRef.current) {
       setStatus("done");
       return;
     }
-
-    await sleep(STEP_MS * 2);
+    await sleep(1000);
     if (bail()) return;
     setStatus("done");
   }, []);
@@ -131,142 +123,136 @@ export default function DemoBeforeAfter() {
     navigator.clipboard.writeText(TRACE_LINES.join("\n"));
   }, []);
 
-  const showOutcomes = status === "done";
-  const isRunning = status === "running";
+  const done = status === "done";
+  const running = status === "running";
 
   return (
-    <section className="py-12 sm:py-16" aria-label="Demo">
-      <div className="mx-auto max-w-[640px] px-4 sm:px-6 demoPanel">
-        <h2 className="section-h2 text-center">
-          See what happens when a scanner opens your link
+    <section className="demo-section" aria-label="Product demo">
+      <div className="demo-wrap">
+        {/* Narrative: See it in action */}
+        <p className="demo-label">See it in action</p>
+        <h2 className="demo-headline">
+          Same email. A scanner opens the link. One burns, one stays valid.
         </h2>
-        <p className="mt-2 text-center text-[var(--text-secondary)] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-          One link burns. One stays valid. Same email—only the edge decides.
+        <p className="demo-sub">
+          Your user gets this email with two sign-in links. Hit the button to simulate what happens when a security scanner opens the link first.
         </p>
 
-        <div className="demoPanel-inner mt-8">
-          <p className="demoPanel-hook">
-            Two links in the same email. Hit the button to see which one survives.
-          </p>
-
-          {/* Email snippet */}
-          <div className="demoEmail">
-            <p className="demoEmail-eyebrow">Your sign-in link is ready</p>
-            <div className="demoEmail-row">
-              <div className="demoEmail-rowInner">
-                <span className="demoEmail-link">Sign in to Example</span>
-                <span className="demoEmail-pill">unprotected</span>
-              </div>
-              <p className="demoEmail-url" title={UNPROTECTED_DISPLAY_URL}>
-                {UNPROTECTED_DISPLAY_URL}
+        <div className="demo-panel">
+          {/* Email mock */}
+          <div className="demo-email">
+            <p className="demo-email-from">Acme &lt;auth@acme.com&gt;</p>
+            <p className="demo-email-subject">Sign in to your account</p>
+            <div className="demo-email-body">
+              <p className="demo-email-line">
+                <span className="demo-email-link">Sign in (unprotected)</span>
               </p>
-            </div>
-            <div className="demoEmail-row">
-              <div className="demoEmail-rowInner">
-                <span className="demoEmail-link">Sign in to Example</span>
-                <span className="demoEmail-pill demoEmail-pillProtected">protected</span>
-              </div>
-              <p className="demoEmail-url" title={PROTECTED_DISPLAY_URL}>
-                {PROTECTED_DISPLAY_URL}
+              <p className="demo-email-url">{UNPROTECTED_URL}</p>
+              <p className="demo-email-line demo-email-line-second">
+                <span className="demo-email-link">Sign in (protected)</span>
               </p>
+              <p className="demo-email-url">{PROTECTED_URL}</p>
             </div>
           </div>
 
-          <hr className="demoPanel-divider" aria-hidden />
+          {/* Single CTA */}
+          <div className="demo-action">
+            <button
+              type="button"
+              onClick={runDemo}
+              disabled={running}
+              className="demo-btn"
+              aria-busy={running}
+              aria-live="polite"
+            >
+              {running ? (
+                <>
+                  <span>Simulating…</span>
+                  <span className="demo-btn-dots" aria-hidden>
+                    <span /><span /><span />
+                  </span>
+                </>
+              ) : (
+                "Simulate scanner opening the link"
+              )}
+            </button>
+          </div>
 
-          <button
-            type="button"
-            onClick={runDemo}
-            disabled={isRunning}
-            className="demoPanel-cta"
-            aria-busy={isRunning}
-            aria-live="polite"
-          >
-            <span>Simulate scanner pre-open</span>
-            {isRunning && (
-              <span className="demoPanel-ctaDots" aria-hidden>
-                <span />
-                <span />
-                <span />
-              </span>
-            )}
-          </button>
-
-          {showOutcomes && (
+          {/* Result: side-by-side comparison */}
+          {done && (
             <motion.div
-              className="demoOutcomes"
+              className="demo-result"
               variants={prefersReducedMotion ? undefined : container}
               initial="hidden"
               animate="show"
             >
               <motion.div
-                className="demoOutcome"
-                data-status="expired"
-                variants={prefersReducedMotion ? undefined : tile}
+                className="demo-card demo-card-bad"
+                variants={prefersReducedMotion ? undefined : item}
               >
-                <div className="demoOutcome-header">
-                  <IconX className="demoOutcome-icon" aria-hidden />
-                  <p className="demoOutcome-title">Expired</p>
+                <p className="demo-card-label">Without Suqram</p>
+                <div className="demo-card-head">
+                  <IconX className="demo-card-icon" aria-hidden />
+                  <p className="demo-card-title">Link expired</p>
                 </div>
-                <p className="demoOutcome-desc">User sees &quot;Link expired&quot;—token was consumed by the scanner.</p>
-                <p className="demoOutcome-why">Scanners that open links burn one-time tokens.</p>
+                <p className="demo-card-body">The scanner consumed the token. User sees an error and can&apos;t sign in.</p>
+                <p className="demo-card-why">Scanners that open links burn one-time tokens.</p>
               </motion.div>
               <motion.div
-                className="demoOutcome"
-                data-status="valid"
-                variants={prefersReducedMotion ? undefined : tile}
+                className="demo-card demo-card-good"
+                variants={prefersReducedMotion ? undefined : item}
               >
-                <div className="demoOutcome-header">
-                  <IconCheck className="demoOutcome-icon" aria-hidden />
-                  <p className="demoOutcome-title">Still valid</p>
+                <p className="demo-card-label">With Suqram</p>
+                <div className="demo-card-head">
+                  <IconCheck className="demo-card-icon" aria-hidden />
+                  <p className="demo-card-title">Still valid</p>
                 </div>
-                <p className="demoOutcome-desc">User can still sign in. Scanner views don&apos;t redeem.</p>
-                <p className="demoOutcome-why">Only interactive redemption counts—links survive the real world.</p>
+                <p className="demo-card-body">Scanner viewed it; only a real click redeems. User can still sign in.</p>
+                <p className="demo-card-why">Only interactive redemption counts.</p>
               </motion.div>
             </motion.div>
           )}
 
-          {showOutcomes && (
-            <>
-              <div className="demoPanel-ctaWrap">
-                <Link href="/start" className="demoPanel-ctaSecondary">
-                  Protect your links →
-                </Link>
-              </div>
-              <details className="demoDetails">
-                <summary className="demoDetails-summary">
-                  <ChevronIcon className="demoDetails-chevron" aria-hidden />
-                  View trace
-                </summary>
-                <div className="demoTrace-block">
-                  <button
-                    type="button"
-                    className="demoTrace-copy"
-                    onClick={copyTrace}
-                    title="Copy trace"
-                    aria-label="Copy trace"
-                  >
-                    <CopyIcon />
-                  </button>
-                  <div className="demoTrace-lines">
-                    {TRACE_LINES.map((line, i) => (
-                      <p key={i} className="demoTrace-line">
-                        {line}
-                      </p>
-                    ))}
-                  </div>
+          {done && (
+            <div className="demo-cta-wrap">
+              <Link href="/start" className="demo-cta-link">
+                Protect your links →
+              </Link>
+            </div>
+          )}
+
+          {done && (
+            <details className="demo-details">
+              <summary className="demo-details-summary">
+                <ChevronIcon className="demo-details-chevron" aria-hidden />
+                View trace
+              </summary>
+              <div className="demo-trace">
+                <button
+                  type="button"
+                  className="demo-trace-copy"
+                  onClick={copyTrace}
+                  title="Copy trace"
+                  aria-label="Copy trace"
+                >
+                  <CopyIcon />
+                </button>
+                <div className="demo-trace-lines">
+                  {TRACE_LINES.map((line, i) => (
+                    <p key={i} className="demo-trace-line">{line}</p>
+                  ))}
                 </div>
-              </details>
-            </>
+              </div>
+            </details>
           )}
 
           {error && (
-            <p className="text-sm text-[var(--status-error)]" role="alert">
+            <p className="demo-error" role="alert">
               {error}
             </p>
           )}
 
-          <p className="demoPanel-footer">
+          <p className="demo-footer">
             No signup. Runs on Suqram&apos;s edge.
           </p>
         </div>

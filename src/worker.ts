@@ -958,6 +958,23 @@ export default {
 
     // Admin API routes are handled above (before this point)
 
+    // Dashboard API: GET /app/bootstrap — session + site (200 JSON, never redirect; CORS for Pages)
+    if (path === '/app/bootstrap') {
+      if (request.method === 'OPTIONS') {
+        const origin = getAppCorsOrigin(request);
+        const headers = new Headers(CORS_APP_HEADERS);
+        if (origin) {
+          headers.set('Access-Control-Allow-Origin', origin);
+          headers.set('Access-Control-Allow-Credentials', 'true');
+        }
+        return new Response(null, { status: 204, headers });
+      }
+      if (request.method === 'GET') {
+        const res = await handleDashboardBootstrap(request, env);
+        return addCorsApp(request, res);
+      }
+    }
+
     // Dashboard API: /app/create-site — handle before any redirect (OPTIONS + POST only; no redirect)
     if (path === '/app/create-site') {
       if (request.method === 'OPTIONS') {
@@ -988,6 +1005,23 @@ export default {
       }
       if (request.method === 'GET') {
         const res = await handleDashboardCounters(request, env);
+        return addCorsApp(request, res);
+      }
+    }
+
+    // Dashboard API: POST /app/generate-link — build protected URL for destination (200 JSON; CORS)
+    if (path === '/app/generate-link') {
+      if (request.method === 'OPTIONS') {
+        const origin = getAppCorsOrigin(request);
+        const headers = new Headers(CORS_APP_HEADERS);
+        if (origin) {
+          headers.set('Access-Control-Allow-Origin', origin);
+          headers.set('Access-Control-Allow-Credentials', 'true');
+        }
+        return new Response(null, { status: 204, headers });
+      }
+      if (request.method === 'POST') {
+        const res = await handleDashboardGenerateLink(request, env);
         return addCorsApp(request, res);
       }
     }
@@ -2493,7 +2527,11 @@ async function handleCreateSite(request: Request, env: Env): Promise<Response> {
   const redirectTo = getCreateSiteRedirectTo(nextRaw, request);
 
   return new Response(
-    JSON.stringify({ ok: true, redirect_to: redirectTo }),
+    JSON.stringify({
+      ok: true,
+      site: { site_id: site.siteId, hostname: site.hostname },
+      redirect_to: redirectTo,
+    }),
     {
       status: 200,
       headers: {
@@ -2502,6 +2540,76 @@ async function handleCreateSite(request: Request, env: Env): Promise<Response> {
       },
     }
   );
+}
+
+/**
+ * GET /app/bootstrap — 200 JSON { logged_in, site?, limits?, api_key? }. Never redirect.
+ * Resolves site by session (cookie), not by request Host.
+ */
+async function handleDashboardBootstrap(request: Request, env: Env): Promise<Response> {
+  const { site, error } = await resolveSiteForReceipts(request, env);
+  if (!site) {
+    return new Response(JSON.stringify({ logged_in: false }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const body = {
+    logged_in: true,
+    site: { site_id: site.siteId, hostname: site.hostname },
+  };
+  return new Response(JSON.stringify(body), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+/**
+ * POST /app/generate-link — body { url: string }. Returns { protected_url } for dashboard session site.
+ * Resolves site by session (cookie), not by request Host.
+ */
+async function handleDashboardGenerateLink(request: Request, env: Env): Promise<Response> {
+  const { site, error: siteError } = await resolveSiteForReceipts(request, env);
+  if (!site) {
+    return new Response(JSON.stringify({ error: 'unauthorized' }), {
+      status: 401,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  let body: { url?: string };
+  try {
+    body = await request.json<{ url?: string }>();
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid JSON' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const rawUrl = body?.url;
+  if (!rawUrl || typeof rawUrl !== 'string' || !rawUrl.trim()) {
+    return new Response(JSON.stringify({ error: 'url required' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl.trim());
+  } catch {
+    return new Response(JSON.stringify({ error: 'Invalid URL' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+  const pathname = parsed.pathname || '/';
+  const search = parsed.search || '';
+  const isLocalHost = site.hostname === 'localhost' || site.hostname.startsWith('127.0.0.1');
+  const scheme = isLocalHost ? 'http' : 'https';
+  const protectedUrl = `${scheme}://${site.hostname}/l${pathname}${search}`;
+  return new Response(JSON.stringify({ protected_url: protectedUrl }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 async function handleDashboardLogout(request: Request, env: Env): Promise<Response> {

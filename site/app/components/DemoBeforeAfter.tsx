@@ -15,19 +15,38 @@ type Phase = "idle" | "running" | "done";
 type ActiveStep = 0 | 1 | 2 | 3;
 
 const UNPROTECTED_URL = "https://app.example.com/auth/verify?token=••••••••••••";
-const PROTECTED_URL = "https://go.suqram.com/r/••••••••••••";
+const PROTECTED_URL = "https://go.suqram.com/l/auth/verify?token=••••••••••••";
 
-const STEP2_MS = 700;
-const STEP3_MS = 1400;
-const DONE_MS = 2000;
+const STEP2_MS = 600;
+const STEP3_MS = 1200;
+const DONE_MS = 1800;
+
+const LOG_LINES = {
+  step1: "GET /l/... (scanner pre-open)",
+  step2Unprotected: "POST /v/... (scanner consumed token)",
+  step2Protected: "POST /v/... (scanner blocked)",
+  step3Unprotected: "GET /l/... (user → expired)",
+  step3Protected: "POST /v/... (interactive redemption)",
+};
+
+function LogLine({ line, onCopy }: { line: string; onCopy: () => void }) {
+  return (
+    <div className="demo-log-line">
+      <code className="flex-1 truncate">{line}</code>
+      <button type="button" onClick={onCopy} className="shrink-0">
+        Copy
+      </button>
+    </div>
+  );
+}
 
 export default function DemoBeforeAfter() {
   const [mode, setMode] = useState<Mode>("protected");
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeStep, setActiveStep] = useState<ActiveStep>(0);
-  const [hasRun, setHasRun] = useState(false);
   const [runId, setRunId] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [logLines, setLogLines] = useState<string[]>([]);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const abortRef = useRef<AbortController | null>(null);
@@ -54,6 +73,7 @@ export default function DemoBeforeAfter() {
     setPhase("idle");
     setActiveStep(0);
     setError(null);
+    setLogLines([]);
   }, [clearTimers]);
 
   const startRun = useCallback(() => {
@@ -61,22 +81,32 @@ export default function DemoBeforeAfter() {
     setPhase("running");
     setActiveStep(1);
     setRunId((r) => r + 1);
+    setLogLines([LOG_LINES.step1]);
 
     if (prefersReducedMotion) {
       setActiveStep(3);
       setPhase("done");
-      setHasRun(true);
+      setLogLines([
+        LOG_LINES.step1,
+        mode === "unprotected" ? LOG_LINES.step2Unprotected : LOG_LINES.step2Protected,
+        mode === "unprotected" ? LOG_LINES.step3Unprotected : LOG_LINES.step3Protected,
+      ]);
       return;
     }
 
-    const t2 = setTimeout(() => setActiveStep(2), STEP2_MS);
-    const t3 = setTimeout(() => setActiveStep(3), STEP3_MS);
+    const t2 = setTimeout(() => {
+      setActiveStep(2);
+      setLogLines((prev) => [...prev, mode === "unprotected" ? LOG_LINES.step2Unprotected : LOG_LINES.step2Protected]);
+    }, STEP2_MS);
+    const t3 = setTimeout(() => {
+      setActiveStep(3);
+      setLogLines((prev) => [...prev, mode === "unprotected" ? LOG_LINES.step3Unprotected : LOG_LINES.step3Protected]);
+    }, STEP3_MS);
     const t4 = setTimeout(() => {
       setPhase("done");
-      setHasRun(true);
     }, DONE_MS);
     timersRef.current = [t2, t3, t4];
-  }, [prefersReducedMotion, clearTimers]);
+  }, [prefersReducedMotion, clearTimers, mode]);
 
   const runDemo = useCallback(async () => {
     setError(null);
@@ -87,6 +117,7 @@ export default function DemoBeforeAfter() {
     setPhase("running");
     setActiveStep(1);
     setRunId((r) => r + 1);
+    setLogLines([LOG_LINES.step1]);
 
     let tid: string | null = null;
 
@@ -101,12 +132,14 @@ export default function DemoBeforeAfter() {
         setError(formatApiError("Create failed", createRes.status, createJson));
         setPhase("idle");
         setActiveStep(0);
+        setLogLines([]);
         return;
       }
       if (!createJson?.ok || !createJson.tid) {
         setError("Invalid create response. Please try again.");
         setPhase("idle");
         setActiveStep(0);
+        setLogLines([]);
         return;
       }
       tid = createJson.tid;
@@ -122,6 +155,7 @@ export default function DemoBeforeAfter() {
         setError(formatApiError("Scan failed", scanRes.status, scanJson));
         setPhase("idle");
         setActiveStep(0);
+        setLogLines([]);
         return;
       }
     } catch (e) {
@@ -131,6 +165,7 @@ export default function DemoBeforeAfter() {
       setError(message);
       setPhase("idle");
       setActiveStep(0);
+      setLogLines([]);
       return;
     }
 
@@ -152,129 +187,101 @@ export default function DemoBeforeAfter() {
   const showOutcomes = phase === "running" || phase === "done";
 
   return (
-    <section id="demo" className="demo-before-after py-16 sm:py-24" aria-label="Email link demo">
-      <div
-        className="demo-hero mx-auto w-[92vw] max-w-[980px] px-4 sm:px-6"
-        data-phase={phase}
-        data-mode={mode}
-        data-active-step={activeStep}
-        data-run-id={runId}
-      >
+    <section className="py-12 sm:py-16" aria-label="Demo">
+      <div className="mx-auto max-w-[640px] px-4 sm:px-6">
         <h2 className="section-h2 text-center">
-          Watch a scanner burn a token — then see it fail.
+          Proof: scanner vs interactive redemption
         </h2>
-        <p className="mt-3 text-center text-[var(--text2)] max-w-xl mx-auto text-base sm:text-lg">
-          Simulate a security scanner pre-open. Compare unprotected vs protected links.
+        <p className="mt-2 text-center text-[var(--text-secondary)] max-w-xl mx-auto text-sm sm:text-base">
+          Simulate a scanner pre-open. Compare unprotected (token burns) vs protected (only interactive redemption counts).
         </p>
 
-        <div className="demo-hero-inner mt-10 sm:mt-12">
-          <div className="flex justify-center gap-1 mb-8">
+        <div className="demo-hero-inner mt-8">
+          <div className="flex justify-center gap-2 mb-6">
             <button
               type="button"
               onClick={() => onModeChange("unprotected")}
-              className={`demo-toggle px-5 py-2.5 text-base font-medium rounded-full transition-colors h-10 ${
+              className={`demo-toggle rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 mode === "unprotected"
-                  ? "bg-[rgba(255,255,255,0.08)] text-[var(--text)]"
-                  : "text-[var(--muted)] hover:text-[var(--text2)]"
+                  ? "bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)]"
+                  : "text-[var(--muted)] hover:text-[var(--text)] border border-transparent"
               }`}
             >
               Unprotected
             </button>
-            <span className="text-[var(--muted)] self-center px-1" aria-hidden>|</span>
             <button
               type="button"
               onClick={() => onModeChange("protected")}
-              className={`demo-toggle px-5 py-2.5 text-base font-medium rounded-full transition-colors h-10 ${
+              className={`demo-toggle rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
                 mode === "protected"
-                  ? "bg-[var(--accent-dim)] text-[var(--accent)]"
-                  : "text-[var(--muted)] hover:text-[var(--text2)]"
+                  ? "bg-[var(--primary-muted)] text-[var(--primary)] border border-[var(--border)]"
+                  : "text-[var(--muted)] hover:text-[var(--text)] border border-transparent"
               }`}
             >
-              Protected by Suqram
+              Protected
             </button>
           </div>
 
-          <div className="demo-glass relative rounded-[32px] p-8 sm:p-10">
-            <div className="demo-waterline" aria-hidden />
-
+          <div className="demo-glass">
             <div className="demo-inner">
-              <div className="demo-email-line relative z-[1]">
-                <p className="text-[var(--text2)] text-lg sm:text-xl">Your sign-in link is ready.</p>
-                <div className="mt-4 flex flex-col items-start gap-2">
-                  <button
-                    type="button"
-                    className="demo-real-link relative inline-block text-left"
-                    aria-disabled
-                    tabIndex={-1}
-                  >
-                    <span className="demo-real-link-inner">
-                      <span className="demo-real-link-text">Sign in to Example</span>
-                      <span className="demo-underline" aria-hidden />
-                    </span>
-                    <span className="demo-beam" aria-hidden />
-                  </button>
-                  <p className="demo-url-preview text-[var(--muted)] truncate max-w-full" title={previewUrl}>
-                    {previewUrl}
-                  </p>
+              <p className="text-[var(--text-secondary)] text-sm">Your sign-in link is ready.</p>
+              <div className="mt-3 flex flex-col gap-1">
+                <span className="demo-real-link">Sign in to Example</span>
+                <p className="demo-url-preview truncate" title={previewUrl}>
+                  {previewUrl}
+                </p>
+              </div>
+
+              {/* Rail timeline: fixed column for line/dots, flexible for text */}
+              <div className="demo-timeline-rail mt-8">
+                <div className="demo-timeline-track">
+                  <div className={`demo-timeline-dot ${activeStep >= 1 ? "active" : ""}`} />
+                  <div className={`demo-timeline-line ${activeStep >= 2 ? "filled" : ""}`} />
+                  <div className={`demo-timeline-dot ${activeStep >= 2 ? "active" : ""}`} />
+                  <div className={`demo-timeline-line ${activeStep >= 3 ? "filled" : ""}`} />
+                  <div className={`demo-timeline-dot ${activeStep >= 3 ? "active" : ""}`} />
+                </div>
+                <div className="demo-timeline-content">
+                  <div className="demo-timeline-label">Scanner pre-open</div>
+                  {showOutcomes && activeStep >= 1 && <div className="demo-timeline-outcome ok">Detected</div>}
+                </div>
+                <div className="demo-timeline-content">
+                  <div className="demo-timeline-label">Redemption</div>
+                  {showOutcomes && activeStep >= 2 && (
+                    <div className={`demo-timeline-outcome ${mode === "unprotected" ? "bad" : "ok"}`}>
+                      {mode === "unprotected" ? "Consumed" : "Blocked"}
+                    </div>
+                  )}
+                </div>
+                <div className="demo-timeline-content">
+                  <div className="demo-timeline-label">Interactive redemption</div>
+                  {showOutcomes && activeStep >= 3 && (
+                    <div className={`demo-timeline-outcome ${mode === "unprotected" ? "bad" : "ok"}`}>
+                      {mode === "unprotected" ? "Expired" : "Redeemed"}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="demo-steps mt-10">
-                <svg
-                  className="demo-steps-svg"
-                  width={28}
-                  height={224}
-                  viewBox="0 0 28 224"
-                  aria-hidden
-                >
-                  <line className="demo-steps-line" x1={14} y1={10} x2={14} y2={214} />
-                  <circle className="demo-steps-node" cx={14} cy={28} r={5} />
-                  <circle className="demo-steps-node" cx={14} cy={98} r={5} />
-                  <circle className="demo-steps-node" cx={14} cy={168} r={5} />
-                  <circle className="demo-signal-dot" cx={14} cy={28} r={4} />
-                </svg>
-
-                <div className={`demo-step-row ${activeStep >= 1 ? "demo-step-row-active" : ""}`}>
-                  <div className="demo-step-text">
-                    <span className="demo-step-label">Scanner pre-open</span>
-                    {showOutcomes && activeStep >= 1 && (
-                      <span key={`step1-${runId}`} className="demo-step-outcome-line demo-step-outcome-ok demo-outcome-visible">
-                        Detected ✓
-                      </span>
-                    )}
-                  </div>
+              {logLines.length > 0 && (
+                <div className="demo-log" role="log" aria-label="Request log">
+                  {logLines.map((line, i) => (
+                    <LogLine
+                      key={`${runId}-${i}-${line}`}
+                      line={line}
+                      onCopy={() => navigator.clipboard.writeText(line)}
+                    />
+                  ))}
                 </div>
-
-                <div className={`demo-step-row ${activeStep >= 2 ? "demo-step-row-active" : ""} ${activeStep >= 2 ? (mode === "unprotected" ? "demo-step-row-bad" : "demo-step-row-ok") : ""}`}>
-                  <div className="demo-step-text">
-                    <span className="demo-step-label">Redemption</span>
-                    {showOutcomes && activeStep >= 2 && (
-                      <span key={`step2-${mode}-${runId}`} className={`demo-step-outcome-line demo-outcome-visible ${mode === "unprotected" ? "demo-step-outcome-bad" : "demo-step-outcome-ok"}`}>
-                        {mode === "unprotected" ? "Consumed ×" : "Blocked ✓"}
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                <div className={`demo-step-row ${activeStep >= 3 ? "demo-step-row-active" : ""} ${activeStep >= 3 ? (mode === "unprotected" ? "demo-step-row-bad" : "demo-step-row-ok") : ""}`}>
-                  <div className="demo-step-text">
-                    <span className="demo-step-label">User click</span>
-                    {showOutcomes && activeStep >= 3 && (
-                      <span key={`step3-${mode}-${runId}`} className={`demo-step-outcome-line demo-outcome-visible ${mode === "unprotected" ? "demo-step-outcome-bad" : "demo-step-outcome-ok"}`}>
-                        {mode === "unprotected" ? "Expired ×" : "Redeemed ✓"}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+              )}
 
               {error && (
-                <p className="mt-4 text-sm text-[var(--error-muted)]" role="alert">
+                <p className="mt-4 text-sm text-[var(--status-error)]" role="alert">
                   {error}
                 </p>
               )}
 
-              <div className="demo-actions mt-10">
+              <div className="mt-6">
                 <button
                   type="button"
                   onClick={runDemo}
@@ -293,8 +300,8 @@ export default function DemoBeforeAfter() {
                   )}
                 </button>
               </div>
-              <p className="mt-4 text-sm text-[var(--muted)]">
-                No signup. Runs entirely on suqram.com.
+              <p className="mt-3 text-xs text-[var(--muted)]">
+                No signup. Runs on suqram.com.
               </p>
             </div>
           </div>

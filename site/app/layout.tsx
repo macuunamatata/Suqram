@@ -1,20 +1,34 @@
 import type { Metadata } from "next";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Suqram — Scanner-proof auth links",
+  title: "Suqram — Protocol-grade auth links",
   description:
-    "Magic links that survive Safe Links and security scanners. Suqram Auth Link Rail.",
+    "View-safe, exactly-once redemption. Magic links that survive scanners. Dev infra for auth links.",
   openGraph: {
-    title: "Suqram — Scanner-proof auth links",
+    title: "Suqram — Protocol-grade auth links",
     description:
-      "Magic links that survive Safe Links and security scanners. Suqram Auth Link Rail.",
+      "View-safe, exactly-once redemption. Magic links that survive scanners. Dev infra for auth links.",
     type: "website",
   },
 };
 
 const CENTER_NAV = [
-  { href: "#how", label: "How it works" },
+  { href: "#invariants", label: "Invariants" },
+  { href: "#demo", label: "Demo" },
   { href: "#quickstart", label: "Quickstart" },
   { href: "/pricing", label: "Pricing" },
   { href: "#faq", label: "FAQ" },
@@ -33,30 +47,30 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
-      <body className="relative z-10 min-h-screen flex flex-col antialiased">
-        <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--bg)]">
-          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-6 px-4 sm:px-6">
+    <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} scroll-smooth`}>
+      <body className="relative min-h-screen flex flex-col antialiased font-sans">
+        <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/95 backdrop-blur-sm">
+          <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-6 px-4 sm:px-6">
             <a
               href="/"
-              className="text-lg font-semibold text-[var(--text)] transition-opacity hover:opacity-90 shrink-0 whitespace-nowrap"
+              className="text-base font-semibold text-[var(--text)] shrink-0 whitespace-nowrap"
             >
               Suqram
             </a>
-            <nav className="hidden sm:flex items-center justify-center gap-6 md:gap-8 flex-1 min-w-0 px-4" aria-label="Main">
+            <nav className="hidden sm:flex items-center gap-6 flex-1 min-w-0 px-6" aria-label="Main">
               {CENTER_NAV.map(({ href, label }) => (
                 <a
                   key={href}
                   href={href}
-                  className="text-sm text-[var(--text)] transition-colors duration-150 ease-out hover:text-[var(--text)] opacity-90 hover:opacity-100"
+                  className="text-sm text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors"
                 >
                   {label}
                 </a>
               ))}
             </nav>
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
               <a href="#demo" className="btn-nav-cta">
-                Try the demo
+                Demo
               </a>
               <a href="/app" className="btn-nav-cta">
                 Dashboard
@@ -65,18 +79,18 @@ export default function RootLayout({
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-[var(--border)] py-8 bg-[var(--bg)]">
+        <footer className="border-t border-[var(--border)] py-6 bg-[var(--surface)]">
           <div className="mx-auto max-w-[1200px] px-4 sm:px-6">
             <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <p className="text-sm text-[var(--text)]">
-                Suqram — Scanner-proof magic links.
+              <p className="text-sm text-[var(--text-secondary)]">
+                Suqram — Protocol-grade auth links.
               </p>
-              <div className="flex items-center gap-4 flex-wrap justify-center">
+              <div className="flex items-center gap-6 flex-wrap justify-center">
                 {FOOTER_LINKS.map(({ href, label }) => (
                   <a
                     key={label}
                     href={href}
-                    className="text-xs text-[var(--muted)] transition-colors duration-150 ease-out hover:text-[var(--text)]"
+                    className="text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors"
                   >
                     {label}
                   </a>

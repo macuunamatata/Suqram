@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
-const SESSION_CHECK_URL = "https://go.suqram.com/app/counters";
-const SESSION_CHECK_TIMEOUT_MS = 1500;
+const BOOTSTRAP_URL = "https://go.suqram.com/app/bootstrap";
+const BOOTSTRAP_TIMEOUT_MS = 1500;
 
 export default function ApiKeysPage() {
   const [status, setStatus] = useState<"checking" | "authenticated" | "not_logged_in">("checking");
@@ -18,17 +18,16 @@ export default function ApiKeysPage() {
 
     const timeoutId = setTimeout(() => {
       abortRef.current?.abort();
-    }, SESSION_CHECK_TIMEOUT_MS);
+    }, BOOTSTRAP_TIMEOUT_MS);
 
-    fetch(SESSION_CHECK_URL, { credentials: "include", signal })
+    fetch(BOOTSTRAP_URL, { credentials: "include", signal })
       .then((res) => {
-        if (!mounted) return;
         clearTimeout(timeoutId);
-        if (res.ok) {
-          setStatus("authenticated");
-        } else {
-          setStatus("not_logged_in");
-        }
+        return res.json();
+      })
+      .then((data: { logged_in?: boolean }) => {
+        if (!mounted) return;
+        setStatus(data?.logged_in ? "authenticated" : "not_logged_in");
       })
       .catch((e) => {
         if (!mounted) return;
@@ -54,15 +53,20 @@ export default function ApiKeysPage() {
   }
 
   if (status === "not_logged_in") {
+    const startUrl = "/start?next=%2Fapp%2Fapi-keys";
+    const signInUrl = "/start?next=%2Fapp%2Fapi-keys&mode=signin";
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="mx-auto max-w-md px-4 text-center">
           <p className="text-sm text-[var(--muted)]">You’re not signed in.</p>
-          <p className="mt-4">
-            <Link href="/start?next=%2Fapp%2Fapi-keys" className="link-accent text-sm font-medium">
-              Create site or sign in →
+          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Link href={startUrl} className="btn-hero w-full sm:w-auto">
+              Create free site
             </Link>
-          </p>
+            <Link href={signInUrl} className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+              Sign in
+            </Link>
+          </div>
         </div>
       </div>
     );

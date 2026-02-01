@@ -29,28 +29,16 @@ export const metadata: Metadata = {
 };
 
 const NAV_LINKS = [
-  { href: "#features", label: "Product" },
+  { href: "#what-happens", label: "Product" },
   { href: "/docs", label: "Docs" },
   { href: "#pricing", label: "Pricing" },
 ];
 
-const FOOTER_COLUMNS = [
-  {
-    title: "Product",
-    links: [
-      { href: "#features", label: "Features" },
-      { href: "/docs", label: "Docs" },
-      { href: "#pricing", label: "Pricing" },
-    ],
-  },
-  {
-    title: "Company",
-    links: [
-      { href: "/privacy", label: "Privacy" },
-      { href: "/terms", label: "Terms" },
-      { href: "mailto:support@suqram.com", label: "Contact" },
-    ],
-  },
+const FOOTER_LINKS = [
+  { href: "/docs", label: "Docs" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/security", label: "Security" },
+  { href: "mailto:support@suqram.com", label: "Contact" },
 ];
 
 export default function RootLayout({
@@ -94,25 +82,16 @@ export default function RootLayout({
         </header>
         <main className="flex-1">{children}</main>
         <footer className="site-footer">
-          <div className="site-footer__inner">
-            <div className="site-footer__grid">
-              {FOOTER_COLUMNS.map((col) => (
-                <div key={col.title} className="site-footer__col">
-                  <h3 className="site-footer__col-title">{col.title}</h3>
-                  <ul className="site-footer__links">
-                    {col.links.map(({ href, label }) => (
-                      <li key={label}>
-                        <Link href={href} className="site-footer__link">
-                          {label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+          <div className="site-footer__inner site-footer__inner--minimal">
+            <nav className="site-footer__nav-minimal" aria-label="Footer">
+              {FOOTER_LINKS.map(({ href, label }) => (
+                <Link key={label} href={href} className="site-footer__link">
+                  {label}
+                </Link>
               ))}
-            </div>
+            </nav>
             <p className="site-footer__copy">
-              © {new Date().getFullYear()} Suqram. Scanner-safe links for auth.
+              © {new Date().getFullYear()} Suqram. EIG.
             </p>
           </div>
         </footer>

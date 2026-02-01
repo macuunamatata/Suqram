@@ -65,11 +65,11 @@ const FAQ_ITEMS = [
 
 export default function HomePage() {
   return (
-    <>
-      {/* Hero — value prop + benefit checkmarks + primary CTA */}
+    <div className="page-gradient">
+      {/* Hero + Demo: centered, one outer section feel */}
       <section className={`${SECTION_PY}`} id="hero">
         <div className={CONTAINER}>
-          <div className="max-w-3xl">
+          <div className="max-w-3xl mx-auto text-center sm:text-left">
             <p className="pill-hero inline-flex items-center gap-2 text-xs">
               <span className="pill-hero-dot" aria-hidden />
               Protocol-grade auth links
@@ -109,11 +109,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Demo (proof widget) */}
       <section className="pb-16 sm:pb-20 lg:pb-24" id="demo" aria-label="Demo">
-        <div className={CONTAINER}>
-          <DemoBeforeAfter />
-        </div>
+        <DemoBeforeAfter />
       </section>
 
       {/* Invariant tiles — premium surfaces, same shadow */}
@@ -260,6 +257,6 @@ export default function HomePage() {
           </dl>
         </div>
       </section>
-    </>
+    </div>
   );
 }

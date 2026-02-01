@@ -10,8 +10,8 @@
   --border: #e9edf3;
   --text: #0f172a;
   --muted: #64748b;
-  --accent: #2563eb;
-  --accent-soft: #eff6ff;
+  --accent: #0f172a;
+  --accent-soft: #f1f5f9;
   --success-text: #047857;
   --success-bg: #ecfdf5;
   --success-border: #a7f3d0;
@@ -95,10 +95,10 @@ body {
 }
 
 a:not([class*="btn"]):not([class*="Button"]) {
-  color: var(--accent);
+  color: var(--text);
 }
 a:not([class*="btn"]):not([class*="Button"]):hover {
-  color: var(--accent);
+  color: var(--text);
   text-decoration: underline;
 }
 
@@ -294,15 +294,15 @@ h3 {
     box-shadow: 0 0 0 2px var(--primary-ring);
   }
 
-  /* Links — real link styling: blue, underline on hover. Never button-like unless CTA. */
+  /* Links — clean black, underline on hover. Never button-like unless CTA. */
   .link-accent {
-    color: var(--primary);
+    color: var(--text);
     font-weight: 500;
     text-decoration: none;
     transition: color var(--duration-ui) var(--ease-out), text-decoration-color var(--duration-ui) var(--ease-out);
   }
   .link-accent:hover {
-    color: var(--primary-hover);
+    color: var(--text);
     text-decoration: underline;
     text-underline-offset: 2px;
   }
@@ -1217,6 +1217,10 @@ h3 {
   .demo-link-email:hover {
     text-decoration: underline;
   }
+  .demo-link-email.demo-link-active {
+    font-weight: 600;
+    text-decoration: underline;
+  }
   .demo-link-email:focus-visible {
     outline: none;
     border-radius: var(--radius-sm);
@@ -1254,9 +1258,6 @@ h3 {
   .demo-link-result-signedin .demo-link-result-icon {
     color: var(--success-text);
   }
-  .demo-link-result-loading {
-    color: var(--muted);
-  }
   @media (prefers-reduced-motion: reduce) {
     .demo-link-email {
       transition: none;
@@ -1266,7 +1267,7 @@ h3 {
 
 @layer utilities {
   .text-balance { text-wrap: balance; }
-  .text-accent { color: var(--primary); }
+  .text-accent { color: var(--text); }
   .text-warn { color: var(--status-warn); }
   .text-error-muted { color: var(--status-error); }
   .transition-ui {

@@ -157,7 +157,7 @@ export default function DemoBeforeAfter() {
         <a
           href="#"
           onClick={onUnprotectedClick}
-          className="demo-link-email"
+          className={`demo-link-email ${resultUnprotected === "loading" ? "demo-link-active" : ""}`}
           aria-label="Unprotected sign-in link"
         >
           Sign in to Example
@@ -165,11 +165,7 @@ export default function DemoBeforeAfter() {
         <p className="demo-link-domain" aria-hidden>
           app.example.com
         </p>
-        {resultUnprotected === "loading" ? (
-          <p className="demo-link-result demo-link-result-loading" aria-live="polite">
-            …
-          </p>
-        ) : resultUnprotected === "expired" ? (
+        {resultUnprotected === "expired" ? (
           <p className="demo-link-result demo-link-result-expired" aria-live="polite">
             <X className="demo-link-result-icon" aria-hidden />
             Link expired
@@ -182,7 +178,7 @@ export default function DemoBeforeAfter() {
         <a
           href="#"
           onClick={onProtectedClick}
-          className="demo-link-email"
+          className={`demo-link-email ${resultProtected === "loading" ? "demo-link-active" : ""}`}
           aria-label="Protected sign-in link"
         >
           Sign in to Example
@@ -190,11 +186,7 @@ export default function DemoBeforeAfter() {
         <p className="demo-link-domain" aria-hidden>
           go.example.com
         </p>
-        {resultProtected === "loading" ? (
-          <p className="demo-link-result demo-link-result-loading" aria-live="polite">
-            …
-          </p>
-        ) : resultProtected === "signedin" ? (
+        {resultProtected === "signedin" ? (
           <p className="demo-link-result demo-link-result-signedin" aria-live="polite">
             <Check className="demo-link-result-icon" aria-hidden />
             Signed in

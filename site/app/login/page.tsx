@@ -1,29 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
-import { signIn } from "@/auth";
-
-export const runtime = 'edge';
 
 export const metadata: Metadata = {
   title: "Log in — Suqram",
   description: "Sign in with Google to manage your link rail and create protected links.",
 };
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ returnTo?: string }>;
-}) {
-  const session = await auth();
-  const { returnTo } = await searchParams;
-  const callbackUrl = returnTo && returnTo.startsWith("/") ? returnTo : "/app";
-
-  if (session?.user) {
-    redirect(callbackUrl);
-  }
-
+export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center px-4 py-16 sm:px-6 sm:py-20">
       <div className="w-full">
@@ -31,32 +14,14 @@ export default async function LoginPage({
           Log in
         </h1>
         <p className="mt-3 text-[var(--muted)]">
-          Sign in with Google to manage your link rail, create your first site, and generate protected links for auth or transactional emails.
+          Login is temporarily disabled on this deployment.
         </p>
-
-        <form
-          action={async (formData: FormData) => {
-            "use server";
-            const to = (formData.get("callbackUrl") as string) || "/app";
-            await signIn("google", { redirectTo: to });
-          }}
-          className="mt-10"
-        >
-          <input type="hidden" name="callbackUrl" value={callbackUrl} />
-          <button
-            type="submit"
-            className="btn-hero w-full"
-          >
-            Continue with Google
-          </button>
-        </form>
-
-        <p className="mt-8">
+        <p className="mt-6">
           <Link
-            href="/start?mode=signin"
-            className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+            href="/"
+            className="text-sm text-[var(--accent)] transition-colors hover:underline"
           >
-            Advanced: use an API key
+            ← Back to home
           </Link>
         </p>
       </div>

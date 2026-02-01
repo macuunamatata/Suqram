@@ -1012,27 +1012,30 @@ h3 {
     margin: 0;
     margin-top: var(--space-1);
   }
-  .demo-inline-outcome {
-    font-size: 0.8125rem;
+  .demo-url-helper {
+    font-size: 0.6875rem;
     color: var(--muted);
     margin: 0;
-    margin-top: var(--space-1);
+    margin-top: 2px;
   }
-  .demo-inline-outcome-fail { color: var(--muted); }
-  .demo-inline-outcome-ok { color: var(--muted); }
-  .demo-inline-result {
+  .demo-outcomes-inline {
+    margin-top: var(--space-1);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .demo-outcome-row {
+    font-size: 0.8125rem;
+    margin: 0;
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
-    font-size: 0.8125rem;
-    margin: 0;
-    margin-top: var(--space-1);
   }
-  .demo-inline-result-fail { color: var(--status-error); }
-  .demo-inline-result-ok { color: var(--status-success); }
+  .demo-outcome-row-fail { color: var(--status-error); }
+  .demo-outcome-row-neutral { color: var(--muted); }
+  .demo-outcome-row-ok { color: var(--status-success); }
   .demo-inline-icon { width: 0.875rem; height: 0.875rem; flex-shrink: 0; }
-  .demo-inline-result-fail .demo-inline-icon { color: var(--status-error); }
-  .demo-inline-result-ok .demo-inline-icon { color: var(--status-success); }
+  .demo-outcome-row-ok .demo-inline-icon { color: var(--status-success); }
   @media (prefers-reduced-motion: reduce) {
     .demo-link, .demo-link-url { transition: none; }
   }

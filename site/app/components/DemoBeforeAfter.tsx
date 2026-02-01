@@ -1,15 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
-type Clicked = null | "unprotected" | "protected";
 type RunFirstLink = null | "unprotected" | "protected";
 
 export default function DemoBeforeAfter() {
-  const reduceMotion = useReducedMotion() ?? false;
   const [simulated, setSimulated] = useState(false);
-  const [clicked, setClicked] = useState<Clicked>(null);
+  const [clicked, setClicked] = useState<null | "protected">(null);
   const [runFirstLink, setRunFirstLink] = useState<RunFirstLink>(null);
 
   // When user clicks "Run demo" (href="#demo"), focus the simulate button after scroll
@@ -38,7 +35,6 @@ export default function DemoBeforeAfter() {
       setRunFirstLink("unprotected");
       return;
     }
-    setClicked((c) => (c === "unprotected" ? null : "unprotected"));
   };
 
   const onProtectedClick = (e: React.MouseEvent) => {
@@ -89,25 +85,10 @@ export default function DemoBeforeAfter() {
                 </p>
               )}
               {simulated && (
-                <>
-                  <p className="demo-inline-outcome" aria-live="polite">
-                    Token consumed by scanner → Link expired
-                  </p>
-                  <AnimatePresence>
-                    {clicked === "unprotected" && (
-                      <motion.p
-                        className="demo-inline-result demo-inline-result-fail"
-                        initial={reduceMotion ? false : { opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        aria-live="polite"
-                      >
-                        <IconX className="demo-inline-icon" aria-hidden />
-                        Link expired
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </>
+                <div className="demo-outcomes-inline" aria-live="polite">
+                  <p className="demo-outcome-row demo-outcome-row-fail">Scanner pre-open: Consumes token</p>
+                  <p className="demo-outcome-row demo-outcome-row-fail">User click: Expired</p>
+                </div>
               )}
             </div>
 
@@ -123,7 +104,10 @@ export default function DemoBeforeAfter() {
                 Sign in to Example
               </a>
               <p className="demo-link-url" aria-hidden>
-                https://go.suqram.com/r/•••••••
+                https://go.example.com/r/•••••••
+              </p>
+              <p className="demo-url-helper" aria-hidden>
+                Uses your link domain (CNAME). Customers never see suqram.com.
               </p>
               {!simulated && runFirstLink === "protected" && (
                 <p className="demo-inline-hint" aria-live="polite">
@@ -131,39 +115,23 @@ export default function DemoBeforeAfter() {
                 </p>
               )}
               {simulated && (
-                <>
-                  <p className="demo-inline-outcome demo-inline-outcome-ok" aria-live="polite">
-                    Scanner views don&apos;t redeem → First real click succeeds
-                  </p>
-                  <AnimatePresence>
-                    {clicked === "protected" && (
-                      <motion.p
-                        className="demo-inline-result demo-inline-result-ok"
-                        initial={reduceMotion ? false : { opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        aria-live="polite"
-                      >
-                        <IconCheck className="demo-inline-icon" aria-hidden />
-                        Signed in
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </>
+                <div className="demo-outcomes-inline" aria-live="polite">
+                  <p className="demo-outcome-row demo-outcome-row-neutral">Scanner pre-open: View-only</p>
+                  {clicked === "protected" ? (
+                    <p className="demo-outcome-row demo-outcome-row-ok">
+                      <IconCheck className="demo-inline-icon" aria-hidden />
+                      User click: Signed in
+                    </p>
+                  ) : (
+                    <p className="demo-outcome-row demo-outcome-row-neutral">User click: —</p>
+                  )}
+                </div>
               )}
             </div>
           </div>
         </div>
       </div>
     </section>
-  );
-}
-
-function IconX({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M18 6L6 18M6 6l12 12" />
-    </svg>
   );
 }
 

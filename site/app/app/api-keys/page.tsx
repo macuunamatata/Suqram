@@ -85,7 +85,7 @@ export default function ApiKeysPage() {
               API keys
             </h1>
             <p className="mt-2 text-[var(--muted)]">
-              Advanced: programmatic access to your site.
+              Use an API key for programmatic access (Admin API, receipts).
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
@@ -106,7 +106,7 @@ export default function ApiKeysPage() {
             API key
           </h2>
           <p className="mt-3 text-sm text-[var(--muted)]">
-            Your API key is used for programmatic access (e.g. Admin API, receipts). It was provided once when your site was created. For security, we don&apos;t show it again here.
+            Your API key is used for programmatic access (e.g. Admin API, receipts). It was provided once when your link rail was created. For security, we don&apos;t show it again here.
           </p>
           <p className="mt-4 text-sm text-[var(--muted)]">
             To get a new key, use the Admin API <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)] font-mono text-xs">POST /admin/sites/:siteId/rotate-sat</code> with your current admin credentials. The response returns the new key once; store it securely.

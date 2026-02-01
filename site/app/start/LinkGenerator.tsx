@@ -51,7 +51,7 @@ export default function LinkGenerator() {
           type="url"
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
-          placeholder="https://yourapp.com/after-login or your Supabase verify URL"
+          placeholder="https://yourapp.com/after-login or your auth verify URL"
           className="input-base mt-2"
         />
       </div>
@@ -85,7 +85,7 @@ export default function LinkGenerator() {
               Need the snippet?
             </summary>
             <div className="mt-3 rounded-xl border border-[var(--border)] bg-[var(--bg2)] p-4">
-              <p className="text-xs text-[var(--muted)] mb-2">For Supabase (or similar) when sending the email:</p>
+              <p className="text-xs text-[var(--muted)] mb-2">Use in your auth/transactional email templates (any provider):</p>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
                 <pre className="input-base flex-1 overflow-x-auto whitespace-pre-wrap p-3 font-mono text-xs">
                   {snippet}

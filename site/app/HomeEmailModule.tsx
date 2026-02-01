@@ -6,7 +6,7 @@ import { sendTestEmail } from "@/lib/sendTestEmail";
 const BULLETS = [
   "Two links: normal (breaks) and protected (works)",
   "Works even when scanners click first",
-  "Supabase drop-in, bring your own auth",
+  "Drop-in link rail, any auth provider",
 ];
 
 export default function HomeEmailModule() {

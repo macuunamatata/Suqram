@@ -144,7 +144,7 @@ export default function StartPageContent({ defaultNext }: Props) {
               Create your first site
             </h1>
             <p className="mt-3 text-[var(--muted)]">
-              Get a protected link format to paste into Supabase email templates. No API key required.
+              Get a protected link format to use in your auth/transactional email templates (any provider). No API key required.
             </p>
 
             <div className="mt-10 card card-gradient-top border-[var(--accent)]/20 p-6 sm:p-8">
@@ -164,12 +164,12 @@ export default function StartPageContent({ defaultNext }: Props) {
 
             <p className="mt-8">
               <Link href="/app/api-keys" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-                Advanced: sign in with API key
+                Advanced: use an API key
               </Link>
             </p>
             <p className="mt-4">
-              <Link href="/docs/supabase" className="link-accent text-sm">
-                Supabase setup guide →
+              <Link href="/docs/setup" className="link-accent text-sm">
+                Setup guides →
               </Link>
             </p>
           </>

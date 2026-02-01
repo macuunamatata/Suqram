@@ -121,15 +121,18 @@ function DashboardContent() {
               Dashboard
             </h1>
             <p className="mt-2 text-[var(--muted)]">
-              Manage your site and generate protected links.
+              Manage your link rail and generate protected links.
             </p>
           </div>
           <div className="flex items-center gap-3 shrink-0">
-            <Link href="/docs/supabase" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+            <Link href="/docs" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
               Docs
             </Link>
+            <Link href="/docs/setup" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+              Setup guides
+            </Link>
             <Link href="/app/api-keys" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-              API keys
+              Advanced: use an API key
             </Link>
             <a href={logoutUrl} className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
               Sign out
@@ -149,7 +152,7 @@ function DashboardContent() {
                 Domain: <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 font-mono text-xs">{site.hostname}</code>
               </p>
               <p className="mt-3 text-sm text-[var(--muted)]">Status: Active</p>
-              <Link href="/docs/supabase" className="link-accent mt-4 inline-block text-sm">
+              <Link href="/docs/setup" className="link-accent mt-4 inline-block text-sm">
                 Connect domain →
               </Link>
             </>
@@ -211,8 +214,8 @@ function DashboardContent() {
         </section>
 
         <p className="mt-8">
-          <Link href="/docs/supabase" className="link-accent text-sm">
-            Supabase setup guide →
+          <Link href="/docs/setup" className="link-accent text-sm">
+            Setup guides →
           </Link>
         </p>
       </div>

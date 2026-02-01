@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { REPO_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Docs — Auth Link Rail",
-  description: "Quickstart: local run and Supabase integration in minutes.",
+  description: "Quickstart: local run and setup guides (Supabase, Auth0, Clerk, and more) in minutes.",
 };
 
 export default function DocsPage() {
@@ -12,13 +13,13 @@ export default function DocsPage() {
       <div className="max-w-2xl">
         <h1 className="text-3xl font-bold tracking-tight text-[var(--text)]">Docs</h1>
         <p className="mt-3 text-[var(--muted)]">
-          Get the rail running locally or with Supabase in under 15 minutes.
+          Get the rail running locally or follow a setup guide for your stack in under 15 minutes.
         </p>
 
         <p className="mt-6">
-          <a href="/docs/supabase" className="link-accent text-sm">
-            Supabase setup guide →
-          </a>
+          <Link href="/docs/setup" className="link-accent text-sm">
+            Setup guides →
+          </Link>
         </p>
 
         <section id="quickstart" className="mt-14">
@@ -34,14 +35,9 @@ npm run dev`}
             Then in another terminal: <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">npm run smoke</code> to verify.
           </p>
 
-          <h3 className="mt-8 text-base font-semibold text-[var(--text)]">Supabase (15 minutes)</h3>
-          <ol className="mt-3 list-decimal space-y-3 pl-5 text-[var(--muted)]">
-            <li>Deploy the worker and point your rail domain (e.g. <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">links.yourdomain.com</code>) to it.</li>
-            <li>Set allowed destination hosts so the rail can redirect to your Supabase project and app (e.g. <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">ALLOWED_DEST_HOSTS=yourproject.supabase.co,yourapp.com</code> or <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">ALLOWED_DEST_HOST_SUFFIXES=.supabase.co</code>).</li>
-            <li>In your email flow, build the rail link instead of the raw confirmation URL: unique <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">rid</code> + <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">#u=</code> + <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">encodeURIComponent(confirmationUrl)</code>. Use that link in the email body.</li>
-          </ol>
-          <p className="mt-4 text-sm text-[var(--muted)]">
-            Example (Node): <code className="mt-2 block rounded-xl bg-[var(--panel)] border border-[var(--border)] p-3 font-mono text-xs text-[var(--text)]">const railLink = `https://links.yourdomain.com/r/${"${rid}"}#u=${"${encodeURIComponent(destination)}"}`;</code>
+          <h3 className="mt-8 text-base font-semibold text-[var(--text)]">Connect your auth (15 minutes)</h3>
+          <p className="mt-3 text-sm text-[var(--muted)]">
+            See <Link href="/docs/setup" className="text-[var(--accent)] hover:underline">Setup guides</Link> for step-by-step instructions: Supabase, Auth0, Clerk, NextAuth, Firebase, or custom. Deploy the worker, set allowed destination hosts, then build the rail link in your email flow (unique <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">rid</code> + <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">#u=</code> + <code className="rounded bg-[var(--panel)] px-1.5 py-0.5 text-[var(--accent)]">encodeURIComponent(destination)</code>).
           </p>
         </section>
 
@@ -59,7 +55,7 @@ npm run dev`}
           <div className="card card-gradient-top p-6">
             <h2 className="text-lg font-semibold text-[var(--text)]">Full documentation</h2>
             <p className="mt-3 text-[var(--muted)]">
-              Setup, allowed hosts, Supabase templates (Magic Link, Invite, Password Reset),
+              Setup, allowed hosts, email templates (Magic Link, Invite, Password Reset),
               troubleshooting, and demo mode are in the GitHub README.
             </p>
             <a

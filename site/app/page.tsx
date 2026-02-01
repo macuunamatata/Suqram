@@ -3,7 +3,6 @@ import Link from "next/link";
 import ScannerDemo from "./components/ScannerDemo";
 import Section, { CONTAINER, SECTION_PY } from "./components/Section";
 import EventTraceCard from "./components/EventTraceCard";
-import EventTraceReceiptPanel from "./components/EventTraceReceiptPanel";
 import InstallSteps from "./components/InstallSteps";
 import DnsStatusCard from "./components/DnsStatusCard";
 import { Button } from "@/components/ui/button";
@@ -79,38 +78,6 @@ export default function HomePage() {
           </div>
           <div className={`${COL_7} min-w-0`}>
             <EventTraceCard />
-          </div>
-        </div>
-      </Section>
-
-      {/* What happens on every click */}
-      <Section
-        id="every-click"
-        title="What happens on every click"
-        subtext="Each link has one redemption path: view-only fetches leave the token intact; the first interactive click redeems and mints a receipt; replays are blocked."
-      >
-        <div className={GRID_12}>
-          <div className={COL_5}>
-            <p className="text-base text-muted-foreground leading-relaxed mb-6">
-              Suqram distinguishes preview fetches from interactive clicks at the edge. Only the latter consume the token and produce a signed ReceiptClicked event.
-            </p>
-            <ul className="space-y-3 text-base text-muted-foreground leading-relaxed">
-              <li className="flex gap-3">
-                <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
-                <span>Preview fetch is view-only and does not redeem; the token stays valid.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
-                <span>Interactive click redeems exactly once and mints a receipt (EIG-signed).</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
-                <span>Replays and duplicates are blocked deterministically; already-redeemed links return BLOCKED.</span>
-              </li>
-            </ul>
-          </div>
-          <div className={`${COL_7} min-w-0`}>
-            <EventTraceReceiptPanel />
           </div>
         </div>
       </Section>

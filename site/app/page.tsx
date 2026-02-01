@@ -8,10 +8,10 @@ export const metadata: Metadata = {
     "View-safe, exactly-once redemption. Magic links that survive scanners. Dev infra for auth links.",
 };
 
-const CONTAINER = "mx-auto w-full max-w-[1200px] px-4 sm:px-6";
-const SECTION_PY = "py-16 sm:py-20 lg:py-24";
+const CONTAINER = "mx-auto w-full max-w-[1120px] px-4 sm:px-6";
+const SECTION_PY = "py-20 sm:py-24 lg:py-28";
 const SECTION_HEADING = "section-h2 text-center";
-const SECTION_SUB = "mt-3 text-center text-[var(--text-secondary)] max-w-2xl mx-auto";
+const SECTION_SUB = "mt-4 text-center text-[var(--text-secondary)] text-base max-w-2xl mx-auto leading-relaxed";
 
 const INVARIANT_TILES = [
   {
@@ -91,7 +91,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Invariant tiles */}
+      {/* Invariant tiles — premium surfaces, same shadow */}
       <section className={SECTION_PY} id="invariants" aria-label="Invariants">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
@@ -100,14 +100,14 @@ export default function HomePage() {
           <p className={`${SECTION_SUB} mt-2`}>
             Protocol guarantees your auth can rely on.
           </p>
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
+          <div className="mt-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-5xl mx-auto">
             {INVARIANT_TILES.map(({ title, body }) => (
               <div
                 key={title}
-                className="border border-[var(--border)] rounded-lg p-5 bg-[var(--surface)]"
+                className="surface p-5"
               >
-                <h3 className="text-sm font-semibold text-[var(--text)]">{title}</h3>
-                <p className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">
+                <h3 className="text-sm font-semibold text-[var(--text)] tracking-tight">{title}</h3>
+                <p className="mt-2.5 text-sm text-[var(--text-secondary)] leading-relaxed">
                   {body}
                 </p>
               </div>
@@ -116,21 +116,21 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* How: interactive redemption */}
+      {/* How: interactive redemption — one surface, dividers */}
       <section className={SECTION_PY} id="how" aria-label="How it works">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             Interactive redemption, enforced at the edge
           </h2>
-          <div className="mt-10 max-w-2xl mx-auto border border-[var(--border)] rounded-lg p-6 bg-[var(--surface)] space-y-5">
-            <div className="flex flex-wrap items-center gap-2">
+          <div className="mt-12 max-w-2xl mx-auto surface p-6 sm:p-8 space-y-0">
+            <div className="flex flex-wrap items-center gap-2 pb-5 border-b border-[var(--border)]">
               <span className="pill text-xs">Scanner path</span>
               <span className="text-sm text-[var(--text-secondary)]">
                 Email link → Suqram edge → non-redeeming response → token remains unused
               </span>
               <span className="w-2 h-2 rounded-full bg-[var(--status-error)] shrink-0" aria-hidden />
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 pt-5">
               <span className="pill-accent text-xs">Interactive path</span>
               <span className="text-sm text-[var(--text-secondary)]">
                 Email link → Suqram edge → confirm (only if needed) → your app verifies → success
@@ -138,7 +138,7 @@ export default function HomePage() {
               <span className="w-2 h-2 rounded-full bg-[var(--status-success)] shrink-0" aria-hidden />
             </div>
           </div>
-          <p className="mt-5 text-center text-sm text-[var(--muted)]">
+          <p className="mt-6 text-center text-sm text-[var(--muted)]">
             Scanner requests don&apos;t redeem tokens. Only interactive redemption does.
           </p>
         </div>
@@ -161,50 +161,66 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pricing */}
+      {/* Pricing — 3-col grid, subtle surface, Free emphasized */}
       <section className={SECTION_PY} id="pricing" aria-label="Pricing">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             Start free. Scale when you need it.
           </h2>
-          <div className="mt-10 max-w-3xl mx-auto border border-[var(--border)] rounded-lg p-6 bg-[var(--surface)]">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-              <div className="rounded-lg border border-[var(--primary)]/30 bg-[var(--primary-muted)] p-5 flex flex-col">
-                <p className="text-sm font-semibold text-[var(--primary)]">Free</p>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">1K redemptions / month — $0</p>
-                <Link href="/app" className="btn-primary mt-5 w-full justify-center text-sm">
-                  Create site
+          <div className="mt-12 max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
+            <div className="pricing-tier pricing-tier-featured flex flex-col p-6">
+              <h3 className="text-xl font-semibold tracking-tight text-[var(--text)]">Free</h3>
+              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">1K redemptions/mo</p>
+              <p className="mt-4 text-2xl font-bold tracking-tight text-[var(--primary)]">$0</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">/month</p>
+              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">No credit card. One domain.</p>
+              <div className="mt-auto pt-6">
+                <Link href="/start" className="pricing-cta-primary block w-full text-center">
+                  Create free site
                 </Link>
               </div>
-              <div className="rounded-lg border border-[var(--border)] p-5 flex flex-col">
-                <p className="text-sm font-semibold text-[var(--text)]">Pro</p>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">10K / month</p>
-                <p className="mt-1 text-xs text-[var(--muted)]">For growing apps</p>
+            </div>
+            <div className="pricing-tier pricing-tier-quiet flex flex-col">
+              <h3 className="text-xl font-semibold tracking-tight text-[var(--text)]">Pro</h3>
+              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">10K redemptions/mo</p>
+              <p className="mt-4 text-xl font-semibold tracking-tight text-[var(--text)]">$19</p>
+              <p className="mt-1 text-sm text-[var(--muted)]">/month</p>
+              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">Growing apps. Multiple domains.</p>
+              <div className="mt-auto pt-6">
+                <Link href="/pricing" className="pricing-cta-quiet">
+                  Learn more
+                </Link>
               </div>
-              <div className="rounded-lg border border-[var(--border)] p-5 flex flex-col">
-                <p className="text-sm font-semibold text-[var(--text)]">Scale</p>
-                <p className="mt-2 text-sm text-[var(--text-secondary)]">Custom</p>
-                <p className="mt-1 text-xs text-[var(--muted)]">Enterprise</p>
+            </div>
+            <div className="pricing-tier pricing-tier-quiet flex flex-col">
+              <h3 className="text-xl font-semibold tracking-tight text-[var(--text)]">Scale</h3>
+              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">High volume</p>
+              <p className="mt-4 text-xl font-semibold tracking-tight text-[var(--text)]">Custom</p>
+              <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">Enterprise. Dedicated support.</p>
+              <div className="mt-auto pt-6">
+                <Link href="/pricing" className="pricing-cta-quiet">
+                  Learn more
+                </Link>
               </div>
             </div>
           </div>
-          <p className="mt-5 text-center text-sm text-[var(--muted)] max-w-xl mx-auto">
+          <p className="mt-10 text-center text-sm text-[var(--muted)] max-w-xl mx-auto">
             A redemption is a successful interactive link use.
           </p>
         </div>
       </section>
 
-      {/* FAQ */}
+      {/* FAQ — dividers only, no cards */}
       <section className={SECTION_PY} id="faq" aria-label="FAQ">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             FAQ
           </h2>
-          <dl className="mt-10 max-w-2xl mx-auto space-y-4">
+          <dl className="mt-12 max-w-2xl mx-auto surface p-6 sm:p-8 divide-y divide-[var(--border)] first:pt-0 last:pb-0">
             {FAQ_ITEMS.map(({ q, a }) => (
-              <div key={q} className="border-b border-[var(--border)] pb-4 last:border-0">
+              <div key={q} className="py-5 first:pt-0 last:pb-0">
                 <dt className="text-sm font-semibold text-[var(--text)]">{q}</dt>
-                <dd className="mt-1.5 text-sm text-[var(--text-secondary)] leading-relaxed">{a}</dd>
+                <dd className="mt-2 text-sm text-[var(--text-secondary)] leading-relaxed">{a}</dd>
               </div>
             ))}
           </dl>

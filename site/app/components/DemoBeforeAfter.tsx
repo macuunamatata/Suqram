@@ -29,15 +29,12 @@ const LOG_LINES = {
   step3Protected: "POST /v/... (interactive redemption)",
 };
 
-function LogLine({ line, onCopy }: { line: string; onCopy: () => void }) {
-  return (
-    <div className="demo-log-line">
-      <code className="flex-1 truncate">{line}</code>
-      <button type="button" onClick={onCopy} className="shrink-0">
-        Copy
-      </button>
-    </div>
-  );
+const STEP_LABELS = ["Scanner pre-open", "Redemption attempt", "Interactive redemption"] as const;
+
+function getPill(step: 1 | 2 | 3, mode: Mode): { label: string; ok: boolean } {
+  if (step === 1) return { label: "Detected", ok: true };
+  if (step === 2) return { label: mode === "unprotected" ? "Consumed" : "Blocked", ok: mode === "protected" };
+  return { label: mode === "unprotected" ? "Expired" : "Redeemed", ok: mode === "protected" };
 }
 
 export default function DemoBeforeAfter() {
@@ -127,7 +124,7 @@ export default function DemoBeforeAfter() {
         headers: { "Content-Type": "application/json" },
         signal,
       });
-      const createJson = await createRes.json().catch(() => ({})) as { ok?: boolean; tid?: string; error?: string };
+      const createJson = (await createRes.json().catch(() => ({}))) as { ok?: boolean; tid?: string; error?: string };
       if (!createRes.ok) {
         setError(formatApiError("Create failed", createRes.status, createJson));
         setPhase("idle");
@@ -150,7 +147,7 @@ export default function DemoBeforeAfter() {
         body: JSON.stringify({ tid }),
         signal,
       });
-      const scanJson = await scanRes.json().catch(() => ({})) as { ok?: boolean; error?: string };
+      const scanJson = (await scanRes.json().catch(() => ({}))) as { ok?: boolean; error?: string };
       if (!scanRes.ok) {
         setError(formatApiError("Scan failed", scanRes.status, scanJson));
         setPhase("idle");
@@ -185,6 +182,12 @@ export default function DemoBeforeAfter() {
 
   const previewUrl = mode === "unprotected" ? UNPROTECTED_URL : PROTECTED_URL;
   const showOutcomes = phase === "running" || phase === "done";
+  const railFillHeight = activeStep === 0 ? 0 : (activeStep / 3) * 100;
+  const progressBarWidth = activeStep === 0 ? 0 : (activeStep / 3) * 100;
+
+  const copyLog = useCallback(() => {
+    if (logLines.length) navigator.clipboard.writeText(logLines.join("\n"));
+  }, [logLines]);
 
   return (
     <section className="py-12 sm:py-16" aria-label="Demo">
@@ -197,80 +200,107 @@ export default function DemoBeforeAfter() {
         </p>
 
         <div className="demo-hero-inner mt-8">
-          <div className="flex justify-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => onModeChange("unprotected")}
-              className={`demo-toggle rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                mode === "unprotected"
-                  ? "bg-[var(--surface-hover)] text-[var(--text)] border border-[var(--border)]"
-                  : "text-[var(--muted)] hover:text-[var(--text)] border border-transparent"
-              }`}
-            >
-              Unprotected
-            </button>
-            <button
-              type="button"
-              onClick={() => onModeChange("protected")}
-              className={`demo-toggle rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
-                mode === "protected"
-                  ? "bg-[var(--primary-muted)] text-[var(--primary)] border border-[var(--border)]"
-                  : "text-[var(--muted)] hover:text-[var(--text)] border border-transparent"
-              }`}
-            >
-              Protected
-            </button>
+          {/* Segmented control — Unprotected / Protected */}
+          <div className="flex justify-center mb-6">
+            <div className="demo-segmented" role="tablist" aria-label="Link type">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "unprotected"}
+                aria-controls="demo-content"
+                id="demo-tab-unprotected"
+                data-selected={mode === "unprotected"}
+                className="demo-segmented-option"
+                onClick={() => onModeChange("unprotected")}
+              >
+                Unprotected
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={mode === "protected"}
+                aria-controls="demo-content"
+                id="demo-tab-protected"
+                data-selected={mode === "protected"}
+                className="demo-segmented-option demo-segmented-protected"
+                onClick={() => onModeChange("protected")}
+              >
+                Protected
+              </button>
+            </div>
           </div>
 
-          <div className="demo-glass">
+          <div className="demo-glass" id="demo-content">
             <div className="demo-inner">
-              <p className="text-[var(--text-secondary)] text-sm">Your sign-in link is ready.</p>
-              <div className="mt-3 flex flex-col gap-1">
+              {/* Email snippet — realistic, airy */}
+              <p className="demo-email-label">Your sign-in link is ready</p>
+              <div className="mt-2">
                 <span className="demo-real-link">Sign in to Example</span>
                 <p className="demo-url-preview truncate" title={previewUrl}>
                   {previewUrl}
                 </p>
               </div>
 
-              {/* Rail timeline: fixed column for line/dots, flexible for text */}
-              <div className="demo-timeline-rail mt-8">
-                <div className="demo-timeline-track">
-                  <div className={`demo-timeline-dot ${activeStep >= 1 ? "active" : ""}`} />
-                  <div className={`demo-timeline-line ${activeStep >= 2 ? "filled" : ""}`} />
-                  <div className={`demo-timeline-dot ${activeStep >= 2 ? "active" : ""}`} />
-                  <div className={`demo-timeline-line ${activeStep >= 3 ? "filled" : ""}`} />
-                  <div className={`demo-timeline-dot ${activeStep >= 3 ? "active" : ""}`} />
+              {/* Rail — CSS grid: column 1 fixed rail (fill-down), column 2 step + pill */}
+              <div className="demo-rail-grid mt-8">
+                <div className="demo-rail-column">
+                  <div className="demo-rail-track" aria-hidden />
+                  <div
+                    className="demo-rail-fill"
+                    style={{ height: `${railFillHeight}%` }}
+                    aria-hidden
+                  />
+                  <div className={`demo-rail-dot ${activeStep >= 1 ? "active" : ""}`} data-step="1" aria-hidden />
+                  <div className={`demo-rail-dot ${activeStep >= 2 ? "active" : ""}`} data-step="2" aria-hidden />
+                  <div className={`demo-rail-dot ${activeStep >= 3 ? "active" : ""}`} data-step="3" aria-hidden />
                 </div>
-                <div className="demo-timeline-content">
-                  <div className="demo-timeline-label">Scanner pre-open</div>
-                  {showOutcomes && activeStep >= 1 && <div className="demo-timeline-outcome ok">Detected</div>}
-                </div>
-                <div className="demo-timeline-content">
-                  <div className="demo-timeline-label">Redemption</div>
-                  {showOutcomes && activeStep >= 2 && (
-                    <div className={`demo-timeline-outcome ${mode === "unprotected" ? "bad" : "ok"}`}>
-                      {mode === "unprotected" ? "Consumed" : "Blocked"}
-                    </div>
+                <div className="demo-rail-step">
+                  <span className="demo-rail-label">{STEP_LABELS[0]}</span>
+                  {showOutcomes && activeStep >= 1 && (
+                    <span className="demo-pill demo-pill-ok">{getPill(1, mode).label}</span>
                   )}
                 </div>
-                <div className="demo-timeline-content">
-                  <div className="demo-timeline-label">Interactive redemption</div>
+                <div className="demo-rail-step">
+                  <span className="demo-rail-label">{STEP_LABELS[1]}</span>
+                  {showOutcomes && activeStep >= 2 && (
+                    <span className={`demo-pill ${getPill(2, mode).ok ? "demo-pill-ok" : "demo-pill-bad"}`}>
+                      {getPill(2, mode).label}
+                    </span>
+                  )}
+                </div>
+                <div className="demo-rail-step">
+                  <span className="demo-rail-label">{STEP_LABELS[2]}</span>
                   {showOutcomes && activeStep >= 3 && (
-                    <div className={`demo-timeline-outcome ${mode === "unprotected" ? "bad" : "ok"}`}>
-                      {mode === "unprotected" ? "Expired" : "Redeemed"}
-                    </div>
+                    <span className={`demo-pill ${getPill(3, mode).ok ? "demo-pill-ok" : "demo-pill-bad"}`}>
+                      {getPill(3, mode).label}
+                    </span>
                   )}
                 </div>
               </div>
 
+              {/* Slim progress bar under rail (while running) */}
+              {(phase === "running" || phase === "done") && (
+                <div className="demo-rail-progress" aria-hidden>
+                  <div className="demo-rail-progress-bar" style={{ width: `${progressBarWidth}%` }} />
+                </div>
+              )}
+
+              {/* Log — mini terminal, one copy per block, lines reveal in sync */}
               {logLines.length > 0 && (
-                <div className="demo-log" role="log" aria-label="Request log">
+                <div className="demo-log-wrap" role="log" aria-label="Request log">
+                  <button
+                    type="button"
+                    className="demo-log-copy"
+                    onClick={copyLog}
+                    title="Copy log"
+                    aria-label="Copy log"
+                  >
+                    <CopyIcon />
+                  </button>
                   {logLines.map((line, i) => (
-                    <LogLine
-                      key={`${runId}-${i}-${line}`}
-                      line={line}
-                      onCopy={() => navigator.clipboard.writeText(line)}
-                    />
+                    <div key={`${runId}-${i}-${line}`} className="demo-log-line">
+                      <code>{line}</code>
+                    </div>
                   ))}
                 </div>
               )}
@@ -287,14 +317,15 @@ export default function DemoBeforeAfter() {
                   onClick={runDemo}
                   disabled={phase === "running"}
                   className="demo-btn-primary"
+                  aria-busy={phase === "running"}
+                  aria-live="polite"
                 >
                   {phase === "running" ? (
-                    <>
-                      <span>Running…</span>
-                      <span className="demo-btn-dots" aria-hidden>
-                        <span /><span /><span />
-                      </span>
-                    </>
+                    <span className="demo-btn-dots" aria-hidden>
+                      <span />
+                      <span />
+                      <span />
+                    </span>
                   ) : (
                     "Run demo"
                   )}
@@ -308,5 +339,14 @@ export default function DemoBeforeAfter() {
         </div>
       </div>
     </section>
+  );
+}
+
+function CopyIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
   );
 }

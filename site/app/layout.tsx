@@ -17,29 +17,40 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Suqram — Protocol-grade auth links",
+  title: "Suqram — Scanner-safe auth links",
   description:
-    "View-safe, exactly-once redemption. Magic links that survive scanners. Dev infra for auth links.",
+    "Scanner-proof links and human click receipts. Prevent preview bots from triggering your auth workflows.",
   openGraph: {
-    title: "Suqram — Protocol-grade auth links",
+    title: "Suqram — Scanner-safe auth links",
     description:
-      "View-safe, exactly-once redemption. Magic links that survive scanners. Dev infra for auth links.",
+      "Scanner-proof links and human click receipts. Prevent preview bots from triggering your auth workflows.",
     type: "website",
   },
 };
 
-const CENTER_NAV = [
-  { href: "#invariants", label: "Invariants" },
-  { href: "#how", label: "How it works" },
+const NAV_LINKS = [
+  { href: "#features", label: "Product" },
+  { href: "/docs", label: "Docs" },
   { href: "#pricing", label: "Pricing" },
-  { href: "#faq", label: "FAQ" },
 ];
 
-const FOOTER_LINKS = [
-  { href: "/docs", label: "Docs" },
-  { href: "/privacy", label: "Privacy" },
-  { href: "/terms", label: "Terms" },
-  { href: "mailto:support@suqram.com", label: "Contact" },
+const FOOTER_COLUMNS = [
+  {
+    title: "Product",
+    links: [
+      { href: "#features", label: "Features" },
+      { href: "/docs", label: "Docs" },
+      { href: "#pricing", label: "Pricing" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { href: "/privacy", label: "Privacy" },
+      { href: "/terms", label: "Terms" },
+      { href: "mailto:support@suqram.com", label: "Contact" },
+    ],
+  },
 ];
 
 export default function RootLayout({
@@ -49,52 +60,59 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${jetbrainsMono.variable} scroll-smooth`}>
-      <body className="relative min-h-screen flex flex-col antialiased font-sans">
-        <header className="sticky top-0 z-50 border-b border-[#e9edf3] bg-white">
-          <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-8 px-6 sm:px-8">
-            <a
-              href="/"
-              className="text-lg font-semibold text-foreground shrink-0 whitespace-nowrap"
-            >
+      <body className="home-body relative min-h-screen flex flex-col antialiased font-sans">
+        <a href="#announcement" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:p-4 focus:bg-foreground focus:text-background">
+          Skip to content
+        </a>
+        <div className="announcement-bar" id="announcement">
+          <p className="announcement-bar__text">
+            Scanner-safe links are live. Set up in under 10 minutes.
+          </p>
+        </div>
+        <header className="site-header">
+          <div className="site-header__inner">
+            <Link href="/" className="site-header__logo">
               Suqram
-            </a>
-            <nav className="hidden sm:flex items-center gap-8 flex-1 min-w-0 justify-center" aria-label="Main">
-              {CENTER_NAV.map(({ href, label }) => (
-                <a
-                  key={href}
-                  href={href}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
+            </Link>
+            <nav className="site-header__nav" aria-label="Main">
+              {NAV_LINKS.map(({ href, label }) => (
+                <Link key={href} href={href} className="site-header__link">
                   {label}
-                </a>
+                </Link>
               ))}
             </nav>
-            <div className="flex items-center shrink-0">
-              <Button asChild size="sm" className="h-9 px-4 font-semibold text-primary-foreground">
-                <Link href="#demo">Try the demo</Link>
+            <div className="site-header__actions">
+              <Button asChild variant="outline" size="sm" className="site-btn site-btn--secondary">
+                <Link href="/app">Log in</Link>
+              </Button>
+              <Button asChild size="sm" className="site-btn site-btn--primary">
+                <Link href="/start">Get started</Link>
               </Button>
             </div>
           </div>
         </header>
         <main className="flex-1">{children}</main>
-        <footer className="border-t border-[#e9edf3] py-8 bg-white">
-          <div className="mx-auto max-w-[1200px] px-6 sm:px-8">
-            <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-              <p className="text-sm text-muted-foreground">
-                Suqram — Protocol-grade auth links.
-              </p>
-              <div className="flex flex-wrap gap-8 justify-center">
-                {FOOTER_LINKS.map(({ href, label }) => (
-                  <a
-                    key={label}
-                    href={href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
-                    {label}
-                  </a>
-                ))}
-              </div>
+        <footer className="site-footer">
+          <div className="site-footer__inner">
+            <div className="site-footer__grid">
+              {FOOTER_COLUMNS.map((col) => (
+                <div key={col.title} className="site-footer__col">
+                  <h3 className="site-footer__col-title">{col.title}</h3>
+                  <ul className="site-footer__links">
+                    {col.links.map(({ href, label }) => (
+                      <li key={label}>
+                        <Link href={href} className="site-footer__link">
+                          {label}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
+            <p className="site-footer__copy">
+              © {new Date().getFullYear()} Suqram. Scanner-safe links for auth.
+            </p>
           </div>
         </footer>
       </body>

@@ -1,254 +1,214 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import DemoBeforeAfter from "./components/DemoBeforeAfter";
-import SectionFade from "./components/SectionFade";
+import ScannerDemo from "./components/ScannerDemo";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 export const metadata: Metadata = {
-  title: "Suqram — Unbreakable auth links",
+  title: "Suqram — Scanner-safe auth links",
   description:
-    "Links that survive the real world. Edge solution for magic links—scanners don't burn tokens; only a real click redeems.",
+    "Scanner-proof links and human click receipts. Prevent preview bots from triggering your auth workflows. Set up in minutes.",
 };
 
 const CONTAINER = "mx-auto w-full max-w-[1200px] px-6 sm:px-8";
 const SECTION_PY = "py-16 sm:py-20 lg:py-24";
-const SECTION_HEADING = "text-2xl sm:text-3xl font-semibold tracking-tight text-foreground";
-const SECTION_SUB = "mt-3 text-base text-muted-foreground max-w-2xl leading-relaxed";
-const BORDER_SUBTLE = "border-[#e9edf3]";
-const SEPARATOR_SUBTLE = "bg-[#e9edf3]";
 
-const INVARIANT_TILES = [
+const TRUSTED_LOGOS = [
+  "Acme",
+  "BuildCo",
+  "ShipIt",
+  "LaunchPad",
+  "ScaleUp",
+];
+
+const TESTIMONIALS = [
   {
-    title: "View-safe",
-    body: "Scanners can fetch the link page without consuming the token. Only interactive redemption counts.",
+    quote: "One-time links finally behave. Scanners stopped burning our magic-link tokens.",
+    name: "Alex Chen",
+    role: "Founder at AuthFlow",
   },
   {
-    title: "Exactly-once redeem",
-    body: "One successful redemption per link. Replay and pre-open do not burn the token.",
+    quote: "Set up in under 10 minutes. Our login links are now scanner-proof.",
+    name: "Sam Rivera",
+    role: "CTO at SecureApp",
   },
   {
-    title: "Replay-safe retries",
-    body: "Retries and duplicate requests are detected. Your auth stays deterministic.",
-  },
-  {
-    title: "No SDK",
-    body: "Point your link domain to the rail. Swap the URL in your email template.",
+    quote: "Human click receipts gave us the guarantee we needed for compliance.",
+    name: "Jordan Lee",
+    role: "Founder at VerifyLabs",
   },
 ];
 
-const FAQ_ITEMS = [
-  { q: "Does this slow down login?", a: "No. The edge check is fast; real users get a quick path through." },
-  { q: "Will scanners be blocked?", a: "They can fetch the link page, but scanner requests don't redeem tokens—only interactive redemption does." },
-  { q: "Do I need an SDK?", a: "No. Point your link domain to Suqram and swap the link in your email template." },
-  { q: "Does it work with my existing auth?", a: "Yes. If your auth uses one-time links in email (login, verify, reset, invite), you can protect them—custom code, frameworks, or hosted providers." },
-  { q: "What about passkeys?", a: "Compatible. Suqram protects the email link path; passkeys are unaffected." },
+const FEATURES = [
+  {
+    eyebrow: "View-safe",
+    title: "Preview bots don’t consume the token",
+    bullets: [
+      "Scanners can fetch the link page without redeeming.",
+      "Only an interactive click counts as redemption.",
+      "One-time links stay valid until a human clicks.",
+    ],
+    side: "right" as const,
+  },
+  {
+    eyebrow: "Exactly-once",
+    title: "One redemption per link",
+    bullets: [
+      "Replay and pre-open do not burn the token.",
+      "Retries and duplicate requests are detected.",
+      "Deterministic auth you can rely on.",
+    ],
+    side: "left" as const,
+  },
+  {
+    eyebrow: "No SDK",
+    title: "Drop-in link protection",
+    bullets: [
+      "Point your link domain to the rail.",
+      "Swap the URL in your email template.",
+      "Works with any auth: custom, framework, or hosted.",
+    ],
+    side: "right" as const,
+  },
 ];
-
-const HERO_CHIPS = ["View-safe", "Exactly-once redeem", "Replay-safe retries", "No SDK"];
 
 export default function HomePage() {
   return (
     <>
-      {/* Hero: headline + subhead on left only */}
-      <section className="pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-16" id="hero">
+      {/* Hero */}
+      <section className="pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24" id="hero">
         <div className={CONTAINER}>
-          <SectionFade>
-            <div className="max-w-2xl">
-              <Badge variant="secondary" className="mb-4 w-fit font-medium text-xs text-foreground/90">
-                Protocol-grade auth links
-              </Badge>
-              <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-tight text-foreground leading-[1.1]">
-                Links that survive the real world.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="max-w-xl">
+              <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-tight text-foreground leading-[1.08]">
+                Scanner-proof links.
+                <br />
+                Human click receipts.
               </h1>
-              <p className="mt-6 text-lg sm:text-xl text-muted-foreground leading-relaxed">
-                Email scanners pre-open links and burn one-time tokens. Suqram runs at the edge so only an interactive redemption counts—your one-time links stay unbreakable.
+              <p className="mt-6 text-lg text-muted-foreground leading-relaxed">
+                Prevent preview bots from triggering your auth workflows. One-time links that only redeem on a real click. Set up in under 10 minutes.
               </p>
-              <div className="mt-8 flex flex-wrap gap-2">
-                {HERO_CHIPS.map((label) => (
-                  <Badge key={label} variant="outline" className="font-normal text-muted-foreground text-xs border-[#e9edf3]">
-                    {label}
-                  </Badge>
-                ))}
-              </div>
-              <div className="mt-10 flex flex-col sm:flex-row items-start gap-4">
-                <Button asChild size="lg" className="h-12 px-8 text-base font-semibold text-primary-foreground">
-                  <Link href="#demo">Run demo</Link>
+              <div className="mt-8 flex flex-col sm:flex-row items-start gap-4">
+                <Button asChild size="lg" className="rounded-full h-12 px-8 font-medium bg-primary text-primary-foreground hover:bg-primary/90">
+                  <Link href="/start">Get started</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="h-12 px-8 text-base font-medium text-foreground border-[#e9edf3]">
-                  <Link href="/app">Create site</Link>
+                <Button asChild variant="outline" size="lg" className="rounded-full h-12 px-8 font-medium border-border text-foreground">
+                  <Link href="#pricing">Pricing</Link>
                 </Button>
               </div>
-              <p className="mt-4 text-sm text-muted-foreground">
-                For login, verify, invites, and reset links.
+              <p className="mt-5 text-sm text-muted-foreground">
+                For teams dealing with link scanners and preview bots.
               </p>
             </div>
-          </SectionFade>
-        </div>
-      </section>
-
-      {/* Demo: full-width section, title + two links */}
-      <section id="demo" className={`demo-hero-section bg-white border-y ${BORDER_SUBTLE} scroll-mt-24`} aria-label="Try the demo">
-        <div className="demo-hero-inner">
-          <h2 className="demo-hero-title">Click both links.</h2>
-          <DemoBeforeAfter />
-        </div>
-      </section>
-
-      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
-
-      {/* Invariants */}
-      <section className={SECTION_PY} id="invariants" aria-label="Invariants">
-        <div className={CONTAINER}>
-          <SectionFade>
-            <h2 className={`${SECTION_HEADING} text-center`}>Invariants</h2>
-            <p className={`${SECTION_SUB} mt-3 text-center mx-auto`}>
-              Protocol guarantees your auth can rely on.
-            </p>
-            <div className="mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
-              {INVARIANT_TILES.map(({ title, body }) => (
-                <div
-                  key={title}
-                  className={`rounded-xl border ${BORDER_SUBTLE} bg-white p-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}
-                >
-                  <h3 className="text-base font-semibold text-foreground tracking-tight">{title}</h3>
-                  <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{body}</p>
-                </div>
-              ))}
+            <div className="flex justify-center lg:justify-end">
+              <ScannerDemo />
             </div>
-            <p className="mt-12 text-center text-sm text-muted-foreground max-w-xl mx-auto">
-              Works with any auth provider that sends one-time links: custom auth, frameworks, and hosted providers.
-            </p>
-          </SectionFade>
+          </div>
         </div>
       </section>
 
-      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
-
-      {/* How it works */}
-      <section className={SECTION_PY} id="how" aria-label="How it works">
+      {/* Trusted by */}
+      <section className="py-12 sm:py-16 border-y border-border/80 bg-background/50" id="trusted">
         <div className={CONTAINER}>
-          <SectionFade>
-            <h2 className={`${SECTION_HEADING} text-center`}>
-              Interactive redemption, enforced at the edge.
+          <h2 className="text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase mb-8">
+            Trusted by teams who ship auth
+          </h2>
+          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
+            {TRUSTED_LOGOS.map((name) => (
+              <span
+                key={name}
+                className="text-lg font-semibold text-muted-foreground/70 tracking-tight"
+                aria-hidden
+              >
+                {name}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Built for */}
+      <section className={SECTION_PY} id="built-for">
+        <div className={CONTAINER}>
+          <div className="max-w-2xl mx-auto text-center mb-14">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+              Built for <strong>teams that rely on one-time links</strong>
             </h2>
-            <div className="mt-12 max-w-2xl mx-auto space-y-6">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                <span className="font-medium text-foreground">Scanner path:</span> Email link → Suqram edge → non-redeeming response → token remains unused.
-              </p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                <span className="font-medium text-foreground">Interactive path:</span> Email link → Suqram edge → (optional confirm) → your app verifies → success.
-              </p>
-            </div>
-            <p className="mt-8 text-center text-sm text-muted-foreground">
-              Scanner requests don&apos;t redeem tokens. Only interactive redemption does.
+            <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+              Suqram is for engineers and product teams who send magic links, verification links, and reset links in email. It’s the edge layer that keeps scanners from burning tokens—so only a real click redeems.
             </p>
-          </SectionFade>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {TESTIMONIALS.map(({ quote, name, role }) => (
+              <div
+                key={name}
+                className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm flex flex-col"
+              >
+                <p className="text-sm text-foreground leading-relaxed flex-1">&ldquo;{quote}&rdquo;</p>
+                <div className="mt-6 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+                    {name.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{name}</p>
+                    <p className="text-xs text-muted-foreground">{role}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
-
-      {/* Deploy */}
-      <section className={SECTION_PY} id="quickstart" aria-label="Deploy">
+      {/* Feature sections */}
+      <section className={SECTION_PY} id="features">
         <div className={CONTAINER}>
-          <SectionFade>
-            <h2 className={`${SECTION_HEADING} text-center`}>Deploy in minutes.</h2>
-            <p className={`${SECTION_SUB} mt-3 text-center mx-auto`}>
-              Create your site and get a protected link format to paste into your auth emails.
+          {FEATURES.map(({ eyebrow, title, bullets, side }, i) => (
+            <div
+              key={i}
+              className={`grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center ${i > 0 ? "mt-20 lg:mt-28" : ""} ${side === "left" ? "lg:grid-flow-dense" : ""}`}
+            >
+              <div className={side === "left" ? "lg:col-start-2" : ""}>
+                <p className="text-xs font-semibold tracking-wider text-muted-foreground uppercase mb-3">
+                  {eyebrow}
+                </p>
+                <h3 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+                  {title}
+                </h3>
+                <ul className="mt-6 space-y-3">
+                  {bullets.map((b, j) => (
+                    <li key={j} className="flex gap-3 text-base text-muted-foreground leading-relaxed">
+                      <span className="text-primary mt-1.5 shrink-0" aria-hidden>✓</span>
+                      <span>{b}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className={`rounded-xl border border-border bg-card/50 p-8 min-h-[200px] flex items-center justify-center ${side === "left" ? "lg:col-start-1 lg:row-start-1" : ""}`}>
+                <div className="w-full max-w-[280px] h-32 rounded-lg bg-muted/50 border border-border flex items-center justify-center">
+                  <span className="text-xs font-medium text-muted-foreground">Diagram / mock</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Pricing teaser */}
+      <section className={SECTION_PY} id="pricing">
+        <div className={CONTAINER}>
+          <div className="max-w-2xl mx-auto text-center">
+            <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
+              Start free. Scale when you need it.
+            </h2>
+            <p className="mt-4 text-base text-muted-foreground leading-relaxed">
+              Free tier: 1K redemptions per month. No credit card. Pro and Scale when you grow.
             </p>
-            <p className="mt-3 text-center text-sm text-muted-foreground max-w-xl mx-auto">
-              Works with login, verify email, invites, and password reset.
-            </p>
-            <div className="mt-10 flex justify-center">
-              <Button asChild size="lg" className="h-12 px-8 font-semibold text-primary-foreground">
-                <Link href="/app">Create site</Link>
+            <div className="mt-10">
+              <Button asChild size="lg" className="rounded-full h-12 px-10 font-medium bg-primary text-primary-foreground hover:bg-primary/90">
+                <Link href="/start">Get started free</Link>
               </Button>
             </div>
-          </SectionFade>
-        </div>
-      </section>
-
-      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
-
-      {/* Pricing: Start free first */}
-      <section className={SECTION_PY} id="pricing" aria-label="Pricing">
-        <div className={CONTAINER}>
-          <SectionFade>
-            <h2 className={`${SECTION_HEADING} text-center`}>Start free. Scale when you need it.</h2>
-            <div className="mt-16 max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
-              <div className={`rounded-xl border border-primary/15 ${BORDER_SUBTLE} bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)] flex flex-col order-first`}>
-                <h3 className="text-xl font-semibold tracking-tight text-foreground">Free</h3>
-                <p className="mt-2 text-sm text-muted-foreground">1K redemptions / month</p>
-                <p className="mt-6 text-3xl font-bold text-primary">$0</p>
-                <p className="text-sm text-muted-foreground">/ month</p>
-                <p className="mt-4 text-sm text-muted-foreground">No credit card.</p>
-                <div className="mt-auto pt-8">
-                  <Button asChild className="w-full h-12 font-semibold text-primary-foreground">
-                    <Link href="/start">Create free site</Link>
-                  </Button>
-                </div>
-              </div>
-              <div className={`rounded-xl border ${BORDER_SUBTLE} bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)] flex flex-col`}>
-                <h3 className="text-xl font-semibold tracking-tight text-foreground">Pro</h3>
-                <p className="mt-2 text-sm text-muted-foreground">10K redemptions / month</p>
-                <p className="mt-6 text-2xl font-semibold text-foreground">$19</p>
-                <p className="text-sm text-muted-foreground">/ month</p>
-                <p className="mt-4 text-sm text-muted-foreground">Growing apps.</p>
-                <div className="mt-auto pt-8">
-                  <Button asChild variant="outline" className={`w-full h-12 font-medium text-foreground ${BORDER_SUBTLE}`}>
-                    <Link href="/pricing">Learn more</Link>
-                  </Button>
-                </div>
-              </div>
-              <div className={`rounded-xl border ${BORDER_SUBTLE} bg-white p-8 shadow-[0_1px_2px_rgba(0,0,0,0.04)] flex flex-col`}>
-                <h3 className="text-xl font-semibold tracking-tight text-foreground">Scale</h3>
-                <p className="mt-2 text-sm text-muted-foreground">High volume</p>
-                <p className="mt-6 text-2xl font-semibold text-foreground">Custom pricing</p>
-                <p className="mt-4 text-sm text-muted-foreground">Enterprise.</p>
-                <div className="mt-auto pt-8">
-                  <Button asChild variant="outline" className={`w-full h-12 font-medium text-foreground ${BORDER_SUBTLE}`}>
-                    <Link href="/pricing">Learn more</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-            <p className="mt-12 text-center text-sm text-muted-foreground max-w-xl mx-auto">
-              A redemption is a successful interactive link use.
-            </p>
-          </SectionFade>
-        </div>
-      </section>
-
-      <Separator className={`max-w-[1200px] mx-auto ${SEPARATOR_SUBTLE}`} />
-
-      {/* FAQ */}
-      <section className={SECTION_PY} id="faq" aria-label="FAQ">
-        <div className={CONTAINER}>
-          <SectionFade>
-            <h2 className={`${SECTION_HEADING} text-center`}>FAQ</h2>
-            <div className="mt-12 max-w-2xl mx-auto">
-              <Accordion type="single" collapsible className={`rounded-xl border ${BORDER_SUBTLE} bg-white px-6 shadow-[0_1px_2px_rgba(0,0,0,0.04)]`}>
-                {FAQ_ITEMS.map(({ q, a }) => (
-                  <AccordionItem key={q} value={q} className={BORDER_SUBTLE}>
-                    <AccordionTrigger className="text-left hover:no-underline py-5">
-                      {q}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground pb-5">
-                      {a}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          </SectionFade>
+          </div>
         </div>
       </section>
     </>

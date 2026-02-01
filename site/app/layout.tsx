@@ -65,9 +65,10 @@ export default function RootLayout({
           Skip to content
         </a>
         <div className="announcement-bar" id="announcement">
-          <p className="announcement-bar__text">
+          <Link href="/docs" className="announcement-bar__text">
             Scanner-safe links are live. Set up in under 10 minutes.
-          </p>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+          </Link>
         </div>
         <header className="site-header">
           <div className="site-header__inner">
@@ -82,9 +83,9 @@ export default function RootLayout({
               ))}
             </nav>
             <div className="site-header__actions">
-              <Button asChild variant="outline" size="sm" className="site-btn site-btn--secondary">
-                <Link href="/app">Log in</Link>
-              </Button>
+              <Link href="/app" className="site-header__link site-header__link--log">
+                Log in
+              </Link>
               <Button asChild size="sm" className="site-btn site-btn--primary">
                 <Link href="/start">Get started</Link>
               </Button>

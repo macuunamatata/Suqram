@@ -91,9 +91,10 @@ export default function HomePage() {
                 <Button asChild size="lg" className="rounded-full h-12 px-8 font-medium bg-primary text-primary-foreground hover:bg-primary/90">
                   <Link href="/start">Get started</Link>
                 </Button>
-                <Button asChild variant="outline" size="lg" className="rounded-full h-12 px-8 font-medium border-border text-foreground">
-                  <Link href="#pricing">Pricing</Link>
-                </Button>
+                <Link href="#pricing" className="inline-flex items-center gap-1.5 text-base font-medium text-muted-foreground hover:text-foreground transition-colors mt-2 sm:mt-0">
+                  Pricing
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                </Link>
               </div>
               <p className="mt-5 text-sm text-muted-foreground">
                 For teams dealing with link scanners and preview bots.
@@ -106,17 +107,17 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Trusted by */}
-      <section className="py-12 sm:py-16 border-y border-border/80 bg-background/50" id="trusted">
+      {/* Trusted by (Finta-style: centered heading, monochrome logos) */}
+      <section className="py-14 sm:py-16 border-b border-border/60" id="trusted">
         <div className={CONTAINER}>
-          <h2 className="text-center text-sm font-semibold tracking-wider text-muted-foreground uppercase mb-8">
-            Trusted by teams who ship auth
+          <h2 className="text-center text-base font-semibold tracking-tight text-foreground mb-10">
+            Trusted by fast-growing teams
           </h2>
-          <div className="flex flex-wrap justify-center items-center gap-x-12 gap-y-6">
+          <div className="flex flex-wrap justify-center items-center gap-x-14 gap-y-6">
             {TRUSTED_LOGOS.map((name) => (
               <span
                 key={name}
-                className="text-lg font-semibold text-muted-foreground/70 tracking-tight"
+                className="text-lg font-semibold text-muted-foreground/80 tracking-tight"
                 aria-hidden
               >
                 {name}
@@ -126,29 +127,33 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Built for */}
+      {/* Built for (Finta-style: blue-highlight headline, social proof pill, testimonial cards) */}
       <section className={SECTION_PY} id="built-for">
         <div className={CONTAINER}>
-          <div className="max-w-2xl mx-auto text-center mb-14">
+          <div className="max-w-2xl mx-auto text-center mb-8">
             <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
-              Built for <strong>teams that rely on one-time links</strong>
+              Built for <span className="text-primary">teams that rely on one-time links</span>
             </h2>
             <p className="mt-4 text-base text-muted-foreground leading-relaxed">
               Suqram is for engineers and product teams who send magic links, verification links, and reset links in email. It’s the edge layer that keeps scanners from burning tokens—so only a real click redeems.
             </p>
+            <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-muted/50 px-4 py-2 text-sm font-medium text-muted-foreground">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" /></svg>
+              <span>4.8 from 100+ teams</span>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mt-12">
             {TESTIMONIALS.map(({ quote, name, role }) => (
               <div
                 key={name}
-                className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm flex flex-col"
+                className="rounded-2xl bg-muted/30 border border-border/60 p-6 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] flex flex-col"
               >
                 <p className="text-sm text-foreground leading-relaxed flex-1">&ldquo;{quote}&rdquo;</p>
                 <div className="mt-6 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground">
+                  <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-sm font-medium text-muted-foreground shrink-0">
                     {name.split(" ").map((n) => n[0]).join("")}
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm font-medium text-foreground">{name}</p>
                     <p className="text-xs text-muted-foreground">{role}</p>
                   </div>

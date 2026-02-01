@@ -1,43 +1,74 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 
+const SESSION_CHECK_URL = "https://go.suqram.com/app/counters";
+const SESSION_CHECK_TIMEOUT_MS = 1500;
+
 function DashboardContent() {
   const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"checking" | "authenticated" | "redirecting">("checking");
+  const [status, setStatus] = useState<"checking" | "authenticated" | "not_logged_in">("checking");
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    const base = getRailBaseUrl();
+    abortRef.current = new AbortController();
+    const signal = abortRef.current.signal;
     const nextPath = `/app${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
 
-    fetch(`${base}/app/counters`, { credentials: "include" })
+    const timeoutId = setTimeout(() => {
+      abortRef.current?.abort();
+    }, SESSION_CHECK_TIMEOUT_MS);
+
+    fetch(SESSION_CHECK_URL, { credentials: "include", signal })
       .then((res) => {
         if (!mounted) return;
+        clearTimeout(timeoutId);
         if (res.ok) {
           setStatus("authenticated");
         } else {
-          setStatus("redirecting");
-          window.location.href = `/start?next=${encodeURIComponent(nextPath)}`;
+          setStatus("not_logged_in");
         }
       })
-      .catch(() => {
+      .catch((e) => {
         if (!mounted) return;
-        setStatus("redirecting");
-        window.location.href = `/start?next=${encodeURIComponent(nextPath)}`;
+        clearTimeout(timeoutId);
+        if (e instanceof Error && e.name === "AbortError") return;
+        setStatus("not_logged_in");
       });
 
     return () => {
       mounted = false;
+      clearTimeout(timeoutId);
+      abortRef.current?.abort();
+      abortRef.current = null;
     };
   }, [searchParams]);
 
-  if (status === "checking" || status === "redirecting") {
+  if (status === "checking") {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <p className="text-sm text-[var(--muted)]">Checking session…</p>
+      </div>
+    );
+  }
+
+  if (status === "not_logged_in") {
+    const nextPath = `/app${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+    const startUrl = `/start?next=${encodeURIComponent(nextPath)}`;
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="mx-auto max-w-md px-4 text-center">
+          <p className="text-sm text-[var(--muted)]">You’re not signed in.</p>
+          <p className="mt-4">
+            <Link href={startUrl} className="link-accent text-sm font-medium">
+              Create site or sign in →
+            </Link>
+          </p>
+        </div>
       </div>
     );
   }

@@ -90,7 +90,7 @@ function getAppCorsOrigin(request: Request): string | null {
 }
 
 const CORS_APP_HEADERS = {
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Max-Age': '86400',
   'Vary': 'Origin',
@@ -975,6 +975,23 @@ export default {
       }
     }
 
+    // Dashboard API: GET /app/counters — session check + counters (never redirect; CORS for Pages)
+    if (path === '/app/counters') {
+      if (request.method === 'OPTIONS') {
+        const origin = getAppCorsOrigin(request);
+        const headers = new Headers(CORS_APP_HEADERS);
+        if (origin) {
+          headers.set('Access-Control-Allow-Origin', origin);
+          headers.set('Access-Control-Allow-Credentials', 'true');
+        }
+        return new Response(null, { status: 204, headers });
+      }
+      if (request.method === 'GET') {
+        const res = await handleDashboardCounters(request, env);
+        return addCorsApp(request, res);
+      }
+    }
+
     // Safety net: GET /app or /start (dashboard pages) → redirect to Pages site; excludes API paths
     const DASHBOARD_SITE_ORIGIN = 'https://suqram.com';
     if (request.method === 'GET') {
@@ -982,7 +999,7 @@ export default {
         const target = `${DASHBOARD_SITE_ORIGIN}${path}${url.search}`;
         return new Response(null, { status: 302, headers: { 'Location': target } });
       }
-      if (path.startsWith('/app/') && path !== '/app/counters') {
+      if (path.startsWith('/app/')) {
         const target = `${DASHBOARD_SITE_ORIGIN}${path}${url.search}`;
         return new Response(null, { status: 302, headers: { 'Location': target } });
       }
@@ -1000,11 +1017,6 @@ export default {
     // Dashboard: GET or POST /app/logout - Logout and clear session
     if (path === '/app/logout' && (request.method === 'GET' || request.method === 'POST')) {
       return handleDashboardLogout(request, env);
-    }
-
-    // Dashboard: GET /app/counters - Get event counters (last 24h)
-    if (path === '/app/counters' && request.method === 'GET') {
-      return handleDashboardCounters(request, env);
     }
 
     return new Response('Not Found', { status: 404 });

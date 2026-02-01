@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 
 const DEMO_CREATE_URL = "https://go.suqram.com/demo/create";
 const DEMO_SCAN_URL = "https://go.suqram.com/demo/scan";
@@ -37,24 +38,19 @@ function getPill(step: 1 | 2 | 3, mode: Mode): { label: string; ok: boolean } {
   return { label: mode === "unprotected" ? "Expired" : "Redeemed", ok: mode === "protected" };
 }
 
+const STEP_STAGGER = 0.06;
+const DURATION = 0.2;
+
 export default function DemoBeforeAfter() {
+  const reduceMotion = useReducedMotion() ?? false;
   const [mode, setMode] = useState<Mode>("protected");
   const [phase, setPhase] = useState<Phase>("idle");
   const [activeStep, setActiveStep] = useState<ActiveStep>(0);
   const [runId, setRunId] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [logLines, setLogLines] = useState<string[]>([]);
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const abortRef = useRef<AbortController | null>(null);
-
-  useEffect(() => {
-    const m = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setPrefersReducedMotion(m.matches);
-    const handler = () => setPrefersReducedMotion(m.matches);
-    m.addEventListener("change", handler);
-    return () => m.removeEventListener("change", handler);
-  }, []);
 
   const clearTimers = useCallback(() => {
     timersRef.current.forEach(clearTimeout);
@@ -80,7 +76,7 @@ export default function DemoBeforeAfter() {
     setRunId((r) => r + 1);
     setLogLines([LOG_LINES.step1]);
 
-    if (prefersReducedMotion) {
+    if (reduceMotion) {
       setActiveStep(3);
       setPhase("done");
       setLogLines([
@@ -103,7 +99,7 @@ export default function DemoBeforeAfter() {
       setPhase("done");
     }, DONE_MS);
     timersRef.current = [t2, t3, t4];
-  }, [prefersReducedMotion, clearTimers, mode]);
+  }, [reduceMotion, clearTimers, mode]);
 
   const runDemo = useCallback(async () => {
     setError(null);
@@ -188,6 +184,8 @@ export default function DemoBeforeAfter() {
     if (logLines.length) navigator.clipboard.writeText(logLines.join("\n"));
   }, [logLines]);
 
+  const transition = reduceMotion ? { duration: 0, delay: 0 } : { duration: DURATION, ease: [0.25, 0.1, 0.25, 1] };
+
   return (
     <section className="py-12 sm:py-16" aria-label="Demo">
       <div className="mx-auto max-w-[640px] px-4 sm:px-6 demoWidget">
@@ -229,7 +227,6 @@ export default function DemoBeforeAfter() {
           </div>
 
           <div id="demo-content">
-            {/* Part 1: Email snippet — light surface, no heavy border */}
             <div className="demoEmail">
               <p className="demoEmail-label">Your sign-in link is ready</p>
               <span className="demoEmail-link">Sign in to Example</span>
@@ -238,42 +235,46 @@ export default function DemoBeforeAfter() {
               </p>
             </div>
 
-            {/* Part 2: Proof trace — rail + terminal on subtle tint */}
             <div className="demoTrace">
               <div className="demoTrace-grid">
                 <div className="demoRail">
                   <div className="demoRail-track" aria-hidden />
-                  <div
+                  <motion.div
                     className="demoRail-fill"
-                    style={{ height: `${railFillHeight}%` }}
                     aria-hidden
+                    initial={false}
+                    animate={{ height: `${railFillHeight}%` }}
+                    transition={transition}
                   />
                   <div className={`demoRail-dot ${activeStep >= 1 ? "active" : ""}`} data-step="1" aria-hidden />
                   <div className={`demoRail-dot ${activeStep >= 2 ? "active" : ""}`} data-step="2" aria-hidden />
                   <div className={`demoRail-dot ${activeStep >= 3 ? "active" : ""}`} data-step="3" aria-hidden />
                 </div>
-                <div className="demoStep">
-                  <span className="demoStep-label">{STEP_LABELS[0]}</span>
-                  {showOutcomes && activeStep >= 1 && (
-                    <span className="demoPill demoPill-ok">{getPill(1, mode).label}</span>
-                  )}
-                </div>
-                <div className="demoStep">
-                  <span className="demoStep-label">{STEP_LABELS[1]}</span>
-                  {showOutcomes && activeStep >= 2 && (
-                    <span className={`demoPill ${getPill(2, mode).ok ? "demoPill-ok" : "demoPill-bad"}`}>
-                      {getPill(2, mode).label}
-                    </span>
-                  )}
-                </div>
-                <div className="demoStep">
-                  <span className="demoStep-label">{STEP_LABELS[2]}</span>
-                  {showOutcomes && activeStep >= 3 && (
-                    <span className={`demoPill ${getPill(3, mode).ok ? "demoPill-ok" : "demoPill-bad"}`}>
-                      {getPill(3, mode).label}
-                    </span>
-                  )}
-                </div>
+                {([0, 1, 2] as const).map((i) => (
+                  <motion.div
+                    key={`step-${runId}-${i}`}
+                    className="demoStep"
+                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={
+                      reduceMotion
+                        ? { duration: 0 }
+                        : { duration: DURATION, delay: i * STEP_STAGGER, ease: [0.25, 0.1, 0.25, 1] }
+                    }
+                  >
+                    <span className="demoStep-label">{STEP_LABELS[i]}</span>
+                    {showOutcomes && activeStep >= i + 1 && (
+                      <motion.span
+                        className={`demoPill ${getPill((i + 1) as 1 | 2 | 3, mode).ok ? "demoPill-ok" : "demoPill-bad"}`}
+                        initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={reduceMotion ? { duration: 0 } : { duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
+                      >
+                        {getPill((i + 1) as 1 | 2 | 3, mode).label}
+                      </motion.span>
+                    )}
+                  </motion.div>
+                ))}
               </div>
 
               {logLines.length > 0 && (
@@ -288,9 +289,19 @@ export default function DemoBeforeAfter() {
                     <CopyIcon />
                   </button>
                   {logLines.map((line, i) => (
-                    <div key={`${runId}-${i}-${line}`} className="demoTerminal-line">
+                    <motion.div
+                      key={`${runId}-${i}-${line}`}
+                      className="demoTerminal-line"
+                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={
+                        reduceMotion
+                          ? { duration: 0 }
+                          : { duration: DURATION, delay: i * STEP_STAGGER, ease: [0.25, 0.1, 0.25, 1] }
+                      }
+                    >
                       <code>{line}</code>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}

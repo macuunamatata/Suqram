@@ -769,22 +769,6 @@ h3 {
   }
   .demoTerminal-line {
     padding: 2px 0;
-    opacity: 0;
-    transform: translateY(-2px);
-    animation: demoTerminal-reveal var(--duration-ui) var(--ease-out) forwards;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .demoTerminal-line {
-      animation: none;
-      opacity: 1;
-      transform: none;
-    }
-  }
-  @keyframes demoTerminal-reveal {
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
   }
   .demoTerminal-line code {
     display: block;

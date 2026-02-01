@@ -16,14 +16,12 @@ function sleep(ms: number): Promise<void> {
 
 type Status = "idle" | "running" | "done";
 
-/** Human-readable trace lines — no HTTP verbs or paths */
 const TRACE_LINES = [
   "Scanner: opened link (view-only)",
   "Scanner: redemption blocked",
   "User: link still valid for interactive redemption",
 ] as const;
 
-/** Pretty URLs for UI only — never show /l/ or /v/ */
 const UNPROTECTED_DISPLAY_URL = "https://app.example.com/auth/verify?token=••••••••••••";
 const PROTECTED_DISPLAY_URL = "https://go.suqram.com/r/••••••••••••";
 
@@ -32,7 +30,6 @@ const STEP_MS = 500;
 export default function DemoBeforeAfter() {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [detailsOpen, setDetailsOpen] = useState(false);
   const runIdRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
   const reduceMotionRef = useRef(false);
@@ -123,7 +120,7 @@ export default function DemoBeforeAfter() {
 
   return (
     <section className="py-12 sm:py-16" aria-label="Demo">
-      <div className="mx-auto max-w-[640px] px-4 sm:px-6 demoWidget">
+      <div className="mx-auto max-w-[640px] px-4 sm:px-6 demoPanel">
         <h2 className="section-h2 text-center">
           Proof: scanner viewed vs user redeemed
         </h2>
@@ -131,97 +128,135 @@ export default function DemoBeforeAfter() {
           One link gets consumed when a scanner opens it. The other stays valid until a real user clicks.
         </p>
 
-        <div className="demoWidget-header mt-8">
+        <div className="demoPanel-inner mt-8">
+          {/* Email snippet */}
           <div className="demoEmail">
-            <p className="demoEmail-label">Your sign-in link is ready</p>
-            <p className="demoEmail-linkRow">
-              <span className="demoEmail-link">Sign in to Example</span>
-              <span className="demoEmail-linkMeta">(unprotected)</span>
-            </p>
-            <p className="demoEmail-url" title={UNPROTECTED_DISPLAY_URL}>
-              {UNPROTECTED_DISPLAY_URL}
-            </p>
-            <p className="demoEmail-linkRow mt-4">
-              <span className="demoEmail-link">Sign in to Example</span>
-              <span className="demoEmail-linkMeta">(protected)</span>
-            </p>
-            <p className="demoEmail-url" title={PROTECTED_DISPLAY_URL}>
-              {PROTECTED_DISPLAY_URL}
-            </p>
+            <p className="demoEmail-eyebrow">Your sign-in link is ready</p>
+            <div className="demoEmail-row">
+              <div className="demoEmail-rowInner">
+                <span className="demoEmail-link">Sign in to Example</span>
+                <span className="demoEmail-pill">unprotected</span>
+              </div>
+              <p className="demoEmail-url" title={UNPROTECTED_DISPLAY_URL}>
+                {UNPROTECTED_DISPLAY_URL}
+              </p>
+            </div>
+            <div className="demoEmail-row">
+              <div className="demoEmail-rowInner">
+                <span className="demoEmail-link">Sign in to Example</span>
+                <span className="demoEmail-pill">protected</span>
+              </div>
+              <p className="demoEmail-url" title={PROTECTED_DISPLAY_URL}>
+                {PROTECTED_DISPLAY_URL}
+              </p>
+            </div>
           </div>
 
-          <div className="demoProof">
-            <button
-              type="button"
-              onClick={runDemo}
-              disabled={isRunning}
-              className="demoWidget-btn"
-              aria-busy={isRunning}
-              aria-live="polite"
-            >
-              {isRunning ? (
-                <span className="demoWidget-btnDots" aria-hidden>
-                  <span />
-                  <span />
-                  <span />
-                </span>
-              ) : (
-                "Simulate scanner pre-open"
-              )}
-            </button>
+          <hr className="demoPanel-divider" aria-hidden />
 
-            {showOutcomes && (
-              <div className="demoOutcomes">
-                <div className="demoOutcome demoOutcome-bad">
+          {/* Primary CTA — label + 3-dot pulse on right when running */}
+          <button
+            type="button"
+            onClick={runDemo}
+            disabled={isRunning}
+            className="demoPanel-cta"
+            aria-busy={isRunning}
+            aria-live="polite"
+          >
+            <span>Simulate scanner pre-open</span>
+            {isRunning && (
+              <span className="demoPanel-ctaDots" aria-hidden>
+                <span />
+                <span />
+                <span />
+              </span>
+            )}
+          </button>
+
+          {showOutcomes && (
+            <div className="demoOutcomes">
+              <div className="demoOutcome" data-status="expired">
+                <div className="demoOutcome-header">
+                  <IconX className="demoOutcome-icon" aria-hidden />
                   <p className="demoOutcome-title">Expired</p>
-                  <p className="demoOutcome-desc">Token was consumed by scanner.</p>
-                  <p className="demoOutcome-why">Scanners that open links consume one-time tokens.</p>
                 </div>
-                <div className="demoOutcome demoOutcome-ok">
+                <p className="demoOutcome-desc">Token was consumed by scanner.</p>
+                <p className="demoOutcome-why">Scanners that open links consume one-time tokens.</p>
+              </div>
+              <div className="demoOutcome" data-status="valid">
+                <div className="demoOutcome-header">
+                  <IconCheck className="demoOutcome-icon" aria-hidden />
                   <p className="demoOutcome-title">Still valid</p>
-                  <p className="demoOutcome-desc">Scanner views don&apos;t redeem.</p>
-                  <p className="demoOutcome-why">Only interactive redemption counts.</p>
+                </div>
+                <p className="demoOutcome-desc">Scanner views don&apos;t redeem.</p>
+                <p className="demoOutcome-why">Only interactive redemption counts.</p>
+              </div>
+            </div>
+          )}
+
+          {showOutcomes && (
+            <details className="demoDetails">
+              <summary className="demoDetails-summary">
+                <ChevronIcon className="demoDetails-chevron" aria-hidden />
+                View trace
+              </summary>
+              <div className="demoTrace-block">
+                <button
+                  type="button"
+                  className="demoTrace-copy"
+                  onClick={copyTrace}
+                  title="Copy trace"
+                  aria-label="Copy trace"
+                >
+                  <CopyIcon />
+                </button>
+                <div className="demoTrace-lines">
+                  {TRACE_LINES.map((line, i) => (
+                    <p key={i} className="demoTrace-line">
+                      {line}
+                    </p>
+                  ))}
                 </div>
               </div>
-            )}
+            </details>
+          )}
 
-            {showOutcomes && (
-              <details className="demoDetails">
-                <summary className="demoDetails-summary">Trace</summary>
-                <div className="demoTrace-block">
-                  <button
-                    type="button"
-                    className="demoTrace-copy"
-                    onClick={copyTrace}
-                    title="Copy trace"
-                    aria-label="Copy trace"
-                  >
-                    <CopyIcon />
-                  </button>
-                  <div className="demoTrace-lines">
-                    {TRACE_LINES.map((line, i) => (
-                      <p key={i} className="demoTrace-line">
-                        {line}
-                      </p>
-                    ))}
-                  </div>
-                </div>
-              </details>
-            )}
-
-            {error && (
-              <p className="mt-4 text-sm text-[var(--status-error)]" role="alert">
-                {error}
-              </p>
-            )}
-
-            <p className="demoWidget-footerNote mt-4">
-              No signup. Runs on suqram.com.
+          {error && (
+            <p className="text-sm text-[var(--status-error)]" role="alert">
+              {error}
             </p>
-          </div>
+          )}
+
+          <p className="demoPanel-footer">
+            No signup. Runs on suqram.com.
+          </p>
         </div>
       </div>
     </section>
+  );
+}
+
+function IconX({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M18 6L6 18M6 6l12 12" />
+    </svg>
+  );
+}
+
+function IconCheck({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M20 6L9 17l-5-5" />
+    </svg>
+  );
+}
+
+function ChevronIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M9 18l6-6-6-6" />
+    </svg>
   );
 }
 

@@ -2,8 +2,23 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LeadGrid-inspired: conversion-focused, clean hierarchy, soft section tints, benefit-led. */
+/* Premium token-based design system — protocol-grade dev infra */
 :root {
+  /* Core tokens */
+  --bg: #F8FAFC;
+  --surface: #FFFFFF;
+  --border: #E2E8F0;
+  --text: #0F172A;
+  --muted: #475569;
+  --accent: #2563EB;
+  --accent-soft: #EFF6FF;
+  --success-text: #065F46;
+  --success-bg: #ECFDF5;
+  --success-border: #A7F3D0;
+  --danger-text: #991B1B;
+  --danger-bg: #FEF2F2;
+  --danger-border: #FECACA;
+
   /* Type scale */
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
@@ -13,10 +28,10 @@
   --text-2xl: 1.5rem;
   --text-3xl: 2rem;
   --text-4xl: 2.25rem;
-  --text-hero: clamp(2.25rem, 4vw + 1.5rem, 3.5rem); /* 36–56px */
-  --text-h2: clamp(1.75rem, 2.5vw + 1rem, 2.25rem);   /* 28–36px */
+  --text-hero: clamp(2.25rem, 4vw + 1.5rem, 3.5rem);
+  --text-h2: clamp(1.75rem, 2.5vw + 1rem, 2.25rem);
 
-  /* Spacing rhythm */
+  /* Spacing */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -35,61 +50,9 @@
   --radius-lg: 10px;
   --radius-xl: 12px;
 
-  /* Shadow — soft, conversion-friendly */
-  --shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.04);
-  --shadow-cta: 0 2px 8px rgba(37, 99, 235, 0.2);
-
-  /* Colors — warm-neutral base, clear hierarchy */
-  --text: #0f172a;
-  --text-secondary: #475569;
-  --muted: #64748b;
-  --muted-strong: #475569;
-
-  /* Primary — strong CTA blue */
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
-  --primary-muted: rgba(37, 99, 235, 0.08);
-  --primary-ring: rgba(37, 99, 235, 0.25);
-
-  /* Status — muted, consistent */
-  --status-success: #0d9488;
-  --status-success-muted: rgba(13, 148, 136, 0.1);
-  --status-error: #b91c1c;
-  --status-error-muted: rgba(185, 28, 28, 0.08);
-  --status-warn: #b45309;
-  --status-warn-muted: rgba(180, 83, 9, 0.08);
-
-  /* Surfaces — soft tint, alternating section feel */
-  --bg: #fafbfc;
-  --bg-subtle: #f4f6f8;
-  --bg-section-alt: #f8fafc;
-  --surface: #ffffff;
-  --surface-tint: #fcfcfd;
-  --surface-hover: #f8fafc;
-  --border: rgba(0, 0, 0, 0.06);
-  --border-strong: rgba(0, 0, 0, 0.09);
-
-  /* Aliases for compatibility */
-  --panel: var(--surface-tint);
-  --card: var(--surface-tint);
-  --surface-elevated: var(--surface);
-  --bg2: var(--bg-subtle);
-  --text-heading: var(--text);
-  --text-muted: var(--muted);
-  --text2: var(--text-secondary);
-  --accent: var(--primary);
-  --accent-dim: var(--primary-muted);
-  --accent-focus: var(--primary-ring);
-  --accent-glow: transparent;
-  --warn: var(--status-warn);
-  --warn-dim: var(--status-warn-muted);
-  --error-muted: var(--status-error);
-  --cta-bg: var(--primary);
-  --cta-text: #ffffff;
-  --cta-hover-bg: var(--primary-hover);
-  --ring: var(--primary);
-  --ctaBg: var(--primary);
-  --ctaText: #ffffff;
+  /* Shadows — soft only */
+  --shadow-soft: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-cta: 0 2px 6px rgba(37, 99, 235, 0.15);
 
   /* Typography */
   --font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -98,6 +61,14 @@
   /* Motion */
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --duration-ui: 180ms;
+
+  /* Aliases for compatibility */
+  --text-heading: var(--text);
+  --text-muted: var(--muted);
+  --shadow-surface: var(--shadow-soft);
+  --panel: var(--surface);
+  --card: var(--surface);
+  --bg2: var(--bg);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -111,6 +82,7 @@ html {
 }
 
 body {
+  background: var(--bg);
   color: var(--text);
   min-height: 100vh;
   font-family: var(--font-sans);
@@ -120,9 +92,12 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Alternating section background — LeadGrid-style */
-.section-alt {
-  background: var(--bg-section-alt);
+a:not([class*="btn"]):not([class*="Button"]) {
+  color: var(--accent);
+}
+a:not([class*="btn"]):not([class*="Button"]):hover {
+  color: var(--accent);
+  text-decoration: underline;
 }
 
 /* Type scale */
@@ -1202,7 +1177,8 @@ code, .font-mono {
 
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    /* Map to Tailwind HSL (no hsl() wrapper) — match design tokens */
+    --background: 210 40% 98%;
     --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
@@ -1210,61 +1186,24 @@ code, .font-mono {
     --popover-foreground: 222 47% 11%;
     --primary: 221 83% 53%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 20% 96%;
+    --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
-    --muted: 210 20% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 210 20% 96%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 20% 47%;
+    --accent: 214 100% 97%;
     --accent-foreground: 222 47% 11%;
-    --destructive: 0 84% 60%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214 20% 92%;
-    --input: 214 20% 92%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
     --ring: 221 83% 53%;
-    --chart-1: 221 83% 53%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
-  .dark {
-    --background: 222 47% 11%;
-    --foreground: 210 20% 98%;
-    --card: 222 47% 11%;
-    --card-foreground: 210 20% 98%;
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 221 83% 53%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 221 83% 53%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-  }
-}
-
-
-
-@layer base {
   * {
-    @apply border-border;
+    border-color: var(--border);
   }
   body {
-    @apply text-foreground;
-    background: linear-gradient(180deg, hsl(210 25% 97%) 0%, hsl(210 22% 95%) 25%, hsl(212 24% 94%) 50%, hsl(210 22% 96%) 100%);
-    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
   }
 }

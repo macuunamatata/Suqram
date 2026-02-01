@@ -93,15 +93,16 @@ export default function DemoBeforeAfter() {
 
         <div
           className={cn(
-            "rounded-xl border border-border/70 bg-card/80 p-6 sm:p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)]"
+            "rounded-xl border border-[var(--border)] p-6 sm:p-8 shadow-[var(--shadow-soft)]",
+            "bg-[rgba(255,255,255,0.8)] backdrop-blur-sm"
           )}
         >
-          <p className="text-sm text-muted-foreground mb-6">Your sign-in link is ready.</p>
+          <p className="text-sm text-[var(--muted)] mb-6">Your sign-in link is ready.</p>
 
           <div className="relative space-y-6">
             {phase === "sweeping" ? (
               <motion.div
-                className="absolute inset-0 rounded-xl bg-primary/[0.04] pointer-events-none z-0"
+                className="absolute inset-0 rounded-xl bg-[var(--accent-soft)]/60 pointer-events-none z-0"
                 initial={reduceMotion ? {} : { opacity: 0 }}
                 animate={reduceMotion ? {} : { opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -116,8 +117,8 @@ export default function DemoBeforeAfter() {
                   href="#"
                   onClick={onUnprotectedClick}
                   className={cn(
-                    "text-base font-medium text-primary underline-offset-4 hover:underline inline-block transition-[text-decoration,opacity] duration-150",
-                    burned ? "opacity-55 line-through decoration-destructive/80" : ""
+                    "text-base font-medium text-[var(--accent)] underline-offset-4 hover:underline inline-block transition-[text-decoration,opacity] duration-150",
+                    burned ? "opacity-55 line-through decoration-[var(--danger-border)]" : ""
                   )}
                   aria-label={phase === "done" ? "Unprotected link" : "Link"}
                   whileHover={reduceMotion ? {} : { textDecoration: "underline" }}
@@ -127,7 +128,7 @@ export default function DemoBeforeAfter() {
                 </motion.a>
                 <p
                   className={cn(
-                    "font-mono text-xs text-muted-foreground break-all",
+                    "font-mono text-xs text-[var(--muted)] break-all",
                     burned ? "opacity-50" : ""
                   )}
                 >
@@ -142,7 +143,7 @@ export default function DemoBeforeAfter() {
                   >
                     <Badge
                       variant="destructive"
-                      className="text-[11px] px-2 py-0.5 gap-1 font-normal bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/10"
+                      className="text-[11px] px-2 py-0.5 gap-1 font-normal border-[var(--danger-border)] bg-[var(--danger-bg)] text-[var(--danger-text)]"
                     >
                       <X className="h-3 w-3" aria-hidden />
                       Expired
@@ -150,7 +151,7 @@ export default function DemoBeforeAfter() {
                   </motion.div>
                 ) : null}
                 {phase === "done" && clickedUnprotected ? (
-                  <p className="text-xs text-destructive/90 mt-1.5" aria-live="polite">
+                  <p className="text-xs text-[var(--danger-text)] mt-1.5" aria-live="polite">
                     Expired.
                   </p>
                 ) : null}
@@ -161,17 +162,17 @@ export default function DemoBeforeAfter() {
                 <motion.a
                   href="#"
                   onClick={onProtectedClick}
-                  className="text-base font-medium text-primary underline-offset-4 hover:underline inline-block transition-[text-decoration] duration-150"
+                  className="text-base font-medium text-[var(--accent)] underline-offset-4 hover:underline inline-block transition-[text-decoration] duration-150"
                   aria-label={phase === "done" ? "Protected link" : "Link"}
                   whileHover={reduceMotion ? {} : { textDecoration: "underline" }}
                   transition={{ duration: 0.15 }}
                 >
                   Sign in to Example
                 </motion.a>
-                <p className="font-mono text-xs text-muted-foreground break-all">
+                <p className="font-mono text-xs text-[var(--muted)] break-all">
                   https://go.example.com/r/•••••••
                 </p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">
+                <p className="text-[11px] text-[var(--muted)] mt-0.5">
                   Uses your link domain (CNAME). End-users never see suqram.com.
                 </p>
                 {stillValid ? (
@@ -183,7 +184,7 @@ export default function DemoBeforeAfter() {
                   >
                     <Badge
                       variant="secondary"
-                      className="text-[11px] px-2 py-0.5 gap-1 font-normal text-green-700/90 dark:text-green-400/90 border-green-200/60 dark:border-green-800/40 bg-green-500/5"
+                      className="text-[11px] px-2 py-0.5 gap-1 font-normal border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)]"
                     >
                       <Check className="h-3 w-3" aria-hidden />
                       Still valid
@@ -191,7 +192,7 @@ export default function DemoBeforeAfter() {
                   </motion.div>
                 ) : null}
                 {phase === "done" && clickedProtected ? (
-                  <p className="text-xs text-green-700/90 dark:text-green-400/90 mt-1.5" aria-live="polite">
+                  <p className="text-xs text-[var(--success-text)] mt-1.5" aria-live="polite">
                     Signed in.
                   </p>
                 ) : null}
@@ -202,7 +203,7 @@ export default function DemoBeforeAfter() {
           <Button
             id="demo-simulate"
             variant="outline"
-            className="mt-6 h-10 px-5 border-border/80"
+            className="mt-6 h-10 px-5"
             onClick={runSimulation}
             disabled={phase !== "idle" && phase !== "done" ? true : false}
             aria-label="Simulate scanner pre-open"

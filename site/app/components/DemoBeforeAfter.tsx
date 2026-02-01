@@ -183,26 +183,24 @@ export default function DemoBeforeAfter() {
   const previewUrl = mode === "unprotected" ? UNPROTECTED_URL : PROTECTED_URL;
   const showOutcomes = phase === "running" || phase === "done";
   const railFillHeight = activeStep === 0 ? 0 : (activeStep / 3) * 100;
-  const progressBarWidth = activeStep === 0 ? 0 : (activeStep / 3) * 100;
 
-  const copyLog = useCallback(() => {
+  const copyLogs = useCallback(() => {
     if (logLines.length) navigator.clipboard.writeText(logLines.join("\n"));
   }, [logLines]);
 
   return (
     <section className="py-12 sm:py-16" aria-label="Demo">
-      <div className="mx-auto max-w-[640px] px-4 sm:px-6">
+      <div className="mx-auto max-w-[640px] px-4 sm:px-6 demoWidget">
         <h2 className="section-h2 text-center">
           Proof: scanner vs interactive redemption
         </h2>
-        <p className="mt-2 text-center text-[var(--text-secondary)] max-w-xl mx-auto text-sm sm:text-base">
+        <p className="mt-2 text-center text-[var(--text-secondary)] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
           Simulate a scanner pre-open. Compare unprotected (token burns) vs protected (only interactive redemption counts).
         </p>
 
-        <div className="demo-hero-inner mt-8">
-          {/* Segmented control — Unprotected / Protected */}
-          <div className="flex justify-center mb-6">
-            <div className="demo-segmented" role="tablist" aria-label="Link type">
+        <div className="demoWidget-header">
+          <div className="flex justify-center mb-5">
+            <div className="demoWidget-segmented" role="tablist" aria-label="Link type">
               <button
                 type="button"
                 role="tab"
@@ -210,7 +208,7 @@ export default function DemoBeforeAfter() {
                 aria-controls="demo-content"
                 id="demo-tab-unprotected"
                 data-selected={mode === "unprotected"}
-                className="demo-segmented-option"
+                className="demoWidget-segmentedOption"
                 onClick={() => onModeChange("unprotected")}
               >
                 Unprotected
@@ -222,7 +220,7 @@ export default function DemoBeforeAfter() {
                 aria-controls="demo-content"
                 id="demo-tab-protected"
                 data-selected={mode === "protected"}
-                className="demo-segmented-option demo-segmented-protected"
+                className="demoWidget-segmentedOption demoWidget-segmentedProtected"
                 onClick={() => onModeChange("protected")}
               >
                 Protected
@@ -230,75 +228,67 @@ export default function DemoBeforeAfter() {
             </div>
           </div>
 
-          <div className="demo-glass" id="demo-content">
-            <div className="demo-inner">
-              {/* Email snippet — realistic, airy */}
-              <p className="demo-email-label">Your sign-in link is ready</p>
-              <div className="mt-2">
-                <span className="demo-real-link">Sign in to Example</span>
-                <p className="demo-url-preview truncate" title={previewUrl}>
-                  {previewUrl}
-                </p>
-              </div>
+          <div id="demo-content">
+            {/* Part 1: Email snippet — light surface, no heavy border */}
+            <div className="demoEmail">
+              <p className="demoEmail-label">Your sign-in link is ready</p>
+              <span className="demoEmail-link">Sign in to Example</span>
+              <p className="demoEmail-url" title={previewUrl}>
+                {previewUrl}
+              </p>
+            </div>
 
-              {/* Rail — CSS grid: column 1 fixed rail (fill-down), column 2 step + pill */}
-              <div className="demo-rail-grid mt-8">
-                <div className="demo-rail-column">
-                  <div className="demo-rail-track" aria-hidden />
+            {/* Part 2: Proof trace — rail + terminal on subtle tint */}
+            <div className="demoTrace">
+              <div className="demoTrace-grid">
+                <div className="demoRail">
+                  <div className="demoRail-track" aria-hidden />
                   <div
-                    className="demo-rail-fill"
+                    className="demoRail-fill"
                     style={{ height: `${railFillHeight}%` }}
                     aria-hidden
                   />
-                  <div className={`demo-rail-dot ${activeStep >= 1 ? "active" : ""}`} data-step="1" aria-hidden />
-                  <div className={`demo-rail-dot ${activeStep >= 2 ? "active" : ""}`} data-step="2" aria-hidden />
-                  <div className={`demo-rail-dot ${activeStep >= 3 ? "active" : ""}`} data-step="3" aria-hidden />
+                  <div className={`demoRail-dot ${activeStep >= 1 ? "active" : ""}`} data-step="1" aria-hidden />
+                  <div className={`demoRail-dot ${activeStep >= 2 ? "active" : ""}`} data-step="2" aria-hidden />
+                  <div className={`demoRail-dot ${activeStep >= 3 ? "active" : ""}`} data-step="3" aria-hidden />
                 </div>
-                <div className="demo-rail-step">
-                  <span className="demo-rail-label">{STEP_LABELS[0]}</span>
+                <div className="demoStep">
+                  <span className="demoStep-label">{STEP_LABELS[0]}</span>
                   {showOutcomes && activeStep >= 1 && (
-                    <span className="demo-pill demo-pill-ok">{getPill(1, mode).label}</span>
+                    <span className="demoPill demoPill-ok">{getPill(1, mode).label}</span>
                   )}
                 </div>
-                <div className="demo-rail-step">
-                  <span className="demo-rail-label">{STEP_LABELS[1]}</span>
+                <div className="demoStep">
+                  <span className="demoStep-label">{STEP_LABELS[1]}</span>
                   {showOutcomes && activeStep >= 2 && (
-                    <span className={`demo-pill ${getPill(2, mode).ok ? "demo-pill-ok" : "demo-pill-bad"}`}>
+                    <span className={`demoPill ${getPill(2, mode).ok ? "demoPill-ok" : "demoPill-bad"}`}>
                       {getPill(2, mode).label}
                     </span>
                   )}
                 </div>
-                <div className="demo-rail-step">
-                  <span className="demo-rail-label">{STEP_LABELS[2]}</span>
+                <div className="demoStep">
+                  <span className="demoStep-label">{STEP_LABELS[2]}</span>
                   {showOutcomes && activeStep >= 3 && (
-                    <span className={`demo-pill ${getPill(3, mode).ok ? "demo-pill-ok" : "demo-pill-bad"}`}>
+                    <span className={`demoPill ${getPill(3, mode).ok ? "demoPill-ok" : "demoPill-bad"}`}>
                       {getPill(3, mode).label}
                     </span>
                   )}
                 </div>
               </div>
 
-              {/* Slim progress bar under rail (while running) */}
-              {(phase === "running" || phase === "done") && (
-                <div className="demo-rail-progress" aria-hidden>
-                  <div className="demo-rail-progress-bar" style={{ width: `${progressBarWidth}%` }} />
-                </div>
-              )}
-
-              {/* Log — mini terminal, one copy per block, lines reveal in sync */}
               {logLines.length > 0 && (
-                <div className="demo-log-wrap" role="log" aria-label="Request log">
+                <div className="demoTerminal" role="log" aria-label="Request log">
                   <button
                     type="button"
-                    className="demo-log-copy"
-                    onClick={copyLog}
-                    title="Copy log"
-                    aria-label="Copy log"
+                    className="demoTerminal-copy"
+                    onClick={copyLogs}
+                    title="Copy logs"
+                    aria-label="Copy logs"
                   >
                     <CopyIcon />
                   </button>
                   {logLines.map((line, i) => (
-                    <div key={`${runId}-${i}-${line}`} className="demo-log-line">
+                    <div key={`${runId}-${i}-${line}`} className="demoTerminal-line">
                       <code>{line}</code>
                     </div>
                   ))}
@@ -311,17 +301,17 @@ export default function DemoBeforeAfter() {
                 </p>
               )}
 
-              <div className="mt-6">
+              <div className="demoWidget-footer">
                 <button
                   type="button"
                   onClick={runDemo}
                   disabled={phase === "running"}
-                  className="demo-btn-primary"
+                  className="demoWidget-btn"
                   aria-busy={phase === "running"}
                   aria-live="polite"
                 >
                   {phase === "running" ? (
-                    <span className="demo-btn-dots" aria-hidden>
+                    <span className="demoWidget-btnDots" aria-hidden>
                       <span />
                       <span />
                       <span />
@@ -330,10 +320,10 @@ export default function DemoBeforeAfter() {
                     "Run demo"
                   )}
                 </button>
+                <p className="demoWidget-footerNote">
+                  No signup. Runs on suqram.com.
+                </p>
               </div>
-              <p className="mt-3 text-xs text-[var(--muted)]">
-                No signup. Runs on suqram.com.
-              </p>
             </div>
           </div>
         </div>

@@ -1,217 +1,206 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, useReducedMotion } from "framer-motion";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { useState, useRef, useCallback } from "react";
 import { X, Check } from "lucide-react";
 
-type Mode = "unprotected" | "protected";
-type Phase = "idle" | "sweeping" | "done";
+const DEMO_CREATE_URL = "https://go.suqram.com/demo/create";
+const DEMO_SCAN_URL = "https://go.suqram.com/demo/scan";
 
-const BEAT_MS = 600;
+type Session = {
+  tid: string;
+  unprotected_url: string;
+  protected_url: string;
+};
+
+type Result = "idle" | "loading" | "expired" | "signedin";
 
 export default function DemoBeforeAfter() {
-  const [mode, setMode] = useState<Mode>("unprotected");
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [clickedUnprotected, setClickedUnprotected] = useState(false);
-  const [clickedProtected, setClickedProtected] = useState(false);
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const reduceMotion = useReducedMotion() ?? false;
+  const [session, setSession] = useState<Session | null>(null);
+  const [resultUnprotected, setResultUnprotected] = useState<Result>("idle");
+  const [resultProtected, setResultProtected] = useState<Result>("idle");
+  const runIdRef = useRef(0);
 
-  const clearAllTimeouts = useCallback(() => {
-    timeoutsRef.current.forEach((id) => clearTimeout(id));
-    timeoutsRef.current = [];
-  }, []);
+  const runUnprotectedClick = useCallback(async () => {
+    const currentRunId = runIdRef.current + 1;
+    runIdRef.current = currentRunId;
+    setResultProtected("idle");
+    setResultUnprotected("loading");
 
-  const runSimulation = useCallback(() => {
-    clearAllTimeouts();
-    setClickedUnprotected(false);
-    setClickedProtected(false);
-    setPhase("sweeping");
+    try {
+      let tid: string;
+      let unprotectedUrl: string;
+      let protectedUrl: string;
 
-    const t = setTimeout(() => setPhase("done"), BEAT_MS);
-    timeoutsRef.current.push(t);
-  }, [clearAllTimeouts]);
+      if (session !== null) {
+        tid = session.tid;
+        unprotectedUrl = session.unprotected_url;
+        protectedUrl = session.protected_url;
+      } else {
+        const createRes = await fetch(DEMO_CREATE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        const createJson = (await createRes.json().catch(() => ({}))) as {
+          ok?: boolean;
+          tid?: string;
+          unprotected_url?: string;
+          protected_url?: string;
+        };
+        if (!createRes.ok || !createJson?.ok || !createJson.tid) {
+          if (currentRunId !== runIdRef.current) return;
+          setResultUnprotected("idle");
+          return;
+        }
+        tid = createJson.tid;
+        unprotectedUrl = createJson.unprotected_url ?? "";
+        protectedUrl = createJson.protected_url ?? "";
+        const scanRes = await fetch(DEMO_SCAN_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tid }),
+        });
+        if (!scanRes.ok) {
+          if (currentRunId !== runIdRef.current) return;
+          setResultUnprotected("idle");
+          return;
+        }
+        setSession({ tid, unprotected_url: unprotectedUrl, protected_url: protectedUrl });
+      }
 
-  const onToggle = useCallback(
-    (newMode: Mode) => {
-      if (newMode === mode) return;
-      clearAllTimeouts();
-      setMode(newMode);
-      setPhase("idle");
-      setClickedUnprotected(false);
-      setClickedProtected(false);
+      await fetch(unprotectedUrl, { method: "GET", redirect: "follow" });
+      if (currentRunId !== runIdRef.current) return;
+      setResultUnprotected("expired");
+    } catch {
+      if (currentRunId !== runIdRef.current) return;
+      setResultUnprotected("idle");
+    }
+  }, [session]);
+
+  const runProtectedClick = useCallback(async () => {
+    const currentRunId = runIdRef.current + 1;
+    runIdRef.current = currentRunId;
+    setResultUnprotected("idle");
+    setResultProtected("loading");
+
+    try {
+      let tid: string;
+      let unprotectedUrl: string;
+      let protectedUrl: string;
+
+      if (session !== null) {
+        tid = session.tid;
+        unprotectedUrl = session.unprotected_url;
+        protectedUrl = session.protected_url;
+      } else {
+        const createRes = await fetch(DEMO_CREATE_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        });
+        const createJson = (await createRes.json().catch(() => ({}))) as {
+          ok?: boolean;
+          tid?: string;
+          unprotected_url?: string;
+          protected_url?: string;
+        };
+        if (!createRes.ok || !createJson?.ok || !createJson.tid) {
+          if (currentRunId !== runIdRef.current) return;
+          setResultProtected("idle");
+          return;
+        }
+        tid = createJson.tid;
+        unprotectedUrl = createJson.unprotected_url ?? "";
+        protectedUrl = createJson.protected_url ?? "";
+        const scanRes = await fetch(DEMO_SCAN_URL, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tid }),
+        });
+        if (!scanRes.ok) {
+          if (currentRunId !== runIdRef.current) return;
+          setResultProtected("idle");
+          return;
+        }
+        setSession({ tid, unprotected_url: unprotectedUrl, protected_url: protectedUrl });
+      }
+
+      await fetch(protectedUrl, { method: "GET", redirect: "follow" });
+      if (currentRunId !== runIdRef.current) return;
+      setResultProtected("signedin");
+    } catch {
+      if (currentRunId !== runIdRef.current) return;
+      setResultProtected("idle");
+    }
+  }, [session]);
+
+  const onUnprotectedClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (resultUnprotected === "loading") return;
+      runUnprotectedClick();
     },
-    [mode, clearAllTimeouts]
+    [resultUnprotected, runUnprotectedClick]
   );
 
-  const onUnprotectedClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    if (phase !== "done") return;
-    setClickedUnprotected(true);
-  }, [phase]);
-
-  const onProtectedClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    if (phase !== "done") return;
-    setClickedProtected(true);
-  }, [phase]);
-
-  useEffect(() => {
-    return () => clearAllTimeouts();
-  }, [clearAllTimeouts]);
-
-  useEffect(() => {
-    const focusSimulate = () => {
-      if (typeof window !== "undefined" && window.location.hash === "#demo") {
-        const t = setTimeout(() => document.getElementById("demo-simulate")?.focus(), 150);
-        return () => clearTimeout(t);
-      }
-    };
-    focusSimulate();
-    window.addEventListener("hashchange", focusSimulate);
-    return () => window.removeEventListener("hashchange", focusSimulate);
-  }, []);
-
-  const burned = phase === "done";
-  const stillValid = phase === "done";
+  const onProtectedClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      if (resultProtected === "loading") return;
+      runProtectedClick();
+    },
+    [resultProtected, runProtectedClick]
+  );
 
   return (
-    <div className="w-full">
-      <Tabs value={mode} onValueChange={(v) => onToggle(v as Mode)} className="w-full">
-        <TabsList className="mb-4 w-full sm:w-auto h-10">
-          <TabsTrigger value="unprotected" className="flex-1 sm:flex-none px-4">
-            Unprotected
-          </TabsTrigger>
-          <TabsTrigger value="protected" className="flex-1 sm:flex-none px-4">
-            Protected
-          </TabsTrigger>
-        </TabsList>
-
-        <div
-          className={cn(
-            "rounded-xl border border-[var(--border)] p-6 sm:p-8 shadow-[var(--shadow-soft)]",
-            "bg-[rgba(255,255,255,0.8)] backdrop-blur-sm"
-          )}
+    <div className="demo-links-only">
+      <div className="demo-link-block">
+        <p className="demo-link-caption">Unprotected</p>
+        <a
+          href="#"
+          onClick={onUnprotectedClick}
+          className="demo-link-email"
+          aria-label="Unprotected sign-in link"
         >
-          <p className="text-sm text-[var(--muted)] mb-6">Your sign-in link is ready.</p>
+          Sign in to Example
+        </a>
+        <p className="demo-link-domain" aria-hidden>
+          app.example.com
+        </p>
+        {resultUnprotected === "loading" ? (
+          <p className="demo-link-result demo-link-result-loading" aria-live="polite">
+            …
+          </p>
+        ) : resultUnprotected === "expired" ? (
+          <p className="demo-link-result demo-link-result-expired" aria-live="polite">
+            <X className="demo-link-result-icon" aria-hidden />
+            Link expired
+          </p>
+        ) : null}
+      </div>
 
-          <div className="relative space-y-6">
-            {phase === "sweeping" ? (
-              <motion.div
-                className="absolute inset-0 rounded-xl bg-[var(--accent-soft)]/60 pointer-events-none z-0"
-                initial={reduceMotion ? {} : { opacity: 0 }}
-                animate={reduceMotion ? {} : { opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                aria-hidden
-              />
-            ) : null}
-            <div className="relative z-10 space-y-6">
-              {/* Unprotected link */}
-              <div className="space-y-1">
-                <motion.a
-                  href="#"
-                  onClick={onUnprotectedClick}
-                  className={cn(
-                    "text-base font-medium text-[var(--accent)] underline-offset-4 hover:underline inline-block transition-[text-decoration,opacity] duration-150",
-                    burned ? "opacity-55 line-through decoration-[var(--danger-border)]" : ""
-                  )}
-                  aria-label={phase === "done" ? "Unprotected link" : "Link"}
-                  whileHover={reduceMotion ? {} : { textDecoration: "underline" }}
-                  transition={{ duration: 0.15 }}
-                >
-                  Sign in to Example
-                </motion.a>
-                <p
-                  className={cn(
-                    "font-mono text-xs text-[var(--muted)] break-all",
-                    burned ? "opacity-50" : ""
-                  )}
-                >
-                  https://app.example.com/auth/verify?token=•••••••••
-                </p>
-                {burned ? (
-                  <motion.div
-                    initial={reduceMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center gap-1.5 mt-2"
-                  >
-                    <Badge
-                      variant="destructive"
-                      className="text-[11px] px-2 py-0.5 gap-1 font-normal border-[var(--danger-border)] bg-[var(--danger-bg)] text-[var(--danger-text)]"
-                    >
-                      <X className="h-3 w-3" aria-hidden />
-                      Expired
-                    </Badge>
-                  </motion.div>
-                ) : null}
-                {phase === "done" && clickedUnprotected ? (
-                  <p className="text-xs text-[var(--danger-text)] mt-1.5" aria-live="polite">
-                    Expired.
-                  </p>
-                ) : null}
-              </div>
-
-              {/* Protected link */}
-              <div className="space-y-1">
-                <motion.a
-                  href="#"
-                  onClick={onProtectedClick}
-                  className="text-base font-medium text-[var(--accent)] underline-offset-4 hover:underline inline-block transition-[text-decoration] duration-150"
-                  aria-label={phase === "done" ? "Protected link" : "Link"}
-                  whileHover={reduceMotion ? {} : { textDecoration: "underline" }}
-                  transition={{ duration: 0.15 }}
-                >
-                  Sign in to Example
-                </motion.a>
-                <p className="font-mono text-xs text-[var(--muted)] break-all">
-                  https://go.example.com/r/•••••••
-                </p>
-                <p className="text-[11px] text-[var(--muted)] mt-0.5">
-                  Uses your link domain (CNAME). End-users never see suqram.com.
-                </p>
-                {stillValid ? (
-                  <motion.div
-                    initial={reduceMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center gap-1.5 mt-2"
-                  >
-                    <Badge
-                      variant="secondary"
-                      className="text-[11px] px-2 py-0.5 gap-1 font-normal border-[var(--success-border)] bg-[var(--success-bg)] text-[var(--success-text)]"
-                    >
-                      <Check className="h-3 w-3" aria-hidden />
-                      Still valid
-                    </Badge>
-                  </motion.div>
-                ) : null}
-                {phase === "done" && clickedProtected ? (
-                  <p className="text-xs text-[var(--success-text)] mt-1.5" aria-live="polite">
-                    Signed in.
-                  </p>
-                ) : null}
-              </div>
-            </div>
-          </div>
-
-          <Button
-            id="demo-simulate"
-            variant="outline"
-            className="mt-6 h-10 px-5"
-            onClick={runSimulation}
-            disabled={phase !== "idle" && phase !== "done" ? true : false}
-            aria-label="Simulate scanner pre-open"
-          >
-            Simulate scanner pre-open
-          </Button>
-        </div>
-      </Tabs>
+      <div className="demo-link-block">
+        <p className="demo-link-caption">Protected (your domain)</p>
+        <a
+          href="#"
+          onClick={onProtectedClick}
+          className="demo-link-email"
+          aria-label="Protected sign-in link"
+        >
+          Sign in to Example
+        </a>
+        <p className="demo-link-domain" aria-hidden>
+          go.example.com
+        </p>
+        {resultProtected === "loading" ? (
+          <p className="demo-link-result demo-link-result-loading" aria-live="polite">
+            …
+          </p>
+        ) : resultProtected === "signedin" ? (
+          <p className="demo-link-result demo-link-result-signedin" aria-live="polite">
+            <Check className="demo-link-result-icon" aria-hidden />
+            Signed in
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }

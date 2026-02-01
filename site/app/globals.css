@@ -508,8 +508,7 @@ h3 {
     color: var(--primary);
   }
 
-  /* ─── Demo widget (Stripe/Linear proof) ─── */
-  /* Tokens */
+  /* ─── Demo widget (email proof) ─── */
   .demoWidget {
     --demo-radius: var(--radius-lg);
     --demo-border: var(--border);
@@ -519,54 +518,17 @@ h3 {
     --demo-text: var(--text);
     --demo-text-secondary: var(--text-secondary);
     --demo-muted: var(--muted);
-    --demo-link-size: 1.125rem; /* 18px */
+    --demo-link-size: 1.125rem;
   }
 
   .demoWidget-header {
-    margin-top: var(--space-6);
-  }
-  .demoWidget-segmented {
-    display: inline-flex;
-    padding: 3px;
-    background: var(--bg-subtle);
-    border: 1px solid var(--demo-border);
-    border-radius: var(--demo-radius);
-    gap: 0;
-  }
-  .demoWidget-segmentedOption {
-    padding: 0.5rem 1rem;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--demo-muted);
-    background: transparent;
-    border: none;
-    border-radius: calc(var(--demo-radius) - 2px);
-    cursor: pointer;
-    transition: color var(--duration-ui) var(--ease-out),
-      background-color var(--duration-ui) var(--ease-out);
-  }
-  .demoWidget-segmentedOption:hover {
-    color: var(--demo-text-secondary);
-  }
-  .demoWidget-segmentedOption[data-selected="true"] {
-    background: var(--surface);
-    color: var(--demo-text);
-    box-shadow: var(--demo-shadow);
-  }
-  .demoWidget-segmentedOption[data-selected="true"].demoWidget-segmentedProtected {
-    background: var(--primary-muted);
-    color: var(--primary);
-  }
-  .demoWidget-segmentedOption:focus-visible {
-    outline: none;
-    box-shadow: 0 0 0 2px var(--primary-ring);
+    margin-top: 0;
   }
 
-  /* Part 1: Email snippet — light surface, no heavy border */
+  /* Email snippet — two links, pretty URLs only (no /l/ or /v/) */
   .demoEmail {
     background: var(--demo-surface);
     border: 1px solid var(--demo-border);
-    border-bottom: none;
     border-radius: var(--demo-radius) var(--demo-radius) 0 0;
     padding: var(--space-5) var(--space-5) var(--space-6);
     text-align: left;
@@ -584,27 +546,33 @@ h3 {
     text-transform: uppercase;
     line-height: 1.4;
   }
-  .demoEmail-link {
-    display: block;
+  .demoEmail-linkRow {
     margin-top: var(--space-2);
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .demoEmail-link {
     color: var(--primary);
     font-size: var(--demo-link-size);
     font-weight: 500;
     line-height: 1.45;
     text-decoration: none;
     text-underline-offset: 3px;
-    transition: color var(--duration-ui) var(--ease-out);
   }
   @media (min-width: 640px) {
     .demoEmail-link {
-      font-size: 1.25rem; /* 20px */
+      font-size: 1.25rem;
     }
   }
-  .demoEmail-link:hover {
-    text-decoration: underline;
+  .demoEmail-linkMeta {
+    font-size: var(--text-sm);
+    color: var(--demo-muted);
+    font-weight: 400;
   }
   .demoEmail-url {
-    margin-top: var(--space-2);
+    margin-top: var(--space-1);
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--demo-muted);
@@ -614,134 +582,112 @@ h3 {
     white-space: nowrap;
   }
 
-  /* Part 2: Proof trace — rail + terminal on subtle tint */
-  .demoTrace {
+  /* Proof area — button + outcomes */
+  .demoProof {
     background: var(--demo-surface-trace);
     border: 1px solid var(--demo-border);
+    border-top: none;
     border-radius: 0 0 var(--demo-radius) var(--demo-radius);
     padding: var(--space-6) var(--space-5);
   }
   @media (min-width: 640px) {
-    .demoTrace {
+    .demoProof {
       padding: var(--space-6) var(--space-6);
     }
   }
 
-  /* 2-column grid: left = rail (fixed), right = step + pill — no misalign on mobile */
-  .demoTrace-grid {
+  /* Outcome cards — two side-by-side, stack on mobile */
+  .demoOutcomes {
     display: grid;
-    grid-template-columns: 20px 1fr;
-    grid-template-rows: auto auto auto;
-    gap: 0 var(--space-4);
-    align-items: center;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-6);
   }
-  .demoRail {
-    grid-column: 1;
-    grid-row: 1 / -1;
-    position: relative;
-    width: 20px;
-    align-self: stretch;
-    min-height: 120px;
-  }
-  .demoRail-track {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    bottom: 0;
-    width: 1.5px;
-    transform: translateX(-50%);
-    background: var(--demo-border);
-    border-radius: 1px;
-  }
-  .demoRail-fill {
-    position: absolute;
-    left: 50%;
-    top: 0;
-    width: 1.5px;
-    transform: translateX(-50%);
-    background: var(--primary);
-    border-radius: 1px;
-    transition: height var(--duration-ui) var(--ease-out);
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .demoRail-fill {
-      transition: none;
+  @media (min-width: 480px) {
+    .demoOutcomes {
+      grid-template-columns: 1fr 1fr;
     }
   }
-  .demoRail-dot {
-    position: absolute;
-    left: 50%;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--demo-border);
-    transform: translate(-50%, -50%);
-    box-shadow: 0 0 0 0 transparent;
-    transition: background var(--duration-ui) var(--ease-out),
-      box-shadow var(--duration-ui) var(--ease-out);
-    z-index: 1;
+  .demoOutcome {
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--demo-border);
+    background: var(--demo-surface);
   }
-  .demoRail-dot.active {
-    background: var(--surface);
-    box-shadow: 0 0 0 2px var(--primary);
+  .demoOutcome-bad {
+    border-color: rgba(185, 28, 28, 0.15);
+    background: var(--status-error-muted);
   }
-  @media (prefers-reduced-motion: reduce) {
-    .demoRail-dot {
-      transition: none;
-    }
+  .demoOutcome-ok {
+    border-color: rgba(13, 148, 136, 0.15);
+    background: var(--status-success-muted);
   }
-  .demoRail-dot[data-step="1"] { top: 16.666%; }
-  .demoRail-dot[data-step="2"] { top: 50%; }
-  .demoRail-dot[data-step="3"] { top: 83.333%; }
-  .demoStep {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--space-3);
-    min-height: 40px;
-    padding: var(--space-2) 0;
+  .demoOutcome-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--demo-text);
+    margin: 0;
+  }
+  .demoOutcome-bad .demoOutcome-title {
+    color: var(--status-error);
+  }
+  .demoOutcome-ok .demoOutcome-title {
+    color: var(--status-success);
+  }
+  .demoOutcome-desc {
+    font-size: var(--text-sm);
+    color: var(--demo-text-secondary);
+    margin: var(--space-1) 0 0;
     line-height: 1.45;
   }
-  .demoStep-label {
+  .demoOutcome-why {
+    font-size: var(--text-xs);
+    color: var(--demo-muted);
+    margin: var(--space-2) 0 0;
+    line-height: 1.4;
+  }
+
+  /* Details accordion — Trace (human-readable, no HTTP verbs) */
+  .demoDetails {
+    margin-top: var(--space-5);
+  }
+  .demoDetails-summary {
     font-size: var(--text-sm);
     font-weight: 500;
     color: var(--demo-text-secondary);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
   }
-  .demoPill {
-    flex-shrink: 0;
-    padding: 3px 8px;
-    font-size: 0.6875rem;
-    font-weight: 500;
-    border-radius: 999px;
-    letter-spacing: 0.02em;
+  .demoDetails-summary::-webkit-details-marker {
+    display: none;
   }
-  .demoPill-ok {
-    background: var(--status-success-muted);
-    color: var(--status-success);
+  .demoDetails-summary::before {
+    content: "";
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-right: var(--space-2);
+    border-left: 5px solid var(--demo-muted);
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    vertical-align: middle;
+    transition: transform var(--duration-ui) var(--ease-out);
   }
-  .demoPill-bad {
-    background: var(--status-error-muted);
-    color: var(--status-error);
+  .demoDetails[open] .demoDetails-summary::before {
+    transform: rotate(90deg);
   }
-
-  /* Terminal log — mono, subtle tint, inset border, one Copy logs */
-  .demoTerminal {
+  .demoTrace-block {
     position: relative;
-    margin-top: var(--space-5);
+    margin-top: var(--space-2);
     padding: var(--space-4) var(--space-4) var(--space-4);
     padding-right: 2.75rem;
     background: var(--demo-surface-trace);
     border: 1px solid var(--demo-border);
     border-radius: var(--radius-md);
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.04);
-    font-family: var(--font-mono);
-    font-size: var(--text-xs);
-    color: var(--demo-text-secondary);
-    line-height: 1.6;
-    max-height: 120px;
-    overflow-y: auto;
   }
-  .demoTerminal-copy {
+  .demoTrace-copy {
     position: absolute;
     top: var(--space-2);
     right: var(--space-2);
@@ -756,32 +702,26 @@ h3 {
     background: var(--surface);
     color: var(--demo-muted);
     cursor: pointer;
-    transition: background-color var(--duration-ui) var(--ease-out),
-      color var(--duration-ui) var(--ease-out);
+    transition: background-color var(--duration-ui) var(--ease-out), color var(--duration-ui) var(--ease-out);
   }
-  .demoTerminal-copy:hover {
+  .demoTrace-copy:hover {
     background: var(--surface-hover);
     color: var(--demo-text);
   }
-  .demoTerminal-copy:focus-visible {
+  .demoTrace-copy:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px var(--primary-ring);
   }
-  .demoTerminal-line {
+  .demoTrace-lines {
+    font-size: var(--text-sm);
+    color: var(--demo-text-secondary);
+    line-height: 1.6;
+  }
+  .demoTrace-line {
+    margin: 0;
     padding: 2px 0;
   }
-  .demoTerminal-line code {
-    display: block;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 
-  /* Widget footer — full-width Run demo */
-  .demoWidget-footer {
-    margin-top: var(--space-6);
-  }
   .demoWidget-btn {
     display: flex;
     align-items: center;

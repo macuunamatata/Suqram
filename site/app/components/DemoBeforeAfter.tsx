@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import { motion, useReducedMotion } from "framer-motion";
 
 const DEMO_CREATE_URL = "https://go.suqram.com/demo/create";
 const DEMO_SCAN_URL = "https://go.suqram.com/demo/scan";
@@ -11,109 +10,56 @@ function formatApiError(prefix: string, status: number, data: { error?: string }
   return `${prefix} (${status})${part}`;
 }
 
-type Mode = "unprotected" | "protected";
-type Phase = "idle" | "running" | "done";
-type ActiveStep = 0 | 1 | 2 | 3;
-
-const UNPROTECTED_URL = "https://app.example.com/auth/verify?token=••••••••••••";
-const PROTECTED_URL = "https://go.suqram.com/l/auth/verify?token=••••••••••••";
-
-const STEP2_MS = 600;
-const STEP3_MS = 1200;
-const DONE_MS = 1800;
-
-const LOG_LINES = {
-  step1: "GET /l/... (scanner pre-open)",
-  step2Unprotected: "POST /v/... (scanner consumed token)",
-  step2Protected: "POST /v/... (scanner blocked)",
-  step3Unprotected: "GET /l/... (user → expired)",
-  step3Protected: "POST /v/... (interactive redemption)",
-};
-
-const STEP_LABELS = ["Scanner pre-open", "Redemption attempt", "Interactive redemption"] as const;
-
-function getPill(step: 1 | 2 | 3, mode: Mode): { label: string; ok: boolean } {
-  if (step === 1) return { label: "Detected", ok: true };
-  if (step === 2) return { label: mode === "unprotected" ? "Consumed" : "Blocked", ok: mode === "protected" };
-  return { label: mode === "unprotected" ? "Expired" : "Redeemed", ok: mode === "protected" };
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const STEP_STAGGER = 0.06;
-const DURATION = 0.2;
+type Status = "idle" | "running" | "done";
+
+/** Human-readable trace lines — no HTTP verbs or paths */
+const TRACE_LINES = [
+  "Scanner: opened link (view-only)",
+  "Scanner: redemption blocked",
+  "User: link still valid for interactive redemption",
+] as const;
+
+/** Pretty URLs for UI only — never show /l/ or /v/ */
+const UNPROTECTED_DISPLAY_URL = "https://app.example.com/auth/verify?token=••••••••••••";
+const PROTECTED_DISPLAY_URL = "https://go.suqram.com/r/••••••••••••";
+
+const STEP_MS = 500;
 
 export default function DemoBeforeAfter() {
-  const reduceMotion = useReducedMotion() ?? false;
-  const [mode, setMode] = useState<Mode>("protected");
-  const [phase, setPhase] = useState<Phase>("idle");
-  const [activeStep, setActiveStep] = useState<ActiveStep>(0);
-  const [runId, setRunId] = useState(0);
+  const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [logLines, setLogLines] = useState<string[]>([]);
-  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const runIdRef = useRef(0);
   const abortRef = useRef<AbortController | null>(null);
+  const reduceMotionRef = useRef(false);
 
-  const clearTimers = useCallback(() => {
-    timersRef.current.forEach(clearTimeout);
-    timersRef.current = [];
+  useEffect(() => {
+    const m = window.matchMedia("(prefers-reduced-motion: reduce)");
+    reduceMotionRef.current = m.matches;
+    const h = () => {
+      reduceMotionRef.current = m.matches;
+    };
+    m.addEventListener("change", h);
+    return () => m.removeEventListener("change", h);
   }, []);
-
-  const cancelRun = useCallback(() => {
-    if (abortRef.current) {
-      abortRef.current.abort();
-      abortRef.current = null;
-    }
-    clearTimers();
-    setPhase("idle");
-    setActiveStep(0);
-    setError(null);
-    setLogLines([]);
-  }, [clearTimers]);
-
-  const startRun = useCallback(() => {
-    clearTimers();
-    setPhase("running");
-    setActiveStep(1);
-    setRunId((r) => r + 1);
-    setLogLines([LOG_LINES.step1]);
-
-    if (reduceMotion) {
-      setActiveStep(3);
-      setPhase("done");
-      setLogLines([
-        LOG_LINES.step1,
-        mode === "unprotected" ? LOG_LINES.step2Unprotected : LOG_LINES.step2Protected,
-        mode === "unprotected" ? LOG_LINES.step3Unprotected : LOG_LINES.step3Protected,
-      ]);
-      return;
-    }
-
-    const t2 = setTimeout(() => {
-      setActiveStep(2);
-      setLogLines((prev) => [...prev, mode === "unprotected" ? LOG_LINES.step2Unprotected : LOG_LINES.step2Protected]);
-    }, STEP2_MS);
-    const t3 = setTimeout(() => {
-      setActiveStep(3);
-      setLogLines((prev) => [...prev, mode === "unprotected" ? LOG_LINES.step3Unprotected : LOG_LINES.step3Protected]);
-    }, STEP3_MS);
-    const t4 = setTimeout(() => {
-      setPhase("done");
-    }, DONE_MS);
-    timersRef.current = [t2, t3, t4];
-  }, [reduceMotion, clearTimers, mode]);
 
   const runDemo = useCallback(async () => {
     setError(null);
-    cancelRun();
+    if (abortRef.current) abortRef.current.abort();
     abortRef.current = new AbortController();
     const signal = abortRef.current.signal;
+    runIdRef.current += 1;
+    const thisRunId = runIdRef.current;
 
-    setPhase("running");
-    setActiveStep(1);
-    setRunId((r) => r + 1);
-    setLogLines([LOG_LINES.step1]);
+    const bail = () => thisRunId !== runIdRef.current || signal.aborted;
+
+    setStatus("running");
 
     let tid: string | null = null;
-
     try {
       const createRes = await fetch(DEMO_CREATE_URL, {
         method: "POST",
@@ -121,18 +67,15 @@ export default function DemoBeforeAfter() {
         signal,
       });
       const createJson = (await createRes.json().catch(() => ({}))) as { ok?: boolean; tid?: string; error?: string };
+      if (bail()) return;
       if (!createRes.ok) {
         setError(formatApiError("Create failed", createRes.status, createJson));
-        setPhase("idle");
-        setActiveStep(0);
-        setLogLines([]);
+        setStatus("idle");
         return;
       }
       if (!createJson?.ok || !createJson.tid) {
         setError("Invalid create response. Please try again.");
-        setPhase("idle");
-        setActiveStep(0);
-        setLogLines([]);
+        setStatus("idle");
         return;
       }
       tid = createJson.tid;
@@ -144,198 +87,137 @@ export default function DemoBeforeAfter() {
         signal,
       });
       const scanJson = (await scanRes.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+      if (bail()) return;
       if (!scanRes.ok) {
         setError(formatApiError("Scan failed", scanRes.status, scanJson));
-        setPhase("idle");
-        setActiveStep(0);
-        setLogLines([]);
+        setStatus("idle");
         return;
       }
     } catch (e) {
       if (signal.aborted) return;
       abortRef.current = null;
-      const message = e instanceof Error ? e.message : "Request failed";
-      setError(message);
-      setPhase("idle");
-      setActiveStep(0);
-      setLogLines([]);
+      setError(e instanceof Error ? e.message : "Request failed");
+      setStatus("idle");
       return;
     }
 
     abortRef.current = null;
-    startRun();
-  }, [startRun, cancelRun]);
 
-  const onModeChange = useCallback(
-    (newMode: Mode) => {
-      cancelRun();
-      setMode(newMode);
-    },
-    [cancelRun]
-  );
+    const reduceMotion = reduceMotionRef.current;
+    if (reduceMotion) {
+      setStatus("done");
+      return;
+    }
 
-  useEffect(() => () => clearTimers(), [clearTimers]);
+    await sleep(STEP_MS * 2);
+    if (bail()) return;
+    setStatus("done");
+  }, []);
 
-  const previewUrl = mode === "unprotected" ? UNPROTECTED_URL : PROTECTED_URL;
-  const showOutcomes = phase === "running" || phase === "done";
-  const railFillHeight = activeStep === 0 ? 0 : (activeStep / 3) * 100;
+  const copyTrace = useCallback(() => {
+    navigator.clipboard.writeText(TRACE_LINES.join("\n"));
+  }, []);
 
-  const copyLogs = useCallback(() => {
-    if (logLines.length) navigator.clipboard.writeText(logLines.join("\n"));
-  }, [logLines]);
-
-  const transition = reduceMotion ? { duration: 0, delay: 0 } : { duration: DURATION, ease: [0.25, 0.1, 0.25, 1] };
+  const showOutcomes = status === "done";
+  const isRunning = status === "running";
 
   return (
     <section className="py-12 sm:py-16" aria-label="Demo">
       <div className="mx-auto max-w-[640px] px-4 sm:px-6 demoWidget">
         <h2 className="section-h2 text-center">
-          Proof: scanner vs interactive redemption
+          Proof: scanner viewed vs user redeemed
         </h2>
         <p className="mt-2 text-center text-[var(--text-secondary)] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-          Simulate a scanner pre-open. Compare unprotected (token burns) vs protected (only interactive redemption counts).
+          One link gets consumed when a scanner opens it. The other stays valid until a real user clicks.
         </p>
 
-        <div className="demoWidget-header">
-          <div className="flex justify-center mb-5">
-            <div className="demoWidget-segmented" role="tablist" aria-label="Link type">
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mode === "unprotected"}
-                aria-controls="demo-content"
-                id="demo-tab-unprotected"
-                data-selected={mode === "unprotected"}
-                className="demoWidget-segmentedOption"
-                onClick={() => onModeChange("unprotected")}
-              >
-                Unprotected
-              </button>
-              <button
-                type="button"
-                role="tab"
-                aria-selected={mode === "protected"}
-                aria-controls="demo-content"
-                id="demo-tab-protected"
-                data-selected={mode === "protected"}
-                className="demoWidget-segmentedOption demoWidget-segmentedProtected"
-                onClick={() => onModeChange("protected")}
-              >
-                Protected
-              </button>
-            </div>
+        <div className="demoWidget-header mt-8">
+          <div className="demoEmail">
+            <p className="demoEmail-label">Your sign-in link is ready</p>
+            <p className="demoEmail-linkRow">
+              <span className="demoEmail-link">Sign in to Example</span>
+              <span className="demoEmail-linkMeta">(unprotected)</span>
+            </p>
+            <p className="demoEmail-url" title={UNPROTECTED_DISPLAY_URL}>
+              {UNPROTECTED_DISPLAY_URL}
+            </p>
+            <p className="demoEmail-linkRow mt-4">
+              <span className="demoEmail-link">Sign in to Example</span>
+              <span className="demoEmail-linkMeta">(protected)</span>
+            </p>
+            <p className="demoEmail-url" title={PROTECTED_DISPLAY_URL}>
+              {PROTECTED_DISPLAY_URL}
+            </p>
           </div>
 
-          <div id="demo-content">
-            <div className="demoEmail">
-              <p className="demoEmail-label">Your sign-in link is ready</p>
-              <span className="demoEmail-link">Sign in to Example</span>
-              <p className="demoEmail-url" title={previewUrl}>
-                {previewUrl}
-              </p>
-            </div>
+          <div className="demoProof">
+            <button
+              type="button"
+              onClick={runDemo}
+              disabled={isRunning}
+              className="demoWidget-btn"
+              aria-busy={isRunning}
+              aria-live="polite"
+            >
+              {isRunning ? (
+                <span className="demoWidget-btnDots" aria-hidden>
+                  <span />
+                  <span />
+                  <span />
+                </span>
+              ) : (
+                "Simulate scanner pre-open"
+              )}
+            </button>
 
-            <div className="demoTrace">
-              <div className="demoTrace-grid">
-                <div className="demoRail">
-                  <div className="demoRail-track" aria-hidden />
-                  <motion.div
-                    className="demoRail-fill"
-                    aria-hidden
-                    initial={false}
-                    animate={{ height: `${railFillHeight}%` }}
-                    transition={transition}
-                  />
-                  <div className={`demoRail-dot ${activeStep >= 1 ? "active" : ""}`} data-step="1" aria-hidden />
-                  <div className={`demoRail-dot ${activeStep >= 2 ? "active" : ""}`} data-step="2" aria-hidden />
-                  <div className={`demoRail-dot ${activeStep >= 3 ? "active" : ""}`} data-step="3" aria-hidden />
+            {showOutcomes && (
+              <div className="demoOutcomes">
+                <div className="demoOutcome demoOutcome-bad">
+                  <p className="demoOutcome-title">Expired</p>
+                  <p className="demoOutcome-desc">Token was consumed by scanner.</p>
+                  <p className="demoOutcome-why">Scanners that open links consume one-time tokens.</p>
                 </div>
-                {([0, 1, 2] as const).map((i) => (
-                  <motion.div
-                    key={`step-${runId}-${i}`}
-                    className="demoStep"
-                    initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={
-                      reduceMotion
-                        ? { duration: 0 }
-                        : { duration: DURATION, delay: i * STEP_STAGGER, ease: [0.25, 0.1, 0.25, 1] }
-                    }
-                  >
-                    <span className="demoStep-label">{STEP_LABELS[i]}</span>
-                    {showOutcomes && activeStep >= i + 1 && (
-                      <motion.span
-                        className={`demoPill ${getPill((i + 1) as 1 | 2 | 3, mode).ok ? "demoPill-ok" : "demoPill-bad"}`}
-                        initial={reduceMotion ? false : { opacity: 0, scale: 0.96 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={reduceMotion ? { duration: 0 } : { duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-                      >
-                        {getPill((i + 1) as 1 | 2 | 3, mode).label}
-                      </motion.span>
-                    )}
-                  </motion.div>
-                ))}
+                <div className="demoOutcome demoOutcome-ok">
+                  <p className="demoOutcome-title">Still valid</p>
+                  <p className="demoOutcome-desc">Scanner views don&apos;t redeem.</p>
+                  <p className="demoOutcome-why">Only interactive redemption counts.</p>
+                </div>
               </div>
+            )}
 
-              {logLines.length > 0 && (
-                <div className="demoTerminal" role="log" aria-label="Request log">
+            {showOutcomes && (
+              <details className="demoDetails">
+                <summary className="demoDetails-summary">Trace</summary>
+                <div className="demoTrace-block">
                   <button
                     type="button"
-                    className="demoTerminal-copy"
-                    onClick={copyLogs}
-                    title="Copy logs"
-                    aria-label="Copy logs"
+                    className="demoTrace-copy"
+                    onClick={copyTrace}
+                    title="Copy trace"
+                    aria-label="Copy trace"
                   >
                     <CopyIcon />
                   </button>
-                  {logLines.map((line, i) => (
-                    <motion.div
-                      key={`${runId}-${i}-${line}`}
-                      className="demoTerminal-line"
-                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={
-                        reduceMotion
-                          ? { duration: 0 }
-                          : { duration: DURATION, delay: i * STEP_STAGGER, ease: [0.25, 0.1, 0.25, 1] }
-                      }
-                    >
-                      <code>{line}</code>
-                    </motion.div>
-                  ))}
+                  <div className="demoTrace-lines">
+                    {TRACE_LINES.map((line, i) => (
+                      <p key={i} className="demoTrace-line">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
                 </div>
-              )}
+              </details>
+            )}
 
-              {error && (
-                <p className="mt-4 text-sm text-[var(--status-error)]" role="alert">
-                  {error}
-                </p>
-              )}
+            {error && (
+              <p className="mt-4 text-sm text-[var(--status-error)]" role="alert">
+                {error}
+              </p>
+            )}
 
-              <div className="demoWidget-footer">
-                <button
-                  type="button"
-                  onClick={runDemo}
-                  disabled={phase === "running"}
-                  className="demoWidget-btn"
-                  aria-busy={phase === "running"}
-                  aria-live="polite"
-                >
-                  {phase === "running" ? (
-                    <span className="demoWidget-btnDots" aria-hidden>
-                      <span />
-                      <span />
-                      <span />
-                    </span>
-                  ) : (
-                    "Run demo"
-                  )}
-                </button>
-                <p className="demoWidget-footerNote">
-                  No signup. Runs on suqram.com.
-                </p>
-              </div>
-            </div>
+            <p className="demoWidget-footerNote mt-4">
+              No signup. Runs on suqram.com.
+            </p>
           </div>
         </div>
       </div>

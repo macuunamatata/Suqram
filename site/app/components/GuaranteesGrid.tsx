@@ -1,7 +1,7 @@
 const CARDS = [
   {
-    title: "View-safe",
-    subtitle: "Scanners don't redeem",
+    label: "VIEW-SAFE",
+    title: "Scanners don't redeem",
     bullets: [
       "Link page fetch returns view-only response.",
       "Token remains valid until interactive redemption.",
@@ -16,8 +16,8 @@ User-Agent: ScannerBot/1.0
     ),
   },
   {
-    title: "Exactly-once",
-    subtitle: "One redemption per link",
+    label: "EXACTLY-ONCE",
+    title: "One redemption per link",
     bullets: [
       "First successful click redeems; replays blocked.",
       "Duplicate requests detected and deduplicated.",
@@ -31,8 +31,8 @@ dup_request: deduped`}
     ),
   },
   {
-    title: "Drop-in",
-    subtitle: "Domain CNAME, no SDK",
+    label: "NO SDK",
+    title: "Domain CNAME, drop-in",
     bullets: [
       "Point your link domain at the Suqram rail.",
       "Swap URL in email templates; no code changes.",
@@ -49,19 +49,19 @@ links: paste rail URL`}
 
 export default function GuaranteesGrid() {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {CARDS.map(({ title, subtitle, bullets, snippet }) => (
-        <div key={title} className="product-panel product-panel--card">
-          <div className="product-panel__header">
-            <span className="product-panel__title">{title}</span>
-            <span className="text-xs font-medium text-muted-foreground">{subtitle}</span>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:items-stretch">
+      {CARDS.map(({ label, title, bullets, snippet }) => (
+        <div key={label} className="product-panel product-panel--card flex flex-col">
+          <div className="product-panel__header product-panel__header--col">
+            <span className="product-panel__badge product-panel__badge--label">{label}</span>
           </div>
-          <ul className="product-panel__bullets">
+          <h3 className="text-base font-semibold tracking-tight text-foreground mt-0 mb-3">{title}</h3>
+          <ul className="product-panel__bullets flex-1 min-h-0">
             {bullets.map((b, i) => (
               <li key={i}>{b}</li>
             ))}
           </ul>
-          <div className="product-panel__mini">
+          <div className="product-panel__mini mt-auto pt-4">
             {snippet}
           </div>
         </div>

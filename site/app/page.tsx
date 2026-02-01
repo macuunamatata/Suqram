@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import ScannerDemo from "./components/ScannerDemo";
-import ReceiptPanel from "./components/ReceiptPanel";
+import Section, { CONTAINER, SECTION_PY } from "./components/Section";
+import EventTraceCard from "./components/EventTraceCard";
 import GuaranteesGrid from "./components/GuaranteesGrid";
 import InstallSteps from "./components/InstallSteps";
 import DnsStatusCard from "./components/DnsStatusCard";
@@ -13,17 +14,18 @@ export const metadata: Metadata = {
     "Scanner-proof links and human click receipts. EIG. Prevent preview bots from triggering your auth workflows.",
 };
 
-const CONTAINER = "mx-auto w-full max-w-[1200px] px-6 sm:px-8";
-const SECTION_PY = "py-16 sm:py-20 lg:py-24";
+const GRID_12 = "grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start";
+const COL_5 = "col-span-12 lg:col-span-5";
+const COL_7 = "col-span-12 lg:col-span-7";
 
 export default function HomePage() {
   return (
     <>
-      {/* A) Hero + Demo */}
-      <section className="pt-12 sm:pt-16 lg:pt-20 pb-16 sm:pb-20 lg:pb-24" id="hero">
+      {/* Hero + Demo (demo ~55–60% width on desktop, centerpiece) */}
+      <section className={SECTION_PY} id="hero">
         <div className={CONTAINER}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-            <div className="max-w-xl">
+          <div className={`${GRID_12}`}>
+            <div className={COL_5}>
               <h1 className="text-4xl sm:text-5xl lg:text-[3.25rem] font-semibold tracking-tight text-foreground leading-[1.08]">
                 Scanner-proof links.
                 <br />
@@ -45,75 +47,74 @@ export default function HomePage() {
                 For login, verify, reset, and invite links. No SDK.
               </p>
             </div>
-            <div className="flex justify-center lg:justify-end">
+            <div className={`${COL_7} hero-demo-wrap`}>
               <ScannerDemo />
             </div>
           </div>
         </div>
       </section>
 
-      {/* B) What actually happens */}
-      <section className={SECTION_PY} id="what-happens">
-        <div className={CONTAINER}>
-          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground mb-10">
-            What actually happens
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-            <div>
-              <ul className="space-y-3 text-base text-muted-foreground leading-relaxed">
-                <li className="flex gap-3">
-                  <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
-                  <span>Scanner or bot fetches the link page → Suqram returns a view-only response. Token is not consumed.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
-                  <span>Human clicks the link → Suqram records a signed receipt and redeems the token. Your app gets the redemption.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
-                  <span>Every redemption is a ReceiptClicked event with proof (EIG-signed). Use it for audit or downstream workflows.</span>
-                </li>
-              </ul>
-            </div>
-            <div className="w-full max-w-[400px] lg:max-w-none lg:min-w-0">
-              <ReceiptPanel />
-            </div>
+      {/* What happens on a click */}
+      <Section
+        id="what-happens"
+        title="What happens on a click"
+        subtext="Two paths: preview fetch is view-only; human click redeems and produces a signed receipt."
+      >
+        <div className={GRID_12}>
+          <div className={COL_5}>
+            <ul className="space-y-3 text-base text-muted-foreground leading-relaxed">
+              <li className="flex gap-3">
+                <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
+                <span>Scanner or bot fetches the link page → Suqram returns a view-only response. Token is not consumed.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
+                <span>Human clicks the link → Suqram records a signed receipt and redeems the token. Your app gets the redemption.</span>
+              </li>
+              <li className="flex gap-3">
+                <span className="text-primary mt-1 shrink-0" aria-hidden>•</span>
+                <span>Every redemption is a ReceiptClicked event with proof (EIG-signed). Use it for audit or downstream workflows.</span>
+              </li>
+            </ul>
+          </div>
+          <div className={`${COL_7} min-w-0`}>
+            <EventTraceCard />
           </div>
         </div>
-      </section>
+      </Section>
 
-      {/* C) Deterministic guarantees */}
-      <section className={SECTION_PY} id="guarantees">
-        <div className={CONTAINER}>
-          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground mb-10">
-            Deterministic guarantees
-          </h2>
-          <GuaranteesGrid />
-        </div>
-      </section>
+      {/* Deterministic guarantees */}
+      <Section
+        id="guarantees"
+        title="Deterministic guarantees"
+        subtext="View-safe, exactly-once, and drop-in. No SDK."
+      >
+        <GuaranteesGrid />
+      </Section>
 
-      {/* D) How to install */}
-      <section className={SECTION_PY} id="install">
-        <div className={CONTAINER}>
-          <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground mb-10">
-            How to install
-          </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+      {/* Install in minutes */}
+      <Section
+        id="install"
+        title="Install in minutes"
+        subtext="CNAME, swap links, optional destination."
+      >
+        <div className={GRID_12}>
+          <div className={COL_5}>
             <InstallSteps />
-            <div className="w-full max-w-[340px] lg:max-w-none lg:min-w-0">
-              <DnsStatusCard />
-            </div>
           </div>
-          <div className="mt-12">
-            <Button asChild size="lg" className="rounded-full h-12 px-8 font-medium bg-primary text-primary-foreground hover:bg-primary/90">
-              <Link href="/start">Get started</Link>
-            </Button>
+          <div className={`${COL_7} min-w-0`}>
+            <DnsStatusCard />
           </div>
         </div>
-      </section>
+        <div className="mt-12">
+          <Button asChild size="lg" className="rounded-full h-12 px-8 font-medium bg-primary text-primary-foreground hover:bg-primary/90">
+            <Link href="/start">Get started</Link>
+          </Button>
+        </div>
+      </Section>
 
-      {/* Pricing anchor for nav */}
-      <section className="py-12" id="pricing">
+      {/* Pricing anchor */}
+      <section className={SECTION_PY} id="pricing">
         <div className={CONTAINER}>
           <p className="text-sm text-muted-foreground">
             Free tier: 1K redemptions/month. <Link href="/pricing" className="text-primary hover:underline">Pricing</Link>.

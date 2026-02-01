@@ -1380,6 +1380,72 @@ h3 {
     color: var(--text);
   }
 
+  /* ─── Hero demo wrapper (dominant centerpiece, ~55–60% width on desktop) ─── */
+  .hero-demo-wrap {
+    width: 100%;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 0;
+  }
+  @media (min-width: 768px) {
+    .hero-demo-wrap {
+      min-height: 380px;
+      padding: 1.5rem 0 1.5rem 1rem;
+      justify-content: flex-end;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero-demo-wrap {
+      min-height: 400px;
+      padding: 2rem 0 2rem 1.5rem;
+    }
+  }
+  .hero-demo-wrap .scanner-demo {
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+  }
+  @media (min-width: 640px) {
+    .hero-demo-wrap .scanner-demo {
+      max-width: 540px;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero-demo-wrap .scanner-demo {
+      max-width: 580px;
+      min-width: 420px;
+    }
+  }
+  .hero-demo-wrap .scanner-demo .scanner-demo__chrome {
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 8px 24px rgba(0, 0, 0, 0.06);
+  }
+  .hero-demo-wrap .scanner-demo .scanner-demo__body {
+    padding: 24px 26px 28px;
+  }
+  .hero-demo-wrap .scanner-demo .scanner-demo__label {
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+  }
+  .hero-demo-wrap .scanner-demo .scanner-demo__links {
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-demo-wrap .scanner-demo .scanner-demo__link {
+    font-size: 1.0625rem;
+  }
+  @media (min-width: 640px) {
+    .hero-demo-wrap .scanner-demo .scanner-demo__link {
+      font-size: 1.125rem;
+    }
+  }
+  .hero-demo-wrap .scanner-demo .scanner-demo__output {
+    min-height: 3rem;
+    padding: 1rem 1.25rem;
+  }
+
   /* ─── Scanner demo window ─── */
   .scanner-demo {
     width: 100%;
@@ -1388,17 +1454,17 @@ h3 {
   }
   .scanner-demo__chrome {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 4px 12px rgba(0, 0, 0, 0.04);
     overflow: hidden;
   }
   .scanner-demo__titlebar {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 10px 14px;
-    background: #f5f5f4;
+    padding: 12px 18px;
+    background: #f9fafb;
   }
   .scanner-demo__dot {
     width: 8px;
@@ -1416,7 +1482,7 @@ h3 {
     color: var(--muted);
   }
   .scanner-demo__body {
-    padding: 1.25rem 1.25rem 1.5rem;
+    padding: 18px 20px 20px;
   }
   .scanner-demo__label {
     margin: 0 0 0.75rem;
@@ -1576,7 +1642,7 @@ h3 {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    min-height: 0;
+    min-height: 260px;
   }
   .product-panel__bullets {
     list-style: none;
@@ -1615,6 +1681,20 @@ h3 {
   .product-panel__row span:last-child {
     flex-shrink: 0;
   }
+  .product-panel__trace-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .product-panel__trace-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .product-panel__trace-row:first-child {
+    padding-top: 0;
+  }
   .product-panel__badge {
     font-size: 0.6875rem;
     font-weight: 600;
@@ -1635,6 +1715,20 @@ h3 {
   .product-panel__badge--blocked {
     background: #fef2f2;
     color: #b91c1c;
+  }
+  .product-panel__badge--label {
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+  .product-panel__header--col {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
   }
   .product-panel__timeline {
     margin-top: 14px;

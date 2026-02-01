@@ -2,6 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import DemoBeforeAfter from "./components/DemoBeforeAfter";
 
+function BenefitCheck({ className, ...props }: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg className={className} viewBox="0 0 20 20" fill="currentColor" aria-hidden {...props}>
+      <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
 export const metadata: Metadata = {
   title: "Suqram — Unbreakable auth links",
   description:
@@ -62,7 +70,7 @@ const FAQ_ITEMS = [
 export default function HomePage() {
   return (
     <>
-      {/* Hero: concrete claim + proof widget */}
+      {/* Hero — value prop + benefit checkmarks + primary CTA */}
       <section className={`${SECTION_PY}`} id="hero">
         <div className={CONTAINER}>
           <div className="max-w-3xl">
@@ -76,6 +84,20 @@ export default function HomePage() {
             <p className="mt-5 body-hero text-[var(--text-secondary)] leading-relaxed">
               Email scanners pre-open links and burn one-time tokens. Suqram runs at the edge so only a real click redeems—your magic links stay unbreakable.
             </p>
+            <ul className="mt-6 benefit-list" aria-label="Key benefits">
+              <li className="benefit-item">
+                <BenefitCheck className="benefit-check" aria-hidden />
+                View-safe
+              </li>
+              <li className="benefit-item">
+                <BenefitCheck className="benefit-check" aria-hidden />
+                Exactly-once redeem
+              </li>
+              <li className="benefit-item">
+                <BenefitCheck className="benefit-check" aria-hidden />
+                No SDK
+              </li>
+            </ul>
             <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
               <Link href="#demo" className="btn-hero">
                 Run demo
@@ -110,7 +132,10 @@ export default function HomePage() {
                 key={title}
                 className="surface p-5"
               >
-                <h3 className="text-sm font-semibold text-[var(--text)] tracking-tight">{title}</h3>
+                <div className="flex items-center gap-2">
+                  <BenefitCheck className="w-4 h-4 shrink-0 text-[var(--status-success)]" aria-hidden />
+                  <h3 className="text-sm font-semibold text-[var(--text)] tracking-tight">{title}</h3>
+                </div>
                 <p className="mt-2.5 text-sm text-[var(--text-secondary)] leading-relaxed">
                   {body}
                 </p>
@@ -165,8 +190,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pricing — 3-col grid, subtle surface, Free emphasized */}
-      <section className={SECTION_PY} id="pricing" aria-label="Pricing">
+      {/* Pricing — alternating section, Free emphasized */}
+      <section className={`${SECTION_PY} section-alt`} id="pricing" aria-label="Pricing">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             Start free. Scale when you need it.
@@ -214,8 +239,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FAQ — dividers only, no cards */}
-      <section className={SECTION_PY} id="faq" aria-label="FAQ">
+      {/* FAQ — alternating section */}
+      <section className={`${SECTION_PY} section-alt`} id="faq" aria-label="FAQ">
         <div className={CONTAINER}>
           <h2 className={SECTION_HEADING}>
             FAQ

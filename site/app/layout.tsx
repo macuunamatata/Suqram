@@ -69,10 +69,10 @@ export default function RootLayout({
               ))}
             </nav>
             <div className="flex items-center gap-2 shrink-0">
-              <a href="#demo" className="btn-nav-cta">
+              <a href="#demo" className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text)] transition-colors">
                 Demo
               </a>
-              <a href="/app" className="btn-nav-cta">
+              <a href="/app" className="btn-hero !h-9 !min-h-9 !py-0 !text-sm">
                 Dashboard
               </a>
             </div>

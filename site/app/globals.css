@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Premium dev infra — Linear/Stripe polish. One background, clear type scale, premium surfaces. */
+/* LeadGrid-inspired: conversion-focused, clean hierarchy, soft section tints, benefit-led. */
 :root {
   /* Type scale */
   --text-xs: 0.75rem;
@@ -35,20 +35,21 @@
   --radius-lg: 10px;
   --radius-xl: 12px;
 
-  /* Shadow — one consistent token */
-  --shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.05);
+  /* Shadow — soft, conversion-friendly */
+  --shadow-surface: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-cta: 0 2px 8px rgba(37, 99, 235, 0.2);
 
-  /* Colors — near-black, no harsh black */
+  /* Colors — warm-neutral base, clear hierarchy */
   --text: #0f172a;
   --text-secondary: #475569;
   --muted: #64748b;
   --muted-strong: #475569;
 
-  /* Primary blue — not neon */
+  /* Primary — strong CTA blue */
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
   --primary-muted: rgba(37, 99, 235, 0.08);
-  --primary-ring: rgba(37, 99, 235, 0.2);
+  --primary-ring: rgba(37, 99, 235, 0.25);
 
   /* Status — muted, consistent */
   --status-success: #0d9488;
@@ -58,11 +59,12 @@
   --status-warn: #b45309;
   --status-warn-muted: rgba(180, 83, 9, 0.08);
 
-  /* Surfaces — subtle tint, low-contrast border */
-  --bg: #f8fafc;
-  --bg-subtle: #f1f5f9;
+  /* Surfaces — soft tint, alternating section feel */
+  --bg: #fafbfc;
+  --bg-subtle: #f4f6f8;
+  --bg-section-alt: #f8fafc;
   --surface: #ffffff;
-  --surface-tint: #fafbfc;
+  --surface-tint: #fcfcfd;
   --surface-hover: #f8fafc;
   --border: rgba(0, 0, 0, 0.06);
   --border-strong: rgba(0, 0, 0, 0.09);
@@ -111,14 +113,17 @@ html {
 body {
   color: var(--text);
   background: var(--bg);
-  background-image: radial-gradient(ellipse 100% 50% at 50% 0%, rgba(37, 99, 235, 0.03) 0%, transparent 55%);
-  background-attachment: fixed;
   min-height: 100vh;
   font-family: var(--font-sans);
   font-size: var(--text-base);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+}
+
+/* Alternating section background — LeadGrid-style */
+.section-alt {
+  background: var(--bg-section-alt);
 }
 
 /* Type scale */
@@ -212,19 +217,19 @@ h3 {
     box-shadow: var(--shadow-surface);
   }
 
-  /* Primary button — filled blue, soft shadow, hover lift, active press */
+  /* Primary CTA — conversion-focused, soft glow */
   .btn-hero,
   .btn-primary {
-    @apply inline-flex items-center justify-center font-medium;
-    height: 44px;
-    min-height: 44px;
-    padding: 0 1.25rem;
+    @apply inline-flex items-center justify-center font-semibold;
+    height: 48px;
+    min-height: 48px;
+    padding: 0 1.5rem;
     font-size: var(--text-sm);
     border-radius: var(--radius-md);
     background: var(--primary);
     color: var(--cta-text);
     border: none;
-    box-shadow: var(--shadow-surface);
+    box-shadow: var(--shadow-cta);
     transition: background-color var(--duration-ui) var(--ease-out),
       transform var(--duration-ui) var(--ease-out),
       box-shadow var(--duration-ui) var(--ease-out);
@@ -233,12 +238,12 @@ h3 {
   .btn-primary:hover:not(:disabled) {
     background: var(--primary-hover);
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   }
   .btn-hero:active:not(:disabled),
   .btn-primary:active:not(:disabled) {
     transform: translateY(0);
-    box-shadow: var(--shadow-surface);
+    box-shadow: var(--shadow-cta);
   }
   .btn-hero:focus-visible,
   .btn-primary:focus-visible {
@@ -344,6 +349,26 @@ h3 {
     height: 6px;
     border-radius: 50%;
     background: var(--primary);
+  }
+  /* Benefit list — checkmarks, conversion-style */
+  .benefit-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-4) var(--space-6);
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+  .benefit-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .benefit-check {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: var(--status-success);
   }
   .pill {
     @apply inline-flex items-center rounded-full text-xs font-medium;

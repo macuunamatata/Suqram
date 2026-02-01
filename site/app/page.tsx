@@ -3,9 +3,9 @@ import Link from "next/link";
 import DemoBeforeAfter from "./components/DemoBeforeAfter";
 
 export const metadata: Metadata = {
-  title: "Suqram — Protocol-grade auth links",
+  title: "Suqram — Unbreakable auth links",
   description:
-    "View-safe, exactly-once redemption. Magic links that survive scanners. Dev infra for auth links.",
+    "Links that survive the real world. Edge solution for magic links—scanners don't burn tokens; only a real click redeems.",
 };
 
 const CONTAINER = "mx-auto w-full max-w-[1120px] px-4 sm:px-6";
@@ -67,10 +67,10 @@ export default function HomePage() {
               Protocol-grade auth links
             </p>
             <h1 className="hero-h1 mt-6">
-              View-safe, exactly-once redemption. No scanner burn.
+              Links that survive the real world.
             </h1>
             <p className="mt-5 body-hero text-[var(--text-secondary)] leading-relaxed">
-              Email security tools pre-open links and burn one-time tokens. Suqram enforces interactive redemption at the edge—scanners don't consume; only a confirmed click redeems.
+              Email scanners pre-open links and burn one-time tokens. Suqram runs at the edge so only a real click redeems—your magic links stay unbreakable.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row items-start gap-3">
               <Link href="#demo" className="btn-hero">

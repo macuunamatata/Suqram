@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 
 const DEMO_CREATE_URL = "https://go.suqram.com/demo/create";
 const DEMO_SCAN_URL = "https://go.suqram.com/demo/scan";
@@ -27,7 +29,21 @@ const PROTECTED_DISPLAY_URL = "https://go.suqram.com/r/••••••••�
 
 const STEP_MS = 500;
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.08, delayChildren: 0.05 },
+  },
+};
+
+const tile = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0 },
+};
+
 export default function DemoBeforeAfter() {
+  const prefersReducedMotion = useReducedMotion() ?? false;
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
   const runIdRef = useRef(0);
@@ -100,8 +116,8 @@ export default function DemoBeforeAfter() {
 
     abortRef.current = null;
 
-    const reduceMotion = reduceMotionRef.current;
-    if (reduceMotion) {
+    const reduceMotionVal = reduceMotionRef.current;
+    if (reduceMotionVal) {
       setStatus("done");
       return;
     }
@@ -122,13 +138,17 @@ export default function DemoBeforeAfter() {
     <section className="py-12 sm:py-16" aria-label="Demo">
       <div className="mx-auto max-w-[640px] px-4 sm:px-6 demoPanel">
         <h2 className="section-h2 text-center">
-          Proof: scanner viewed vs user redeemed
+          See what happens when a scanner opens your link
         </h2>
         <p className="mt-2 text-center text-[var(--text-secondary)] max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
-          One link gets consumed when a scanner opens it. The other stays valid until a real user clicks.
+          One link burns. One stays valid. Same email—only the edge decides.
         </p>
 
         <div className="demoPanel-inner mt-8">
+          <p className="demoPanel-hook">
+            Two links in the same email. Hit the button to see which one survives.
+          </p>
+
           {/* Email snippet */}
           <div className="demoEmail">
             <p className="demoEmail-eyebrow">Your sign-in link is ready</p>
@@ -144,7 +164,7 @@ export default function DemoBeforeAfter() {
             <div className="demoEmail-row">
               <div className="demoEmail-rowInner">
                 <span className="demoEmail-link">Sign in to Example</span>
-                <span className="demoEmail-pill">protected</span>
+                <span className="demoEmail-pill demoEmail-pillProtected">protected</span>
               </div>
               <p className="demoEmail-url" title={PROTECTED_DISPLAY_URL}>
                 {PROTECTED_DISPLAY_URL}
@@ -154,7 +174,6 @@ export default function DemoBeforeAfter() {
 
           <hr className="demoPanel-divider" aria-hidden />
 
-          {/* Primary CTA — label + 3-dot pulse on right when running */}
           <button
             type="button"
             onClick={runDemo}
@@ -174,51 +193,71 @@ export default function DemoBeforeAfter() {
           </button>
 
           {showOutcomes && (
-            <div className="demoOutcomes">
-              <div className="demoOutcome" data-status="expired">
+            <motion.div
+              className="demoOutcomes"
+              variants={prefersReducedMotion ? undefined : container}
+              initial="hidden"
+              animate="show"
+            >
+              <motion.div
+                className="demoOutcome"
+                data-status="expired"
+                variants={prefersReducedMotion ? undefined : tile}
+              >
                 <div className="demoOutcome-header">
                   <IconX className="demoOutcome-icon" aria-hidden />
                   <p className="demoOutcome-title">Expired</p>
                 </div>
-                <p className="demoOutcome-desc">Token was consumed by scanner.</p>
-                <p className="demoOutcome-why">Scanners that open links consume one-time tokens.</p>
-              </div>
-              <div className="demoOutcome" data-status="valid">
+                <p className="demoOutcome-desc">User sees &quot;Link expired&quot;—token was consumed by the scanner.</p>
+                <p className="demoOutcome-why">Scanners that open links burn one-time tokens.</p>
+              </motion.div>
+              <motion.div
+                className="demoOutcome"
+                data-status="valid"
+                variants={prefersReducedMotion ? undefined : tile}
+              >
                 <div className="demoOutcome-header">
                   <IconCheck className="demoOutcome-icon" aria-hidden />
                   <p className="demoOutcome-title">Still valid</p>
                 </div>
-                <p className="demoOutcome-desc">Scanner views don&apos;t redeem.</p>
-                <p className="demoOutcome-why">Only interactive redemption counts.</p>
-              </div>
-            </div>
+                <p className="demoOutcome-desc">User can still sign in. Scanner views don&apos;t redeem.</p>
+                <p className="demoOutcome-why">Only interactive redemption counts—links survive the real world.</p>
+              </motion.div>
+            </motion.div>
           )}
 
           {showOutcomes && (
-            <details className="demoDetails">
-              <summary className="demoDetails-summary">
-                <ChevronIcon className="demoDetails-chevron" aria-hidden />
-                View trace
-              </summary>
-              <div className="demoTrace-block">
-                <button
-                  type="button"
-                  className="demoTrace-copy"
-                  onClick={copyTrace}
-                  title="Copy trace"
-                  aria-label="Copy trace"
-                >
-                  <CopyIcon />
-                </button>
-                <div className="demoTrace-lines">
-                  {TRACE_LINES.map((line, i) => (
-                    <p key={i} className="demoTrace-line">
-                      {line}
-                    </p>
-                  ))}
-                </div>
+            <>
+              <div className="demoPanel-ctaWrap">
+                <Link href="/start" className="demoPanel-ctaSecondary">
+                  Protect your links →
+                </Link>
               </div>
-            </details>
+              <details className="demoDetails">
+                <summary className="demoDetails-summary">
+                  <ChevronIcon className="demoDetails-chevron" aria-hidden />
+                  View trace
+                </summary>
+                <div className="demoTrace-block">
+                  <button
+                    type="button"
+                    className="demoTrace-copy"
+                    onClick={copyTrace}
+                    title="Copy trace"
+                    aria-label="Copy trace"
+                  >
+                    <CopyIcon />
+                  </button>
+                  <div className="demoTrace-lines">
+                    {TRACE_LINES.map((line, i) => (
+                      <p key={i} className="demoTrace-line">
+                        {line}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              </details>
+            </>
           )}
 
           {error && (
@@ -228,7 +267,7 @@ export default function DemoBeforeAfter() {
           )}
 
           <p className="demoPanel-footer">
-            No signup. Runs on suqram.com.
+            No signup. Runs on Suqram&apos;s edge.
           </p>
         </div>
       </div>

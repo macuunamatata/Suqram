@@ -547,6 +547,13 @@ h3 {
     gap: var(--gap-lg);
   }
 
+  .demoPanel-hook {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+
   /* Email snippet — real email module */
   .demoEmail {
     display: flex;
@@ -599,6 +606,11 @@ h3 {
     border-radius: 6px;
     background: rgba(0, 0, 0, 0.04);
     border: 1px solid var(--border);
+  }
+  .demoEmail-pillProtected {
+    color: var(--blue);
+    background: rgba(37, 99, 235, 0.06);
+    border-color: rgba(37, 99, 235, 0.15);
   }
   .demoEmail-url {
     font-family: var(--font-mono);
@@ -740,6 +752,28 @@ h3 {
     margin: 0;
     line-height: 1.4;
     opacity: 0.9;
+  }
+
+  .demoPanel-ctaWrap {
+    display: flex;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .demoPanel-ctaSecondary {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--blue);
+    text-decoration: none;
+    text-underline-offset: 3px;
+    transition: color var(--duration-ui) var(--ease-out), text-decoration-color var(--duration-ui) var(--ease-out);
+  }
+  .demoPanel-ctaSecondary:hover {
+    text-decoration: underline;
+  }
+  .demoPanel-ctaSecondary:focus-visible {
+    outline: none;
+    border-radius: 6px;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
   }
 
   /* Trace — "View trace" with chevron, collapsed by default */

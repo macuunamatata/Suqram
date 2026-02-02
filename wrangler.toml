@@ -3,7 +3,9 @@
 name = "suqram"
 main = "src/worker.ts"
 compatibility_date = "2026-01-23"
+compatibility_flags = ["nodejs_compat"]
 account_id = "e51733a914697da87e60c4d6f4a5aef6"
+pages_build_output_dir = ".vercel/output/static"
 
 [durable_objects]
 bindings = [

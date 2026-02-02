@@ -1,28 +1,56 @@
-import { auth } from "@/auth";
-import { NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { NextResponse, type NextRequest } from "next/server";
 
-export default auth((req) => {
-  const path = req.nextUrl.pathname;
-  const isApp = path === "/app" || path.startsWith("/app/");
-  const isStart = path === "/start";
-  const modeSignin = req.nextUrl.searchParams.get("mode") === "signin";
+const PUBLIC_PATHS = new Set([
+  "/",
+  "/pricing",
+  "/docs",
+  "/privacy",
+  "/terms",
+  "/start",
+  "/live-test",
+  "/login",
+]);
 
-  if (isApp && !req.auth) {
-    const returnTo = encodeURIComponent(path + req.nextUrl.search);
-    return NextResponse.redirect(new URL(`/login?returnTo=${returnTo}`, req.url));
+function isPublicPath(pathname: string): boolean {
+  if (PUBLIC_PATHS.has(pathname)) return true;
+  if (pathname.startsWith("/docs/")) return true;
+  if (pathname.startsWith("/_next/")) return true;
+  if (pathname === "/favicon.ico" || pathname === "/robots.txt" || pathname === "/sitemap.xml") return true;
+  return false;
+}
+
+export async function middleware(request: NextRequest) {
+  let response = NextResponse.next({ request });
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet: { name: string; value: string }[]) {
+          cookiesToSet.forEach(({ name, value }) =>
+            response.cookies.set(name, value)
+          );
+        },
+      },
+    }
+  );
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const pathname = request.nextUrl.pathname;
+  if (isPublicPath(pathname)) return response;
+  if (!user) {
+    const next = encodeURIComponent(pathname + request.nextUrl.search);
+    return NextResponse.redirect(new URL(`/login?next=${next}`, request.url));
   }
-
-  if (isStart && !req.auth && !modeSignin) {
-    return NextResponse.redirect(new URL("/login?returnTo=%2Fapp", req.url));
-  }
-
-  if (isStart && req.auth) {
-    return NextResponse.redirect(new URL("/app", req.url));
-  }
-
-  return NextResponse.next();
-});
+  return response;
+}
 
 export const config = {
-  matcher: ["/app", "/app/:path*", "/start", "/login"],
+  matcher: ["/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:ico|png|jpg|jpeg|gif|svg|woff2?)$).*)"],
 };

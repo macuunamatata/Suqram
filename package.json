@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "src/worker.ts",
   "scripts": {
-    "build": "npm run build --prefix site",
+    "build": "cd site && npm run build",
+    "check:pages-output": "node -e \"const fs=require('fs'); console.log(fs.existsSync('site/.vercel/output/static') ? 'OK: site/.vercel/output/static exists' : 'MISSING: run npm run build'); process.exit(fs.existsSync('site/.vercel/output/static')?0:1)\"",
     "setup:dev": "powershell -ExecutionPolicy Bypass -File scripts/setup-dev.ps1",
     "clean:dev": "powershell -ExecutionPolicy Bypass -File scripts/cleanup-dev.ps1",
     "predev": "npm run clean:dev",

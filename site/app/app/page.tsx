@@ -3,8 +3,9 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
+import { useDashboardUser } from "./DashboardContext";
+import { signOut } from "@/app/actions/auth";
 
 const BOOTSTRAP_URL = "https://go.suqram.com/app/bootstrap";
 const GENERATE_LINK_URL = "https://go.suqram.com/app/generate-link";
@@ -12,8 +13,8 @@ const BOOTSTRAP_TIMEOUT_MS = 1500;
 
 type Bootstrap = { logged_in: false } | { logged_in: true; site: { site_id: string; hostname: string } };
 
-function DashboardHeader({ session }: { session: { user?: { email?: string | null; name?: string | null } } | null }) {
-  const signOutUrl = "/api/auth/signout?callbackUrl=/login";
+function DashboardHeader() {
+  const user = useDashboardUser();
   return (
     <div className="flex flex-wrap items-center justify-between gap-4">
       <div>
@@ -34,14 +35,16 @@ function DashboardHeader({ session }: { session: { user?: { email?: string | nul
         <Link href="/app/api-keys" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
           Advanced: use an API key
         </Link>
-        {session?.user?.email && (
-          <span className="text-sm text-[var(--muted)]" title={session.user.email}>
-            {session.user.email}
+        {user?.email && (
+          <span className="text-sm text-[var(--muted)]" title={user.email}>
+            {user.email}
           </span>
         )}
-        <a href={signOutUrl} className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-          Sign out
-        </a>
+        <form action={signOut} className="inline">
+          <button type="submit" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+            Sign out
+          </button>
+        </form>
       </div>
     </div>
   );
@@ -83,7 +86,8 @@ function CreateFirstSiteButton() {
 
 function DashboardContent() {
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
+  const user = useDashboardUser();
+  const session = user ? { user: { email: user.email, name: user.user_metadata?.name ?? null } } : null;
   const [status, setStatus] = useState<"checking" | "authenticated" | "not_logged_in">("checking");
   const [bootstrap, setBootstrap] = useState<Bootstrap | null>(null);
   const [destUrl, setDestUrl] = useState("");
@@ -163,7 +167,7 @@ function DashboardContent() {
     return (
       <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-20">
         <div className="max-w-2xl">
-          <DashboardHeader session={session} />
+          <DashboardHeader />
           <div className="mt-12 flex min-h-[40vh] flex-col items-center justify-center">
             <p className="text-center text-[var(--muted)]">
               Create your first link rail to get started.
@@ -180,7 +184,7 @@ function DashboardContent() {
   return (
     <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-20">
       <div className="max-w-2xl">
-        <DashboardHeader session={session} />
+        <DashboardHeader />
 
         {/* Section 1: Site */}
         <section className="mt-12 card border-[var(--border)] p-6 sm:p-8">

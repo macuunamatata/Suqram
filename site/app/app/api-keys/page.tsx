@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
+import { ApiKeysHeader } from "./ApiKeysHeader";
 
 const BOOTSTRAP_URL = "https://go.suqram.com/app/bootstrap";
 const BOOTSTRAP_TIMEOUT_MS = 1500;
@@ -53,17 +53,13 @@ export default function ApiKeysPage() {
   }
 
   if (status === "not_logged_in") {
-    const startUrl = "/start?next=%2Fapp%2Fapi-keys";
-    const signInUrl = "/start?next=%2Fapp%2Fapi-keys&mode=signin";
+    const signInUrl = "/login?next=" + encodeURIComponent("/app/api-keys");
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="mx-auto max-w-md px-4 text-center">
           <p className="text-sm text-[var(--muted)]">You’re not signed in.</p>
           <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-            <Link href={startUrl} className="btn-hero w-full sm:w-auto">
-              Create free site
-            </Link>
-            <Link href={signInUrl} className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
+            <Link href={signInUrl} className="btn-hero w-full sm:w-auto">
               Sign in
             </Link>
           </div>
@@ -72,34 +68,10 @@ export default function ApiKeysPage() {
     );
   }
 
-  const logoutUrl = `${getRailBaseUrl()}/app/logout?redirect=${encodeURIComponent(
-    `${getSiteOrigin()}/start`
-  )}`;
-
   return (
     <div className="mx-auto max-w-[1120px] px-4 py-16 sm:px-6 sm:py-20">
       <div className="max-w-2xl">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-[var(--text)] sm:text-4xl">
-              API keys
-            </h1>
-            <p className="mt-2 text-[var(--muted)]">
-              Use an API key for programmatic access (Admin API, receipts).
-            </p>
-          </div>
-          <div className="flex items-center gap-3 shrink-0">
-            <Link href="/app" className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]">
-              Dashboard
-            </Link>
-            <a
-              href={logoutUrl}
-              className="text-sm text-[var(--muted)] transition-colors hover:text-[var(--text)]"
-            >
-              Sign out
-            </a>
-          </div>
-        </div>
+        <ApiKeysHeader />
 
         <div className="mt-12 card border-[var(--border)] p-6 sm:p-8">
           <h2 className="text-lg font-semibold text-[var(--text)]">

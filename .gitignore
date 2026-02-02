@@ -4,6 +4,9 @@ node_modules/
 # Build outputs
 .wrangler/
 dist/
+.vercel/
+.next/
+out/
 
 # Environment variables (local dev secrets)
 .dev.vars

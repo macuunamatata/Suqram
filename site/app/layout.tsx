@@ -4,6 +4,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Button } from "@/components/ui/button";
 import { Providers } from "./components/Providers";
+import { HeaderAuth } from "./components/HeaderAuth";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,12 +73,7 @@ export default function RootLayout({
               ))}
             </nav>
             <div className="site-header__actions">
-              <Link href="/login" className="site-header__link site-header__link--log">
-                Log in
-              </Link>
-              <Button asChild size="sm" className="site-btn site-btn--primary">
-                <Link href="/login">Get started</Link>
-              </Button>
+              <HeaderAuth />
             </div>
           </div>
         </header>

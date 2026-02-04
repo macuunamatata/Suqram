@@ -3,6 +3,8 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
+export const runtime = 'edge';
+
 function ResultContent() {
   const searchParams = useSearchParams();
   const used = searchParams.get("used") === "1";

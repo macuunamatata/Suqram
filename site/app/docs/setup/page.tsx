@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Setup guides — Suqram",
   description: "Connect your link rail to Supabase, Auth0, Clerk, NextAuth, Firebase, or a custom stack.",

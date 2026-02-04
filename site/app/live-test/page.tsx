@@ -4,6 +4,8 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import { getRailBaseUrl } from "@/lib/railBase";
 
+export const runtime = 'edge';
+
 type Session = { tid: string; normalLink: string; protectedLink: string };
 type Status = {
   created_at: number;

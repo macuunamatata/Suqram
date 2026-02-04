@@ -1,7 +1,7 @@
 import { handlers } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
 const authDisabled = process.env.DISABLE_AUTH_ROUTES === "1";
 

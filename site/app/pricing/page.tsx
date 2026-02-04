@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Pricing — Suqram",
   description: "Free tier and usage-based pricing. You only pay for successful interactive redemptions.",

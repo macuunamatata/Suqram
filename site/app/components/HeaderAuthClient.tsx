@@ -3,27 +3,32 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { signOut } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import type { User } from "@supabase/supabase-js";
 
-export function HeaderAuth() {
+export function HeaderAuthClient() {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
-    const getSession = async () => {
-      const { data: { user: u } } = await supabase.auth.getUser();
-      setUser(u ?? null);
+    const syncSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
     };
-    getSession();
+    syncSession();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      getSession();
+      syncSession();
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleSignOut = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    window.location.href = "/";
+  };
 
   if (user) {
     return (
@@ -31,14 +36,13 @@ export function HeaderAuth() {
         <span className="text-sm text-[var(--muted)]" title={user.email ?? undefined}>
           {user.email}
         </span>
-        <form action={signOut} className="inline">
-          <button
-            type="submit"
-            className="site-header__link site-header__link--log"
-          >
-            Sign out
-          </button>
-        </form>
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="site-header__link site-header__link--log"
+        >
+          Sign out
+        </button>
         <Button asChild size="sm" className="site-btn site-btn--primary">
           <Link href="/app">Dashboard</Link>
         </Button>

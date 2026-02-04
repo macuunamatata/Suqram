@@ -3,6 +3,8 @@
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
+export const runtime = 'edge';
+
 function ProtectedContent() {
   const searchParams = useSearchParams();
   const tid = searchParams.get("tid") ?? "";

@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import LinkGenerator from "@/app/start/LinkGenerator";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Supabase setup — Suqram",
   description: "Run the inbox test, generate protected links, and paste into Supabase email templates.",

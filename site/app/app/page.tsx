@@ -7,6 +7,8 @@ import { getRailBaseUrl, getSiteOrigin } from "@/lib/railBase";
 import { useDashboardUser } from "./DashboardContext";
 import { signOut } from "@/app/actions/auth";
 
+export const runtime = 'edge';
+
 const BOOTSTRAP_URL = "https://go.suqram.com/app/bootstrap";
 const GENERATE_LINK_URL = "https://go.suqram.com/app/generate-link";
 const BOOTSTRAP_TIMEOUT_MS = 1500;

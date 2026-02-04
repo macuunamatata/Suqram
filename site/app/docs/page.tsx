@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { REPO_URL } from "@/lib/constants";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Docs — Auth Link Rail",
   description: "Quickstart: local run and setup guides (Supabase, Auth0, Clerk, and more) in minutes.",

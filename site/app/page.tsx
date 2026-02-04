@@ -7,6 +7,8 @@ import InstallSteps from "./components/InstallSteps";
 import DnsStatusCard from "./components/DnsStatusCard";
 import { Button } from "@/components/ui/button";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Suqram — Scanner-safe auth links",
   description:

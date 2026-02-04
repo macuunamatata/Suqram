@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+export const runtime = 'edge';
+
 export const metadata: Metadata = {
   title: "Privacy Policy — Auth Link Rail",
   description: "Privacy Policy for Auth Link Rail.",

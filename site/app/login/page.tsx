@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./LoginForm";
 
-export const runtime = "edge";
+export const runtime = 'edge';
 
 export const metadata: Metadata = {
   title: "Log in — Suqram",

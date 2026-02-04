@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ApiKeysHeader } from "./ApiKeysHeader";
 
+export const runtime = 'edge';
+
 const BOOTSTRAP_URL = "https://go.suqram.com/app/bootstrap";
 const BOOTSTRAP_TIMEOUT_MS = 1500;
 

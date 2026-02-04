@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { DashboardProvider } from "./DashboardContext";
 
+export const runtime = 'edge';
+
 export default async function AppLayout({
   children,
 }: {

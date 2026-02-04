@@ -11,7 +11,7 @@ import { writeFileSync, unlinkSync } from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const wranglerConfigPath = resolve(__dirname, '..', 'wrangler.toml');
+const wranglerConfigPath = resolve(__dirname, '..', 'worker', 'wrangler.toml');
 const quotedConfig = `"${wranglerConfigPath}"`;
 
 const args = process.argv.slice(2);
@@ -28,7 +28,7 @@ function detectD1Binding() {
   if (cliArg) return cliArg.split('=')[1];
   if (process.env.D1_BINDING) return process.env.D1_BINDING;
   try {
-    const content = readFileSync(resolve(__dirname, '..', 'wrangler.toml'), 'utf-8');
+    const content = readFileSync(resolve(__dirname, '..', 'worker', 'wrangler.toml'), 'utf-8');
     const m = content.match(/\[\[d1_databases\]\][\s\S]*?binding\s*=\s*"([^"]+)"/);
     if (m && m[1]) return m[1];
   } catch (_) {}

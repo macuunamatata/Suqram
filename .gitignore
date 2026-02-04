@@ -1,3 +1,7 @@
+# Prevent Pages from validating Worker config (config lives in worker/wrangler.toml only)
+/wrangler.toml
+site/wrangler.toml
+
 # Dependencies
 node_modules/
 

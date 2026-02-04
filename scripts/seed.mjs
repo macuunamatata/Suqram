@@ -11,8 +11,8 @@ import { dirname, join, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Get absolute path to wrangler.toml (repo root)
-const wranglerConfigPath = resolve(__dirname, '..', 'wrangler.toml');
+// Worker config is in worker/wrangler.toml (repo root)
+const wranglerConfigPath = resolve(__dirname, '..', 'worker', 'wrangler.toml');
 const quotedConfig = `"${wranglerConfigPath}"`;
 
 const args = process.argv.slice(2);
@@ -31,9 +31,9 @@ function detectD1Binding() {
     return process.env.D1_BINDING;
   }
   
-  // 3. Auto-detect from wrangler.toml
+  // 3. Auto-detect from worker/wrangler.toml
   try {
-    const wranglerPath = resolve(__dirname, '..', 'wrangler.toml');
+    const wranglerPath = resolve(__dirname, '..', 'worker', 'wrangler.toml');
     const content = readFileSync(wranglerPath, 'utf-8');
     
     // Find first [[d1_databases]] section and extract binding

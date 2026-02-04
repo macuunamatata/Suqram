@@ -1,4 +1,0 @@
-# Pages only. Worker config is in wrangler.worker.toml (npm run worker:deploy).
-name = "suqram"
-compatibility_date = "2026-01-23"
-pages_build_output_dir = ".vercel/output/static"

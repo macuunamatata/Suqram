@@ -24,7 +24,7 @@ Set-and-forget. No analytics dashboards. Deterministic only.
 npm install
 
 # 2. Apply schema (first time only)
-wrangler d1 execute EIG_DB --file=sql/schema.sql --local -c worker/wrangler.toml
+wrangler d1 execute EIG_DB --file=sql/schema.sql --local -c worker/wrangler.worker.toml
 
 # 3. Terminal 1: start dev server
 npm run dev
@@ -63,12 +63,12 @@ For local dev with D1: `npm run migrate:d1:local`.
 
 Use either:
 
-1. **Wrangler routes (already in repo):** `worker/wrangler.toml` includes a route for `go.suqram.com/*` on zone `suqram.com`. After deploy, ensure the zone is active in your Cloudflare account so the route applies.
+1. **Wrangler routes (already in repo):** `worker/wrangler.worker.toml` includes a route for `go.suqram.com/*` on zone `suqram.com`. After deploy, ensure the zone is active in your Cloudflare account so the route applies.
 2. **Cloudflare Dashboard:** Workers & Pages → your Worker → Settings → Domains & Routes → Add Custom Domain → `go.suqram.com` (zone must be suqram.com).
 
 ### Required production env
 
-Set these via **Cloudflare Secrets** (not in `worker/wrangler.toml`):
+Set these via **Cloudflare Secrets** (not in `worker/wrangler.worker.toml`):
 
 - **`ALLOWED_DEST_HOSTS`** — Comma-separated hosts the rail may redirect to (e.g. your Supabase project + app host). Example: `yourproject.supabase.co,app.suqram.com`
 - **`ALLOWED_DEST_HOST_SUFFIXES`** (optional) — Comma-separated host suffixes, e.g. `.supabase.co`
@@ -122,10 +122,10 @@ Use a test destination host on suqram.com so you can try the full flow (go.suqra
 ## 15-minute production setup
 
 1. **CNAME:** Point your rail domain to the Worker (e.g. `links.yourdomain.com` → `your-worker.workers.dev`).
-2. **D1:** Create DB, apply schema, set `database_id` in `worker/wrangler.toml`:
+2. **D1:** Create DB, apply schema, set `database_id` in `worker/wrangler.worker.toml`:
    ```bash
    wrangler d1 create eig-db
-   wrangler d1 execute eig-db --file=sql/schema.sql --remote -c worker/wrangler.toml
+   wrangler d1 execute eig-db --file=sql/schema.sql --remote -c worker/wrangler.worker.toml
    ```
 3. **Secrets / vars (minimal):**  
    - Set **allowed destination hosts** so the rail only redirects to your app (see [Allowed destination hosts](#allowed-destination-hosts) below).  
@@ -204,10 +204,10 @@ The rail only redirects to hosts you allow. No allowlist = only localhost is all
   `ALLOWED_DEST_HOSTS=myapp.vercel.app`  
   or use suffix: `ALLOWED_DEST_HOST_SUFFIXES=.vercel.app`
 
-Set in **worker/wrangler.toml** `[vars]` or **Secrets** (production):
+Set in **worker/wrangler.worker.toml** `[vars]` or **Secrets** (production):
 
 ```toml
-# worker/wrangler.toml [vars] – example
+# worker/wrangler.worker.toml [vars] – example
 ALLOWED_DEST_HOSTS = "abcdefghijk.supabase.co,myapp.vercel.app"
 # or
 ALLOWED_DEST_HOST_SUFFIXES = ".supabase.co,.vercel.app"
@@ -247,7 +247,7 @@ Prove the rail works in a real mailbox with real corporate scanners. The marketi
    ```
 3. **D1:** Apply schema (includes `live_tests` and `live_test_events`):
    ```bash
-   wrangler d1 execute EIG_DB --file=sql/schema.sql --remote -c worker/wrangler.toml
+   wrangler d1 execute EIG_DB --file=sql/schema.sql --remote -c worker/wrangler.worker.toml
    ```
 
 ### How to run

@@ -1,4 +1,4 @@
-# Worker config (go.suqram.com). Run from repo root: wrangler deploy -c worker/wrangler.toml
+# Worker config (go.suqram.com). Run from repo root: wrangler deploy -c worker/wrangler.worker.toml
 # main is relative to this config's directory; entrypoint is repo root src/worker.ts
 name = "suqram"
 main = "../src/worker.ts"

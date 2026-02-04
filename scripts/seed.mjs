@@ -11,7 +11,7 @@ import { dirname, join, resolve } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Worker config is in worker/wrangler.toml (repo root)
+// Worker config is in worker/wrangler.worker.toml (repo root)
 const wranglerConfigPath = resolve(__dirname, '..', 'worker', 'wrangler.toml');
 const quotedConfig = `"${wranglerConfigPath}"`;
 
@@ -31,7 +31,7 @@ function detectD1Binding() {
     return process.env.D1_BINDING;
   }
   
-  // 3. Auto-detect from worker/wrangler.toml
+  // 3. Auto-detect from worker/wrangler.worker.toml
   try {
     const wranglerPath = resolve(__dirname, '..', 'worker', 'wrangler.toml');
     const content = readFileSync(wranglerPath, 'utf-8');
